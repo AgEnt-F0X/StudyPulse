@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Settings as SettingsIcon, RefreshCw, Eye, EyeOff, Check, LogOut, Trash2, ExternalLink, Cpu, Download } from 'lucide-react'
-import { useAuthStore, useUIStore, useAssignmentsStore } from '../stores'
+import { Settings as SettingsIcon, RefreshCw, Eye, EyeOff, Check, LogOut, RotateCcw, Sparkles, Key, Zap, ExternalLink } from 'lucide-react'
+import { useAuthStore, useUIStore, useAssignmentsStore, useEventStore, useGradesStore, useNotesStore, useFlashcardsStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme'
 import { PageHeader, Card } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
-import { preloadLocalAI, isLocalAISupported, useLocalAIStore } from '../utils/localAI'
+import { hasClientKey, getKeyProvider } from '../utils/gemini'
+import { DEMO_COURSES, DEMO_ASSIGNMENTS, DEMO_EVENTS, DEMO_GRADES, DEMO_NOTES, DEMO_COURSE_WEIGHTS, DEMO_DECKS, DEMO_QUIZ_HISTORY, DEMO_LEADERBOARD } from '../utils/demoData'
 
 function Section({ title, children }) {
   return (
@@ -33,13 +34,9 @@ export default function Settings() {
   const { user, logout, loginWithGoogle, clearGoogleAuth, isGoogleConnected } = useAuthStore()
   const { geminiApiKey, setGeminiApiKey, addToast } = useUIStore()
   const { syncClassroom, syncing, lastSynced } = useAssignmentsStore()
-  const [keyInput, setKeyInput] = useState(geminiApiKey || '')
+  const [keyInput, setKeyInput] = useState(geminiApiKey || localStorage.getItem('gemini-api-key') || '')
   const [keySaved, setKeySaved] = useState(false)
   const [showKey, setShowKey] = useState(false)
-  const localAIStatus = useLocalAIStore(s => s.status)
-  const localAIProgress = useLocalAIStore(s => s.progress)
-  const localAIError = useLocalAIStore(s => s.error)
-  const localAISupported = isLocalAISupported()
 
   const connected = isGoogleConnected()
 
@@ -58,9 +55,12 @@ export default function Settings() {
   }
 
   const saveKey = () => {
-    setGeminiApiKey(keyInput.trim())
+    const trimmed = keyInput.trim()
+    setGeminiApiKey(trimmed)
+    localStorage.setItem('gemini-api-key', trimmed)
     setKeySaved(true)
-    setTimeout(() => setKeySaved(false), 2000)
+    addToast({ type: 'success', message: trimmed ? 'AI API Key activated!' : 'API Key cleared' })
+    setTimeout(() => setKeySaved(false), 2500)
   }
 
   const userName = user?.firstName && user?.lastName
@@ -68,14 +68,101 @@ export default function Settings() {
     : user?.name || 'Student'
   const userInitial = userName[0]?.toUpperCase() || 'S'
 
+  const activeProvider = getKeyProvider()
+
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 640, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 680, margin: '0 auto' }}>
       <PageHeader
         icon={SettingsIcon}
         accent={C.blue}
         title="Settings"
-        subtitle="Account, integrations and preferences"
+        subtitle="Account, AI key, sample content & preferences"
       />
+
+      {/* AI Key Section (Prominent) */}
+      <Section title="AI Intelligence & API Key (100% Free)">
+        <div style={{ marginBottom: 10 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: hasClientKey() ? 'rgba(77,255,145,0.08)' : 'rgba(82,141,255,0.08)',
+            border: `1px solid ${hasClientKey() ? 'rgba(77,255,145,0.3)' : 'rgba(82,141,255,0.25)'}`,
+            borderRadius: 12, padding: '12px 16px', marginBottom: 16
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 10,
+                background: hasClientKey() ? 'rgba(77,255,145,0.2)' : 'rgba(82,141,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: hasClientKey() ? '#4dff91' : '#528dff'
+              }}>
+                <Zap size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>
+                  {hasClientKey() ? `Active Engine: ${activeProvider}` : 'Instant Local AI Engine'}
+                </div>
+                <div style={{ fontSize: 11, color: C.textMuted }}>
+                  {hasClientKey() ? 'Ultra-low latency intelligent generation active' : 'Runs instant CBSE study assistant offline'}
+                </div>
+              </div>
+            </div>
+            <span style={{
+              padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+              color: hasClientKey() ? '#4dff91' : '#528dff',
+              background: hasClientKey() ? 'rgba(77,255,145,0.15)' : 'rgba(82,141,255,0.12)'
+            }}>
+              {hasClientKey() ? '● AI Connected' : '● Local Ready'}
+            </span>
+          </div>
+
+          <label style={{ display: 'block', fontSize: 13, color: C.text, marginBottom: 6, fontWeight: 700 }}>
+            Paste Free API Key (Groq / Gemini / OpenRouter)
+          </label>
+          <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 12, lineHeight: 1.6 }}>
+            Paste any free key below. StudyPulse automatically detects and activates it:
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, marginBottom: 16 }}>
+            <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, fontSize: 12 }}>
+              <span style={{ color: '#528dff', fontWeight: 700 }}>⚡ Groq (Recommended — Ultra-Fast ~300 t/s)</span>: Free Llama 3.3 70B & DeepSeek R1.{' '}
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: '#afc6ff', textDecoration: 'underline', fontWeight: 600 }}>
+                Get free Groq key <ExternalLink size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
+              </a>
+            </div>
+            <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, fontSize: 12 }}>
+              <span style={{ color: '#528dff', fontWeight: 700 }}>✨ Google Gemini</span>: Free Gemini 2.0 Flash.{' '}
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ color: '#afc6ff', textDecoration: 'underline', fontWeight: 600 }}>
+                Get free Gemini key <ExternalLink size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
+              </a>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              type={showKey ? 'text' : 'password'}
+              value={keyInput}
+              onChange={e => setKeyInput(e.target.value)}
+              placeholder="Paste your key: gsk_... or AIza... or sk-or-..."
+              style={{ ...inputStyle, flex: 1, width: 'auto' }}
+              onFocus={e => { e.target.style.borderColor = C.blueDark }}
+              onBlur={e => { e.target.style.borderColor = C.border }}
+            />
+            <button onClick={() => setShowKey(s => !s)} aria-label={showKey ? 'Hide key' : 'Show key'} style={{
+              padding: '9px 12px', borderRadius: 10, border: `1px solid ${C.border}`,
+              background: 'transparent', color: C.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center',
+            }}>
+              {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+            <button onClick={saveKey} style={{
+              ...btnPrimary,
+              background: keySaved ? C.greenDark : btnPrimary.background,
+              minWidth: 90,
+            }}>
+              {keySaved ? <><Check size={14} /> Saved</> : 'Save Key'}
+            </button>
+          </div>
+        </div>
+      </Section>
 
       {/* Profile */}
       <Section title="Profile">
@@ -91,7 +178,7 @@ export default function Settings() {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{userName}</div>
-            <div style={{ fontSize: 13, color: C.textMuted }}>{user?.email || ''}</div>
+            <div style={{ fontSize: 13, color: C.textMuted }}>{user?.email || 'Local Student Session'}</div>
           </div>
         </div>
       </Section>
@@ -144,96 +231,37 @@ export default function Settings() {
         </div>
       </Section>
 
-      {/* On-device AI */}
-      <Section title="AI — no API key needed">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: 12, background: tint(C.purple, 0.12),
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.purple, flexShrink: 0,
-          }}><Cpu size={20} /></div>
-          <div style={{ flex: 1, minWidth: 180 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>On-device AI model</div>
+      {/* CBSE Sample Data Reset */}
+      <Section title="Data & Sample Content">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Reset to CBSE Class 11 Subjects</div>
             <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>
-              {!localAISupported
-                ? "This browser doesn't support WebGPU — use Chrome or Edge to run AI fully offline with no key."
-                : localAIStatus === 'ready'
-                  ? 'Downloaded and cached in this browser. Runs 100% offline.'
-                  : localAIStatus === 'loading'
-                    ? `Downloading… ${Math.round(localAIProgress * 100)}% (one-time, then cached)`
-                    : localAIStatus === 'error'
-                      ? (localAIError || 'Failed to load — try again')
-                      : 'Runs quiz, study plan, flashcard and chat AI right in your browser — nothing uploaded, no key required.'}
+              Loads clean sample assignments, notes & flashcards for Physics, Chemistry, Maths & Biology.
             </div>
           </div>
-          <span style={{
-            padding: '4px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700,
-            fontFamily: fonts.heading, flexShrink: 0,
-            color: localAIStatus === 'ready' ? C.green : localAIStatus === 'error' ? C.pink : C.textMuted,
-            background: localAIStatus === 'ready' ? tint(C.greenDark, 0.1) : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${localAIStatus === 'ready' ? tint(C.greenDark, 0.4) : C.border}`,
-          }}>
-            {localAIStatus === 'ready' ? '● Ready' : localAIStatus === 'loading' ? '○ Downloading' : localAIStatus === 'error' ? '● Error' : '○ Not loaded'}
-          </span>
-        </div>
-        {localAISupported && localAIStatus !== 'ready' && (
           <button
-            onClick={() => { preloadLocalAI(); addToast({ type: 'info', message: 'Downloading on-device AI model…' }) }}
-            disabled={localAIStatus === 'loading'}
-            style={{ ...btnPrimary, cursor: localAIStatus === 'loading' ? 'not-allowed' : 'pointer', opacity: localAIStatus === 'loading' ? 0.7 : 1 }}
-          >
-            <Download size={14} /> {localAIStatus === 'loading' ? 'Downloading…' : 'Download now'}
-          </button>
-        )}
-      </Section>
-
-      {/* API Keys */}
-      <Section title="API Keys (optional)">
-        <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, color: C.text, marginBottom: 8, fontWeight: 700 }}>
-            Gemini API Key
-          </label>
-          <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 10, lineHeight: 1.6 }}>
-            Optional — Shiori works without one via the on-device AI above. Adding a key gives faster, higher-quality answers. Stored only on this device.{' '}
-            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, textDecoration: 'none' }}>
-              Get a free key <ExternalLink size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
-            </a>
-          </p>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              type={showKey ? 'text' : 'password'}
-              value={keyInput}
-              onChange={e => setKeyInput(e.target.value)}
-              placeholder="AIza..."
-              style={{ ...inputStyle, flex: 1, width: 'auto' }}
-              onFocus={e => { e.target.style.borderColor = C.blueDark }}
-              onBlur={e => { e.target.style.borderColor = C.border }}
-            />
-            <button onClick={() => setShowKey(s => !s)} aria-label={showKey ? 'Hide key' : 'Show key'} style={{
-              padding: '9px 12px', borderRadius: 10, border: `1px solid ${C.border}`,
-              background: 'transparent', color: C.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center',
-            }}>
-              {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
-            </button>
-            <button onClick={saveKey} style={{
+            onClick={() => {
+              useAssignmentsStore.getState().setCourses(DEMO_COURSES)
+              useAssignmentsStore.getState().setAssignments(DEMO_ASSIGNMENTS)
+              useEventStore.getState().setEvents(DEMO_EVENTS)
+              useNotesStore.getState().replaceNotes(DEMO_NOTES)
+              useFlashcardsStore.getState().replaceDecks(DEMO_DECKS)
+              Object.entries(DEMO_GRADES).forEach(([id, g]) => useGradesStore.getState().setCourseGrades(id, g))
+              Object.entries(DEMO_COURSE_WEIGHTS).forEach(([id, w]) => useGradesStore.getState().setCourseWeights(id, w))
+              localStorage.setItem('studypulse-quiz-history', JSON.stringify(DEMO_QUIZ_HISTORY))
+              localStorage.setItem('studypulse-leaderboard', JSON.stringify(DEMO_LEADERBOARD))
+              localStorage.setItem('studypulse_seed_version', 'v4_cbse_clean')
+              addToast({ type: 'success', message: 'Loaded CBSE Class 11 subjects & study notes!' })
+            }}
+            style={{
               ...btnPrimary,
-              background: keySaved ? C.greenDark : btnPrimary.background,
-            }}>{keySaved ? <><Check size={14} /> Saved</> : 'Save'}</button>
-          </div>
-        </div>
-      </Section>
-
-      {/* Appearance */}
-      <Section title="Appearance">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Theme</div>
-            <div style={{ fontSize: 12, color: C.textMuted }}>Dark mode only (more themes coming soon)</div>
-          </div>
-          <div style={{
-            padding: '6px 16px', borderRadius: 999, background: tint(C.blue, 0.1),
-            border: `1px solid ${tint(C.blue, 0.4)}`, fontSize: 12, color: C.blue,
-            fontFamily: fonts.heading, fontWeight: 600,
-          }}>Dark</div>
+              display: 'flex', alignItems: 'center', gap: 7,
+              fontSize: 13, padding: '9px 16px',
+            }}
+          >
+            <RotateCcw size={14} /> Load CBSE Samples
+          </button>
         </div>
       </Section>
 
@@ -248,31 +276,20 @@ export default function Settings() {
             <span style={{ color: C.textMuted }}>License</span>
             <span style={{ color: C.text }}>MIT — free & open source</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span style={{ color: C.textMuted }}>Source</span>
-            <a href="https://github.com/kaorii-ako/Shiori-v1" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, textDecoration: 'none' }}>GitHub ↗</a>
-          </div>
         </div>
       </Section>
 
       {/* Account */}
       <Section title="Account">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button onClick={() => { Promise.resolve(logout?.()).finally(() => navigate('/login')) }} style={{
+          <button onClick={() => { Promise.resolve(logout?.()).finally(() => navigate('/home')) }} style={{
             display: 'flex', alignItems: 'center', gap: 9,
             padding: '11px 16px', borderRadius: 10,
             border: `1px solid ${C.border}`, background: 'transparent',
             color: C.text, cursor: 'pointer', textAlign: 'left',
             fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
             transition: 'border-color 0.15s ease',
-          }}><LogOut size={14} /> Sign Out</button>
-          <button onClick={() => addToast({ type: 'info', message: 'To delete your account and data, email the address on our GitHub page.' })} style={{
-            display: 'flex', alignItems: 'center', gap: 9,
-            padding: '11px 16px', borderRadius: 10,
-            border: `1px solid ${tint(C.pink, 0.4)}`, background: tint(C.pink, 0.07),
-            color: C.pink, cursor: 'pointer', textAlign: 'left',
-            fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
-          }}><Trash2 size={14} /> Delete Account</button>
+          }}><LogOut size={14} /> Reset Session</button>
         </div>
       </Section>
     </div>

@@ -1,5 +1,5 @@
 // Bump the version to invalidate caches poisoned by the old cache-first worker.
-const CACHE = 'shiori-static-v2'
+const CACHE = 'studypulse-static-v2'
 
 self.addEventListener('install', () => {
   self.skipWaiting()

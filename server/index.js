@@ -43,5 +43,5 @@ app.get('/api/health', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`Shiori server running on http://localhost:${PORT}`)
+  console.log(`StudyPulse server running on http://localhost:${PORT}`)
 })

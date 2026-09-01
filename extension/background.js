@@ -1,4 +1,4 @@
-// Background service worker for Shiori extension
+// Background service worker for StudyPulse extension
 // Handles alarms and cross-script messaging
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -8,9 +8,9 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type !== 'IMPORT_ASSIGNMENTS') return false
 
-  chrome.storage.local.get('shiori-assignments', async (result) => {
+  chrome.storage.local.get('studypulse-assignments', async (result) => {
     try {
-      const data = JSON.parse(result['shiori-assignments'] || 'null') || { state: { assignments: [], courses: [] } }
+      const data = JSON.parse(result['studypulse-assignments'] || 'null') || { state: { assignments: [], courses: [] } }
       const existing = data.state?.assignments || []
       const existingTitles = new Set(existing.map(a => a.title.toLowerCase()))
 
@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         }))
 
       data.state.assignments = [...existing, ...newItems]
-      await chrome.storage.local.set({ 'shiori-assignments': JSON.stringify(data) })
+      await chrome.storage.local.set({ 'studypulse-assignments': JSON.stringify(data) })
       sendResponse({ success: true, count: newItems.length })
     } catch (e) {
       sendResponse({ success: false })
@@ -48,9 +48,9 @@ function parseDue(str) {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== 'check-assignments') return
 
-  const result = await chrome.storage.local.get('shiori-assignments')
+  const result = await chrome.storage.local.get('studypulse-assignments')
   try {
-    const data = JSON.parse(result['shiori-assignments'] || 'null')
+    const data = JSON.parse(result['studypulse-assignments'] || 'null')
     const assignments = data?.state?.assignments || []
 
     const soon = assignments.filter(a => {

@@ -1,4 +1,4 @@
-// Validation patterns and helper functions for Shiori auth
+// Validation patterns and helper functions for StudyPulse auth
 
 // Username: lowercase, can contain non-leading hyphen/period
 // Example valid: kaorii-ako, john.doe, user123

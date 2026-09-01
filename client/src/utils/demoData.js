@@ -10,11 +10,11 @@ export const DEMO_USER = {
 }
 
 export const DEMO_COURSES = [
-  { id: 'course-1', name: 'Calculus II', code: 'MATH 202', color: '#ff6b9d', instructor: 'Dr. Sarah Chen', credits: 4 },
-  { id: 'course-2', name: 'Data Structures', code: 'CS 301', color: '#c44dff', instructor: 'Prof. James Park', credits: 3 },
-  { id: 'course-3', name: 'World History', code: 'HIST 101', color: '#4daaff', instructor: 'Dr. Maria Santos', credits: 3 },
-  { id: 'course-4', name: 'Physics I', code: 'PHYS 201', color: '#4dff91', instructor: 'Prof. David Liu', credits: 4 },
-  { id: 'course-5', name: 'English Composition', code: 'ENG 102', color: '#ffd6a0', instructor: 'Prof. Emma Wells', credits: 3 }
+  { id: 'course-1', name: 'Physics', code: 'PHY', color: '#4daaff', credits: 1 },
+  { id: 'course-2', name: 'Chemistry', code: 'CHEM', color: '#c44dff', credits: 1 },
+  { id: 'course-3', name: 'Mathematics', code: 'MATH', color: '#ff6b9d', credits: 1 },
+  { id: 'course-4', name: 'Biology', code: 'BIO', color: '#4dff91', credits: 1 },
+  { id: 'course-5', name: 'English Core', code: 'ENG', color: '#ffd6a0', credits: 1 },
 ]
 
 const now = new Date()
@@ -23,121 +23,121 @@ const daysFromNow = (n) => new Date(now.getTime() + n * 24 * 60 * 60 * 1000).toI
 export const DEMO_ASSIGNMENTS = [
   {
     id: 'assign-1',
-    title: 'Integration by Parts Problem Set',
+    title: 'Kinematics Numericals — Chapter 3',
     courseId: 'course-1',
-    courseName: 'Calculus II',
+    courseName: 'Physics',
     dueDate: daysFromNow(2),
     status: 'pending',
     priority: 'high',
-    description: 'Complete exercises 7.1 – 7.4 from textbook. Show all work.',
+    description: 'Solve all numericals from NCERT Chapter 3 — Motion in a Straight Line.',
     estimatedHours: 3,
     grade: null
   },
   {
     id: 'assign-2',
-    title: 'Binary Search Tree Implementation',
+    title: 'Chemical Bonding Worksheet',
     courseId: 'course-2',
-    courseName: 'Data Structures',
+    courseName: 'Chemistry',
     dueDate: daysFromNow(4),
     status: 'in-progress',
     priority: 'high',
-    description: 'Implement BST with insert, delete, search, and traversal methods in Python.',
-    estimatedHours: 5,
-    grade: null
-  },
-  {
-    id: 'assign-3',
-    title: 'Essay: Causes of WWI',
-    courseId: 'course-3',
-    courseName: 'World History',
-    dueDate: daysFromNow(6),
-    status: 'pending',
-    priority: 'medium',
-    description: '1500-word analytical essay on the primary causes of World War I.',
-    estimatedHours: 4,
-    grade: null
-  },
-  {
-    id: 'assign-4',
-    title: "Newton's Laws Lab Report",
-    courseId: 'course-4',
-    courseName: 'Physics I',
-    dueDate: daysFromNow(8),
-    status: 'pending',
-    priority: 'medium',
-    description: "Write up lab results from last week's experiment on Newton's second law.",
+    description: 'Complete NCERT back exercises + coaching sheet on ionic and covalent bonding.',
     estimatedHours: 2,
     grade: null
   },
   {
-    id: 'assign-5',
-    title: 'Midterm Review — Integration Techniques',
-    courseId: 'course-1',
-    courseName: 'Calculus II',
-    dueDate: daysFromNow(11),
+    id: 'assign-3',
+    title: 'Trigonometry Problem Set — Ex 3.3',
+    courseId: 'course-3',
+    courseName: 'Mathematics',
+    dueDate: daysFromNow(3),
     status: 'pending',
     priority: 'high',
-    description: 'Midterm exam covers integration by parts, trig substitution, and partial fractions.',
-    estimatedHours: 6,
+    description: 'Exercise 3.3 from NCERT — trigonometric functions and identities.',
+    estimatedHours: 2,
+    grade: null
+  },
+  {
+    id: 'assign-4',
+    title: 'Cell Biology Diagram — Label & Explain',
+    courseId: 'course-4',
+    courseName: 'Biology',
+    dueDate: daysFromNow(5),
+    status: 'pending',
+    priority: 'medium',
+    description: 'Draw and label plant & animal cell diagrams. Explain each organelle function.',
+    estimatedHours: 1.5,
+    grade: null
+  },
+  {
+    id: 'assign-5',
+    title: 'Reading Comprehension — Unseen Passage Practice',
+    courseId: 'course-5',
+    courseName: 'English Core',
+    dueDate: daysFromNow(6),
+    status: 'pending',
+    priority: 'medium',
+    description: 'Practice 3 unseen passages with short-answer and long-answer questions.',
+    estimatedHours: 1,
     grade: null
   },
   {
     id: 'assign-6',
-    title: 'Graph Traversal Algorithms Quiz',
-    courseId: 'course-2',
-    courseName: 'Data Structures',
+    title: 'Laws of Motion — NCERT Exemplar',
+    courseId: 'course-1',
+    courseName: 'Physics',
     dueDate: daysFromNow(-3),
     status: 'completed',
-    priority: 'low',
-    description: 'Quiz on BFS and DFS algorithms.',
-    estimatedHours: 1,
-    grade: 92
+    priority: 'medium',
+    description: 'NCERT Exemplar problems for Chapter 5.',
+    estimatedHours: 2,
+    grade: 88
   },
   {
     id: 'assign-7',
-    title: 'Research Proposal: AI Ethics',
-    courseId: 'course-5',
-    courseName: 'English Composition',
-    dueDate: daysFromNow(5),
+    title: 'Mole Concept Numericals',
+    courseId: 'course-2',
+    courseName: 'Chemistry',
+    dueDate: daysFromNow(8),
     status: 'pending',
     priority: 'medium',
-    description: '500-word research proposal on AI bias in hiring systems.',
+    description: 'Practice problems on mole concept, molar mass, and stoichiometry.',
     estimatedHours: 2,
     grade: null
   },
   {
     id: 'assign-8',
-    title: 'Projectile Motion Problems',
-    courseId: 'course-4',
-    courseName: 'Physics I',
+    title: 'Limits & Derivatives Practice',
+    courseId: 'course-3',
+    courseName: 'Mathematics',
     dueDate: daysFromNow(-5),
     status: 'graded',
     priority: 'low',
-    description: 'Problem set on 2D kinematics and projectile motion.',
-    estimatedHours: 2,
-    grade: { pointsEarned: 91, pointsPossible: 100 }
+    description: 'RD Sharma exercises on limits and introduction to derivatives.',
+    estimatedHours: 3,
+    grade: { pointsEarned: 42, pointsPossible: 50 }
   },
   {
     id: 'assign-9',
-    title: 'Sorting Algorithms Analysis',
-    courseId: 'course-2',
-    courseName: 'Data Structures',
-    dueDate: daysFromNow(14),
+    title: 'Biomolecules Notes Summary',
+    courseId: 'course-4',
+    courseName: 'Biology',
+    dueDate: daysFromNow(10),
     status: 'pending',
     priority: 'low',
-    description: 'Write analysis comparing time/space complexity of merge sort, quick sort, heap sort.',
-    estimatedHours: 3,
+    description: 'Summarize Chapter 9 — proteins, carbohydrates, lipids, and nucleic acids.',
+    estimatedHours: 1,
     grade: null
   },
   {
     id: 'assign-10',
-    title: 'Peer Review: Classmate Essay',
+    title: 'Letter Writing — Formal & Informal',
     courseId: 'course-5',
-    courseName: 'English Composition',
-    dueDate: daysFromNow(9),
+    courseName: 'English Core',
+    dueDate: daysFromNow(7),
     status: 'pending',
     priority: 'low',
-    description: 'Review and provide feedback on 2 classmate research proposals.',
+    description: 'Write one formal letter to the editor and one informal letter to a friend.',
     estimatedHours: 1,
     grade: null
   }
@@ -146,85 +146,85 @@ export const DEMO_ASSIGNMENTS = [
 export const DEMO_EVENTS = [
   {
     id: 'event-1',
-    title: 'Calculus Office Hours',
+    title: 'Physics Doubt Session',
     start: daysFromNow(1),
     type: 'academic',
-    description: 'Dr. Chen office hours — bring integration questions',
-    color: '#ff6b9d'
+    description: 'Bring kinematics questions — teacher available after school',
+    color: '#4daaff'
   },
   {
     id: 'event-2',
-    title: 'CS 301 Group Study',
+    title: 'Chemistry Lab — Salt Analysis',
     start: daysFromNow(3),
-    type: 'study',
-    description: 'BST implementation group session in library room 204',
+    type: 'academic',
+    description: 'Practical exam prep — systematic qualitative analysis',
     color: '#c44dff'
   },
   {
     id: 'event-3',
-    title: 'Physics Lab',
-    start: daysFromNow(5),
-    type: 'academic',
-    description: 'Lab session — bring your completed pre-lab worksheet',
-    color: '#4dff91'
+    title: 'Maths Group Study',
+    start: daysFromNow(2),
+    type: 'study',
+    description: 'Trigonometry and coordinate geometry revision with friends',
+    color: '#ff6b9d'
   },
   {
     id: 'event-4',
-    title: 'History Essay Draft Due',
-    start: daysFromNow(6),
-    type: 'deadline',
-    description: 'First draft for peer review',
-    color: '#4daaff'
+    title: 'Biology Diagram Practice',
+    start: daysFromNow(4),
+    type: 'study',
+    description: 'Practice NCERT diagrams — cell structure, mitosis, meiosis',
+    color: '#4dff91'
   },
   {
     id: 'event-5',
-    title: 'Calculus II Midterm',
-    start: daysFromNow(11),
+    title: 'Physics Unit Test',
+    start: daysFromNow(8),
     type: 'exam',
-    description: 'Integration techniques — 90 minutes, closed book',
+    description: 'Kinematics + Laws of Motion — 40 marks, 1 hour',
     color: '#ff4d6a'
   },
   {
     id: 'event-6',
-    title: 'CS Study Session',
-    start: daysFromNow(7),
-    type: 'study',
-    description: 'Algorithm complexity review before quiz',
-    color: '#c44dff'
+    title: 'English Creative Writing',
+    start: daysFromNow(5),
+    type: 'academic',
+    description: 'Article writing and report writing practice',
+    color: '#ffd6a0'
   },
   {
     id: 'event-7',
-    title: 'Physics Lecture',
-    start: daysFromNow(2),
-    type: 'academic',
-    description: 'Chapter 5: Work, Energy, Power',
-    color: '#4dff91'
+    title: 'Chemistry Class Test',
+    start: daysFromNow(10),
+    type: 'exam',
+    description: 'Chemical Bonding + Periodic Table — 30 marks',
+    color: '#c44dff'
   },
   {
     id: 'event-8',
-    title: 'English Writing Workshop',
-    start: daysFromNow(4),
-    type: 'academic',
-    description: 'Workshop on argumentative essay structure',
-    color: '#ffd6a0'
+    title: 'Maths Half-Yearly Revision',
+    start: daysFromNow(14),
+    type: 'study',
+    description: 'Start revising all chapters for half-yearly exams',
+    color: '#ff6b9d'
   }
 ]
 
 export const DEMO_NOTES = [
   {
     id: 'note-demo-1',
-    title: 'Integration Techniques',
-    content: '# Integration Techniques\n\n## U-Substitution\nUse when you see f(g(x)) · g\'(x)\n- Let u = g(x)\n- Then du = g\'(x)dx\n\n## Integration by Parts\n**Formula:** ∫u dv = uv - ∫v du\n\n**LIATE rule** for choosing u:\n- **L**ogarithms\n- **I**nverse trig\n- **A**lgebraic\n- **T**rig\n- **E**xponential\n\n## Trigonometric Substitution\n- √(a²-x²) → x = a·sin(θ)\n- √(a²+x²) → x = a·tan(θ)\n- √(x²-a²) → x = a·sec(θ)\n\n## Partial Fractions\nFor rational functions — factor denominator first.',
+    title: 'Physics — Kinematics Formulas',
+    content: '# Kinematics — Key Formulas\n\n## Equations of Motion (Uniform Acceleration)\n- v = u + at\n- s = ut + ½at²\n- v² = u² + 2as\n- s = ½(u + v)t\n\n## Projectile Motion\n- Horizontal range: R = u²sin2θ / g\n- Max height: H = u²sin²θ / 2g\n- Time of flight: T = 2u sinθ / g\n\n## Relative Velocity\n- v_AB = v_A − v_B\n\n## Tips\n- Always draw a diagram first\n- Choose direction for positive/negative carefully\n- Use g = 9.8 m/s² or 10 m/s² as specified',
     courseId: 'course-1',
-    color: '#ff6b9d',
+    color: '#4daaff',
     pinned: true,
     createdAt: Date.now() - 1000 * 60 * 60 * 24 * 3,
     updatedAt: Date.now() - 1000 * 60 * 30,
   },
   {
     id: 'note-demo-2',
-    title: 'BST Operations — Exam Notes',
-    content: '# Binary Search Tree\n\n## Time Complexity\n| Operation | Average | Worst |\n|-----------|---------|-------|\n| Search    | O(log n)| O(n)  |\n| Insert    | O(log n)| O(n)  |\n| Delete    | O(log n)| O(n)  |\n\n## Traversal Types\n- **Inorder** (L-Root-R): gives sorted order\n- **Preorder** (Root-L-R): used for copying tree\n- **Postorder** (L-R-Root): used for deletion\n\n## Key Interview Points\n- BST invariant: left < node < right\n- Balanced BST: AVL, Red-Black\n- Successor = leftmost node in right subtree\n\n`TODO: Review deletion of nodes with 2 children`',
+    title: 'Chemistry — Periodic Table Trends',
+    content: '# Periodic Table Trends\n\n## Across a Period (Left → Right)\n- Atomic radius **decreases**\n- Ionisation energy **increases**\n- Electronegativity **increases**\n- Metallic character **decreases**\n\n## Down a Group (Top → Bottom)\n- Atomic radius **increases**\n- Ionisation energy **decreases**\n- Electronegativity **decreases**\n- Metallic character **increases**\n\n## Important Exceptions\n- Electron affinity: Fluorine < Chlorine (small size of F)\n- Ionisation energy: Be > B, N > O (half-filled stability)\n\n## NCERT Questions to Revise\n- Ex 3.1, 3.2, 3.4, 3.7',
     courseId: 'course-2',
     color: '#c44dff',
     pinned: false,
@@ -233,10 +233,10 @@ export const DEMO_NOTES = [
   },
   {
     id: 'note-demo-3',
-    title: 'WWI Essay Outline',
-    content: '# Essay: Causes of WWI\n\n## Thesis\nWhile the assassination of Archduke Franz Ferdinand was the spark, WWI was made inevitable by decades of militarism, imperial rivalry, and entangled alliances.\n\n## Body Paragraphs\n1. **Militarism** — arms race, especially Germany vs Britain naval competition\n2. **Alliance System** — Triple Entente vs Triple Alliance, chain-reaction trigger\n3. **Imperial Rivalries** — Moroccan Crises, Balkans instability\n4. **Nationalism** — Pan-Slavism, German nationalism, Austro-Hungarian tensions\n\n## Sources to cite\n- MacMillan, *The War That Ended Peace* (2013)\n- Clark, *The Sleepwalkers* (2012)\n\n**Due in 6 days — start writing tonight!**',
+    title: 'Maths — Trigonometric Identities',
+    content: '# Trigonometric Identities\n\n## Fundamental\n- sin²θ + cos²θ = 1\n- 1 + tan²θ = sec²θ\n- 1 + cot²θ = cosec²θ\n\n## Compound Angles\n- sin(A ± B) = sinA cosB ± cosA sinB\n- cos(A ± B) = cosA cosB ∓ sinA sinB\n- tan(A ± B) = (tanA ± tanB) / (1 ∓ tanA tanB)\n\n## Double Angle\n- sin2A = 2sinA cosA\n- cos2A = cos²A − sin²A = 2cos²A − 1 = 1 − 2sin²A\n- tan2A = 2tanA / (1 − tan²A)\n\n**Practice**: NCERT Ex 3.3, Ex 3.4\n**RD Sharma**: Chapter 5 solved examples',
     courseId: 'course-3',
-    color: '#4daaff',
+    color: '#ff6b9d',
     pinned: false,
     createdAt: Date.now() - 1000 * 60 * 60 * 2,
     updatedAt: Date.now() - 1000 * 60 * 10,
@@ -245,88 +245,86 @@ export const DEMO_NOTES = [
 
 export const DEMO_COURSE_WEIGHTS = {
   'course-1': [
-    { id: 'cat-calc-hw', name: 'Homework', weight: 25 },
-    { id: 'cat-calc-quiz', name: 'Quizzes', weight: 25 },
-    { id: 'cat-calc-mid', name: 'Midterm', weight: 25 },
-    { id: 'cat-calc-fin', name: 'Final Exam', weight: 25 },
+    { id: 'cat-phy-hw', name: 'Homework', weight: 15 },
+    { id: 'cat-phy-test', name: 'Unit Tests', weight: 30 },
+    { id: 'cat-phy-prac', name: 'Practicals', weight: 15 },
+    { id: 'cat-phy-exam', name: 'Final Exam', weight: 40 },
   ],
   'course-2': [
-    { id: 'cat-cs-hw', name: 'Assignments', weight: 40 },
-    { id: 'cat-cs-quiz', name: 'Quizzes', weight: 20 },
-    { id: 'cat-cs-proj', name: 'Projects', weight: 40 },
+    { id: 'cat-chem-hw', name: 'Homework', weight: 15 },
+    { id: 'cat-chem-test', name: 'Unit Tests', weight: 30 },
+    { id: 'cat-chem-prac', name: 'Practicals', weight: 15 },
+    { id: 'cat-chem-exam', name: 'Final Exam', weight: 40 },
   ],
 }
 
 export const DEMO_DECKS = [
   {
     id: 'deck-demo-1',
-    name: 'Integration Techniques',
+    name: 'Physics — Laws of Motion',
     courseId: 'course-1',
     createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2,
     cards: [
-      { id: 'c1', front: 'What is the formula for Integration by Parts?', back: '∫u dv = uv − ∫v du\n\nRemember LIATE for choosing u.', streak: 3, nextReview: Date.now() + 86400000 },
-      { id: 'c2', front: 'When do you use u-substitution?', back: 'When the integrand contains a composite function f(g(x))·g\'(x). Let u = g(x), du = g\'(x)dx.', streak: 2, nextReview: Date.now() - 1000 },
-      { id: 'c3', front: 'What substitution is used for √(a²−x²)?', back: 'x = a·sin(θ)\nThis converts the square root to a·cos(θ).', streak: 0, nextReview: null },
-      { id: 'c4', front: 'What does LIATE stand for?', back: 'Logarithms → Inverse trig → Algebraic → Trig → Exponential\nChoose u as whichever comes first in this list.', streak: 1, nextReview: Date.now() - 1000 },
-      { id: 'c5', front: '∫ sin²(x) dx = ?', back: 'Use half-angle identity: sin²(x) = (1 − cos(2x))/2\nResult: x/2 − sin(2x)/4 + C', streak: 0, nextReview: null },
+      { id: 'c1', front: "State Newton's First Law of Motion.", back: "A body remains at rest or in uniform motion in a straight line unless acted upon by an external force.\n\nAlso called the Law of Inertia.", streak: 3, nextReview: Date.now() + 86400000 },
+      { id: 'c2', front: "Write Newton's Second Law as a formula.", back: "F = ma\n\nForce = mass × acceleration\nSI unit of force: Newton (N) = kg·m/s²", streak: 2, nextReview: Date.now() - 1000 },
+      { id: 'c3', front: "State Newton's Third Law.", back: "For every action, there is an equal and opposite reaction.\n\nF₁₂ = −F₂₁\nAction and reaction act on different bodies.", streak: 0, nextReview: null },
+      { id: 'c4', front: 'What is the formula for friction force?', back: 'f = μN\n\nwhere μ is the coefficient of friction and N is the normal force.', streak: 1, nextReview: Date.now() - 1000 },
+      { id: 'c5', front: 'What is conservation of linear momentum?', back: 'In an isolated system (no external forces), the total momentum before and after collision remains the same.\n\nm₁u₁ + m₂u₂ = m₁v₁ + m₂v₂', streak: 0, nextReview: null },
     ]
   },
   {
     id: 'deck-demo-2',
-    name: 'Data Structures — Key Concepts',
+    name: 'Chemistry — Chemical Bonding',
     courseId: 'course-2',
     createdAt: Date.now() - 1000 * 60 * 60 * 12,
     cards: [
-      { id: 'c6', front: 'Time complexity of BST search (average case)?', back: 'O(log n) average\nO(n) worst case (degenerate/unbalanced tree)', streak: 2, nextReview: Date.now() - 1000 },
-      { id: 'c7', front: 'What traversal gives a BST in sorted order?', back: 'Inorder traversal (Left → Root → Right)\nAlways produces ascending sorted output.', streak: 3, nextReview: Date.now() + 172800000 },
-      { id: 'c8', front: 'Difference between BFS and DFS?', back: 'BFS: queue, explores level by level, finds shortest path\nDFS: stack/recursion, goes deep first, good for cycle detection', streak: 1, nextReview: Date.now() - 1000 },
-      { id: 'c9', front: 'What is amortized O(1) for dynamic arrays?', back: 'Each append is O(1) amortized because doubling the array rarely occurs. Total cost of n operations is O(n), so average per-op cost is O(1).', streak: 0, nextReview: null },
+      { id: 'c6', front: 'What is an ionic bond?', back: 'A bond formed by the complete transfer of electrons from a metal to a non-metal.\n\nExample: NaCl — Na loses 1e⁻ → Na⁺, Cl gains 1e⁻ → Cl⁻', streak: 2, nextReview: Date.now() - 1000 },
+      { id: 'c7', front: 'What is a covalent bond?', back: 'A bond formed by the mutual sharing of electrons between two non-metals.\n\nExample: H₂ — each H shares 1 electron.', streak: 3, nextReview: Date.now() + 172800000 },
+      { id: 'c8', front: 'What is VSEPR theory used for?', back: 'Valence Shell Electron Pair Repulsion theory predicts the shape/geometry of molecules based on electron pairs around the central atom.', streak: 1, nextReview: Date.now() - 1000 },
+      { id: 'c9', front: 'Define electronegativity.', back: 'The tendency of an atom in a molecule to attract the shared pair of electrons towards itself.\n\nPauling scale: F (4.0) is the most electronegative element.', streak: 0, nextReview: null },
     ]
   }
 ]
 
 export const DEMO_GRADES = {
   'course-1': {
-    'hw1': { name: 'HW 1 — U-Substitution', pointsEarned: 48, pointsPossible: 50 },
-    'hw2': { name: 'HW 2 — Trig Integrals', pointsEarned: 44, pointsPossible: 50 },
-    'quiz1': { name: 'Quiz 1', pointsEarned: 18, pointsPossible: 20 },
-    'quiz2': { name: 'Quiz 2 — Partial Fractions', pointsEarned: 17, pointsPossible: 20 },
-    'midterm1': { name: 'Midterm 1', pointsEarned: 138, pointsPossible: 150 }
+    'hw1': { name: 'Kinematics Worksheet', pointsEarned: 18, pointsPossible: 20 },
+    'hw2': { name: 'Motion Numericals', pointsEarned: 23, pointsPossible: 25 },
+    'test1': { name: 'Unit Test — Kinematics', pointsEarned: 34, pointsPossible: 40 },
+    'prac1': { name: 'Practical — Vernier Callipers', pointsEarned: 14, pointsPossible: 15 },
   },
   'course-2': {
-    'hw1': { name: 'Arrays & Linked Lists', pointsEarned: 95, pointsPossible: 100 },
-    'hw2': { name: 'Stacks & Queues', pointsEarned: 88, pointsPossible: 100 },
-    'quiz1': { name: 'BFS/DFS Quiz', pointsEarned: 92, pointsPossible: 100 },
-    'project1': { name: 'Linked List Project', pointsEarned: 145, pointsPossible: 150 }
+    'hw1': { name: 'Atomic Structure Exercises', pointsEarned: 22, pointsPossible: 25 },
+    'hw2': { name: 'Periodic Table Worksheet', pointsEarned: 19, pointsPossible: 20 },
+    'test1': { name: 'Unit Test — Chemical Bonding', pointsEarned: 28, pointsPossible: 35 },
+    'prac1': { name: 'Salt Analysis Practical', pointsEarned: 13, pointsPossible: 15 },
   },
   'course-3': {
-    'essay1': { name: 'Short Essay — Ancient Rome', pointsEarned: 87, pointsPossible: 100 },
-    'reading1': { name: 'Reading Response 1', pointsEarned: 19, pointsPossible: 20 },
-    'reading2': { name: 'Reading Response 2', pointsEarned: 18, pointsPossible: 20 },
-    'quiz1': { name: 'Chapter 3-4 Quiz', pointsEarned: 44, pointsPossible: 50 }
+    'hw1': { name: 'Sets & Functions', pointsEarned: 24, pointsPossible: 25 },
+    'hw2': { name: 'Trigonometry — Ex 3.2', pointsEarned: 18, pointsPossible: 20 },
+    'test1': { name: 'Unit Test — Algebra', pointsEarned: 37, pointsPossible: 40 },
   },
   'course-4': {
-    'lab1': { name: 'Lab 1 — Kinematics', pointsEarned: 96, pointsPossible: 100 },
-    'lab2': { name: 'Lab 2 — Projectile Motion', pointsEarned: 91, pointsPossible: 100 },
-    'hw1': { name: 'HW 1 — Motion Equations', pointsEarned: 47, pointsPossible: 50 },
-    'quiz1': { name: 'Vectors & Forces Quiz', pointsEarned: 38, pointsPossible: 40 }
+    'hw1': { name: 'Cell Structure Diagram', pointsEarned: 9, pointsPossible: 10 },
+    'hw2': { name: 'Biomolecules Questions', pointsEarned: 17, pointsPossible: 20 },
+    'test1': { name: 'Unit Test — Cell Biology', pointsEarned: 26, pointsPossible: 30 },
   },
   'course-5': {
-    'essay1': { name: 'Descriptive Essay', pointsEarned: 92, pointsPossible: 100 },
-    'hw1': { name: 'Grammar Workshop 1', pointsEarned: 24, pointsPossible: 25 },
-    'hw2': { name: 'Grammar Workshop 2', pointsEarned: 23, pointsPossible: 25 }
+    'hw1': { name: 'Reading Comprehension — Practice 1', pointsEarned: 13, pointsPossible: 15 },
+    'hw2': { name: 'Grammar Exercises', pointsEarned: 19, pointsPossible: 20 },
+    'test1': { name: 'Descriptive Essay', pointsEarned: 8, pointsPossible: 10 },
   }
 }
 
 // Pre-seeded quiz history for demo mode
 export const DEMO_QUIZ_HISTORY = [
-  { date: Date.now() - 86400000 * 2, score: 4, total: 5, title: 'Calculus II — Integrals' },
-  { date: Date.now() - 86400000 * 5, score: 7, total: 8, title: 'Data Structures — Trees' },
-  { date: Date.now() - 86400000 * 9, score: 3, total: 5, title: 'World History — WWI' },
+  { date: Date.now() - 86400000 * 2, score: 4, total: 5, title: 'Physics — Kinematics' },
+  { date: Date.now() - 86400000 * 5, score: 7, total: 8, title: 'Chemistry — Periodic Table' },
+  { date: Date.now() - 86400000 * 9, score: 4, total: 5, title: 'Mathematics — Trigonometry' },
 ]
 
 // Pre-seeded leaderboard data for demo mode
 export const DEMO_LEADERBOARD = [
-  { id: 'friend-1', name: 'Ploy S.', avatar: 'P', streak: 12, completionRate: 94, gpa: '91.2', score: 214, isMe: false },
-  { id: 'friend-2', name: 'Nat K.', avatar: 'N', streak: 5, completionRate: 78, gpa: '85.0', score: 120, isMe: false },
+  { id: 'friend-1', name: 'Aarav S.', avatar: 'A', streak: 12, completionRate: 94, gpa: '91.2', score: 214, isMe: false },
+  { id: 'friend-2', name: 'Priya K.', avatar: 'P', streak: 5, completionRate: 78, gpa: '85.0', score: 120, isMe: false },
 ]

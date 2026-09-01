@@ -1,14 +1,14 @@
 ---
 title: I built an MCP server that lets Claude read my study data — here's how
 published: true
-description: Shiori is an open-source AI study companion. I added an MCP server so Claude Code and Claude Desktop can read your assignments, grades, and flashcards directly in context.
+description: StudyPulse is an open-source AI study companion. I added an MCP server so Claude Code and Claude Desktop can read your assignments, grades, and flashcards directly in context.
 tags: mcp, opensource, ai, education
-cover_image: https://shiori-v1.vercel.app/og-image.png
+cover_image: https://studypulse.vercel.app/og-image.png
 ---
 
 # I built an MCP server that lets Claude read my study data
 
-**tl;dr** — Shiori is an open-source AI study app (React + Gemini). I added a Model Context Protocol server so you can ask Claude Code things like "what assignments are due this week?" and get real answers from your actual data.
+**tl;dr** — StudyPulse is an open-source AI study app (React + Gemini). I added a Model Context Protocol server so you can ask Claude Code things like "what assignments are due this week?" and get real answers from your actual data.
 
 ## The problem
 
@@ -16,11 +16,11 @@ I was using Claude Code to help me study, but it had no idea what I was actually
 
 What I wanted: Claude to already *know* my study context.
 
-## What Shiori does
+## What StudyPulse does
 
-Shiori is a full study companion: assignments, grades, GPA predictor, AI flashcard generation, spaced repetition, AI quiz generator, habit tracker, focus mode (Pomodoro), leaderboard, and a syllabus importer that extracts all assignments from a PDF/text dump.
+StudyPulse is a full study companion: assignments, grades, GPA predictor, AI flashcard generation, spaced repetition, AI quiz generator, habit tracker, focus mode (Pomodoro), leaderboard, and a syllabus importer that extracts all assignments from a PDF/text dump.
 
-It runs entirely in the browser — no server needed for the core features. Data lives in localStorage. You can try it at **[shiori-v1.vercel.app](https://shiori-v1.vercel.app)** (click TRY DEMO, no account needed).
+It runs entirely in the browser — no server needed for the core features. Data lives in localStorage. You can try it at **[studypulse.vercel.app](https://studypulse.vercel.app)** (click TRY DEMO, no account needed).
 
 ## The MCP server
 
@@ -37,7 +37,7 @@ get_flashcard_decks   → deck names + mastery %
 
 ### How it works
 
-You export your data from Shiori (Settings → Export Data), which writes `shiori-data.json`. The MCP server reads that file and serves it to Claude.
+You export your data from StudyPulse (Settings → Export Data), which writes `studypulse-data.json`. The MCP server reads that file and serves it to Claude.
 
 ```js
 // mcp/index.js (simplified)
@@ -58,10 +58,10 @@ Add to `.claude/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "shiori": {
+    "studypulse": {
       "command": "node",
-      "args": ["/path/to/Shiori-v1/mcp/index.js"],
-      "env": { "SHIORI_DATA_PATH": "/path/to/shiori-data.json" }
+      "args": ["/path/to/StudyPulse/mcp/index.js"],
+      "env": { "STUDYPULSE_DATA_PATH": "/path/to/studypulse-data.json" }
     }
   }
 }
@@ -76,7 +76,7 @@ Same idea, add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "shiori": {
+    "studypulse": {
       "command": "node",
       "args": ["/absolute/path/to/mcp/index.js"]
     }
@@ -92,8 +92,8 @@ I plan to add more tools: `create_study_plan`, `generate_quiz_from_notes`, `get_
 
 ## Try it
 
-- **Live demo**: [shiori-v1.vercel.app](https://shiori-v1.vercel.app) (no account)
-- **GitHub**: [github.com/kaorii-ako/Shiori-v1](https://github.com/kaorii-ako/Shiori-v1)
+- **Live demo**: [studypulse.vercel.app](https://studypulse.vercel.app) (no account)
+- **GitHub**: [github.com/kaorii-ako/StudyPulse](https://github.com/kaorii-ako/StudyPulse)
 - **MCP docs**: `mcp/README.md` in the repo
 
 Stars appreciated — this is a solo project and GitHub discoverability matters for open source.

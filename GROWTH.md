@@ -1,4 +1,4 @@
-# Shiori Growth Checklist
+# StudyPulse Growth Checklist
 
 **Each item here can directly add stars or revenue. Do them in order.**
 Time estimates are realistic — these are not vague suggestions.
@@ -13,9 +13,9 @@ can drive hundreds of stars. Do this FIRST.
 **Step 1** — Fork: https://github.com/punkpeye/awesome-mcp-servers
 **Step 2** — Add to `README.md` under "Education" section (or create it):
 ```markdown
-- [Shiori](https://github.com/kaorii-ako/Shiori-v1) - Student productivity MCP server. Access assignments, grades, notes, and flashcards from Claude Code. Google Classroom sync + Gemini AI. ![MIT](badge) ![JavaScript](badge)
+- [StudyPulse](https://github.com/kaorii-ako/StudyPulse) - Student productivity MCP server. Access assignments, grades, notes, and flashcards from Claude Code. Google Classroom sync + Gemini AI. ![MIT](badge) ![JavaScript](badge)
 ```
-**Step 3** — Open PR titled: `Add Shiori — student productivity MCP server`
+**Step 3** — Open PR titled: `Add StudyPulse — student productivity MCP server`
 
 **Also submit to `appcypher/awesome-mcp-servers` (5,568 stars):**
 Fork: https://github.com/appcypher/awesome-mcp-servers
@@ -23,22 +23,22 @@ Same text, under "Education" or "Productivity".
 
 **Also submit to glama.ai MCP directory (free, instant):**
 URL: https://glama.ai/mcp/servers/submit
-Name: Shiori MCP Server
-GitHub: https://github.com/kaorii-ako/Shiori-v1
+Name: StudyPulse MCP Server
+GitHub: https://github.com/kaorii-ako/StudyPulse
 Description: Access your study assignments, grades, notes, and flashcards from Claude Code. Google Classroom sync + Gemini AI.
 
 ---
 
 ## 🆕 NEW HIGH-PRIORITY: Post to Claude Code community
 
-Shiori now has a **MCP server** (see `mcp/`). This is the angle that gets stars from developers.
+StudyPulse now has a **MCP server** (see `mcp/`). This is the angle that gets stars from developers.
 
 **Post to r/ClaudeAI and r/mcp immediately:**
 ```
 Title: I added a MCP server to my open-source student productivity app — Claude can now read your assignments, grades, and notes
 
 Body:
-I built Shiori, a study companion that syncs Google Classroom. Just added a MCP server
+I built StudyPulse, a study companion that syncs Google Classroom. Just added a MCP server
 so Claude Code / Claude Desktop can access your data directly.
 
 "What's due this week?"  "Show my grades"  "Add: essay due Friday"
@@ -46,16 +46,16 @@ so Claude Code / Claude Desktop can access your data directly.
 Config (4 lines in ~/.claude.json):
 {
   "mcpServers": {
-    "shiori": {
+    "studypulse": {
       "command": "node",
-      "args": ["/path/to/Shiori-v1/mcp/index.js"],
-      "env": { "SHIORI_DATA_FILE": "/path/to/shiori-data.json" }
+      "args": ["/path/to/StudyPulse/mcp/index.js"],
+      "env": { "STUDYPULSE_DATA_FILE": "/path/to/studypulse-data.json" }
     }
   }
 }
 
-GitHub: https://github.com/kaorii-ako/Shiori-v1
-Demo: https://shiori-v1.vercel.app
+GitHub: https://github.com/kaorii-ako/StudyPulse
+Demo: https://studypulse.vercel.app
 ```
 
 Also post to **Anthropic Discord #mcp-servers** channel and **Claude Code Discord**.
@@ -65,7 +65,7 @@ Also post to **Anthropic Discord #mcp-servers** channel and **Claude Code Discor
 ## 🔴 Do RIGHT NOW (30 min total)
 
 ### 1. Add GitHub repo topics (2 min)
-Go to: https://github.com/kaorii-ako/Shiori-v1
+Go to: https://github.com/kaorii-ako/StudyPulse
 Click ⚙️ gear next to "About" on the right panel → Topics:
 ```
 google-classroom ai-study-planner gemini react student open-source productivity pomodoro edtech spaced-repetition
@@ -104,7 +104,7 @@ URL: https://news.ycombinator.com/submit
 
 **Title:**
 ```
-Show HN: Shiori – open-source AI study companion (React + Gemini, PWA, MIT)
+Show HN: StudyPulse – open-source AI study companion (React + Gemini, PWA, MIT)
 ```
 
 **Body:** (copy from LAUNCH.md → "Hacker News" section)
@@ -124,25 +124,25 @@ Each of these is a 5-min PR. Fork the repo, add one line, open a PR.
 **a) awesome-react** — https://github.com/enaqx/awesome-react
 Add under "Tools" or "Apps":
 ```markdown
-- [Shiori](https://github.com/kaorii-ako/Shiori-v1) - Open-source AI study companion with Google Classroom sync, spaced repetition flashcards, and Gemini AI study plans.
+- [StudyPulse](https://github.com/kaorii-ako/StudyPulse) - Open-source AI study companion with Google Classroom sync, spaced repetition flashcards, and Gemini AI study plans.
 ```
 
 **b) awesome-selfhosted** — https://github.com/awesome-selfhosted/awesome-selfhosted
 Add under "Personal Dashboards" or "Learning & Courses":
 ```markdown
-- [Shiori Study](https://shiori-v1.vercel.app) - AI-powered student productivity app. Google Classroom sync, Gemini AI study plans, SRS flashcards, GPA calculator, Pomodoro. ([Source Code](https://github.com/kaorii-ako/Shiori-v1)) `MIT` `Nodejs`
+- [StudyPulse Study](https://studypulse.vercel.app) - AI-powered student productivity app. Google Classroom sync, Gemini AI study plans, SRS flashcards, GPA calculator, Pomodoro. ([Source Code](https://github.com/kaorii-ako/StudyPulse)) `MIT` `Nodejs`
 ```
 
 **c) awesome-ai-tools** — https://github.com/mahseema/awesome-ai-tools
 Add under "Education":
 ```markdown
-- [Shiori](https://github.com/kaorii-ako/Shiori-v1) - Open-source AI study companion. Paste your syllabus → AI extracts all assignments. Generate MCQ quizzes from notes. SRS flashcards. MIT.
+- [StudyPulse](https://github.com/kaorii-ako/StudyPulse) - Open-source AI study companion. Paste your syllabus → AI extracts all assignments. Generate MCQ quizzes from notes. SRS flashcards. MIT.
 ```
 
 **d) awesome-generative-ai** — https://github.com/steven2358/awesome-generative-ai
 Add under "Education" or "Productivity":
 ```markdown
-- [Shiori](https://github.com/kaorii-ako/Shiori-v1) - Student productivity app powered by Google Gemini. Generates study plans, flashcards, and MCQ quizzes from your notes.
+- [StudyPulse](https://github.com/kaorii-ako/StudyPulse) - Student productivity app powered by Google Gemini. Generates study plans, flashcards, and MCQ quizzes from your notes.
 ```
 
 ---
@@ -150,7 +150,7 @@ Add under "Education" or "Productivity":
 ### 6. AlternativeTo listing (10 min)
 URL: https://alternativeto.net/software/add/
 - Alternative to: Notion, Google Classroom, Anki
-- Link: https://shiori-v1.vercel.app
+- Link: https://studypulse.vercel.app
 - Description: "AI study companion — Google Classroom sync, Gemini AI plans, SRS flashcards, GPA calculator. Free & open source."
 
 **Why:** AlternativeTo has high domain authority. Gets you organic search traffic forever.
@@ -166,7 +166,7 @@ Tag: **@GoogleAI @vercel @reactjs**
 ### 8. Product Hunt launch (30 min — schedule for 12:01am PST)
 URL: https://producthunt.com/posts/new
 - Copy all content from LAUNCH.md → "Product Hunt" section
-- Add screenshots from https://shiori-v1.vercel.app (take 3-4 screenshots)
+- Add screenshots from https://studypulse.vercel.app (take 3-4 screenshots)
 - Upload demo GIF if you have one
 
 **Why:** A good PH launch can drive 500-2000 stars in 24 hours.
@@ -193,10 +193,10 @@ Subject: Free AI study companion for your students — open source
 
 Hi,
 
-I built Shiori, a free open-source AI study companion that syncs with Google Classroom.
+I built StudyPulse, a free open-source AI study companion that syncs with Google Classroom.
 
 Features: AI study plans, grade tracker, flashcards, Pomodoro timer.
-Demo (no login): https://shiori-v1.vercel.app
+Demo (no login): https://studypulse.vercel.app
 
 Would your school be interested in a free trial of the School tier?
 
@@ -216,4 +216,4 @@ Target: Bangkok schools with Google Workspace for Education accounts.
 | Pro subscribers | 0 | 4,196 |
 | School tier | 0 | 209 |
 
-Check stars: https://github.com/kaorii-ako/Shiori-v1/stargazers
+Check stars: https://github.com/kaorii-ako/StudyPulse/stargazers

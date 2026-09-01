@@ -5,7 +5,7 @@
 
 TOKEN=${1:-$GITHUB_TOKEN}
 OWNER="kaorii-ako"
-REPO="Shiori-v1"
+REPO="StudyPulse"
 
 if [ -z "$TOKEN" ]; then
   echo "Usage: bash scripts/setup-github.sh YOUR_GITHUB_TOKEN"
@@ -27,7 +27,7 @@ curl -s -X PATCH \
   -H "Authorization: Bearer $TOKEN" \
   -H "Accept: application/vnd.github+json" \
   https://api.github.com/repos/$OWNER/$REPO \
-  -d '{"description":"🎓 Free AI study companion — Google Classroom sync, GPA calculator, SRS flashcards, AI study plans, Pomodoro. Self-hostable with Docker. MCP server for Claude Code.","homepage":"https://shiori-v1.vercel.app","has_wiki":true,"has_issues":true}' \
+  -d '{"description":"🎓 Free AI study companion — Google Classroom sync, GPA calculator, SRS flashcards, AI study plans, Pomodoro. Self-hostable with Docker. MCP server for Claude Code.","homepage":"https://studypulse.vercel.app","has_wiki":true,"has_issues":true}' \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print('Updated:', d.get('full_name', 'error'))"
 
 echo ""

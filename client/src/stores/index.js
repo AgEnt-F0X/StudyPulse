@@ -29,7 +29,7 @@ const GOOGLE_CLASSROOM_SCOPES = [
   'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
 ].join(' ')
 
-function supabaseUserToShiori(sbUser) {
+function supabaseUserToStudyPulse(sbUser) {
   return {
     id: sbUser.id,
     name: sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || sbUser.email?.split('@')[0] || 'Student',
@@ -41,7 +41,7 @@ function supabaseUserToShiori(sbUser) {
 
 // ── Local account auth (no-backend fallback) ──────────────────
 
-const LOCAL_ACCOUNTS_KEY = 'shiori-local-accounts'
+const LOCAL_ACCOUNTS_KEY = 'studypulse-local-accounts'
 
 function getLocalAccounts() {
   try { return JSON.parse(localStorage.getItem(LOCAL_ACCOUNTS_KEY) || '{}') } catch { return {} }
@@ -52,7 +52,7 @@ function saveLocalAccounts(accounts) {
 }
 
 async function hashPassword(password) {
-  const data = new TextEncoder().encode(password + 'shiori-local-2024')
+  const data = new TextEncoder().encode(password + 'studypulse-local-2024')
   const hash = await crypto.subtle.digest('SHA-256', data)
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
 }
@@ -112,19 +112,6 @@ export const useAuthStore = create(
         set({ user: null, token: null, isAuthenticated: false, isDemo: false, error: null })
       },
 
-      loginWithGitHub: async () => {
-        if (isSupabaseConfigured() && supabase) {
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'github',
-            options: { redirectTo: `${window.location.origin}/auth/callback` }
-          })
-          if (error) { set({ error: error.message }); throw new Error(error.message) }
-        } else {
-          const msg = 'GitHub sign-in isn’t set up. Add your Supabase keys (see SETUP.md) to enable it.'
-          set({ error: msg }); throw new Error(msg)
-        }
-      },
-
       loginWithGoogle: async () => {
         if (isSupabaseConfigured() && supabase) {
           const { error } = await supabase.auth.signInWithOAuth({
@@ -151,7 +138,7 @@ export const useAuthStore = create(
         try {
           const { data: { session } } = await supabase.auth.getSession()
           if (session?.user) {
-            const user = supabaseUserToShiori(session.user)
+            const user = supabaseUserToStudyPulse(session.user)
             const patch = { user, token: session.access_token, isAuthenticated: true, isLoading: false, isDemo: false }
             // provider_token is usually only present right after OAuth; if it's
             // here, refresh our stored Google token. Otherwise keep the persisted one.
@@ -187,7 +174,7 @@ export const useAuthStore = create(
           if (isSupabaseConfigured() && supabase) {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password })
             if (error) throw error
-            const user = supabaseUserToShiori(data.user)
+            const user = supabaseUserToStudyPulse(data.user)
             set({ user, token: data.session.access_token, isAuthenticated: true, isLoading: false, error: null, isDemo: false })
             clearAllStores()
             loadUserDataIntoStores(user.id)
@@ -221,7 +208,7 @@ export const useAuthStore = create(
             })
             if (error) throw error
             if (data.user && data.session) {
-              const user = supabaseUserToShiori(data.user)
+              const user = supabaseUserToStudyPulse(data.user)
               set({ user, token: data.session.access_token, isAuthenticated: true, isLoading: false, error: null, isDemo: false })
               return user
             }
@@ -271,7 +258,7 @@ export const useAuthStore = create(
       },
     }),
     {
-      name: 'shiori-auth',
+      name: 'studypulse-auth',
       onRehydrateStorage: () => (state) => { state?.setHasHydrated(true) },
     }
   )
@@ -299,7 +286,7 @@ export function initAuthSync() {
       return
     }
     if (session?.user) {
-      const user = supabaseUserToShiori(session.user)
+      const user = supabaseUserToStudyPulse(session.user)
       const patch = { user, token: session.access_token, isAuthenticated: true, isDemo: false }
       // Only refresh the Google token when a fresh provider_token is present;
       // otherwise keep the one we already persisted.
@@ -363,7 +350,7 @@ export const useEventStore = create(
       setLoading: (loading) => set({ isLoading: loading }),
       setError: (error) => set({ error })
     }),
-    { name: 'shiori-events' }
+    { name: 'studypulse-events' }
   )
 )
 
@@ -534,7 +521,7 @@ export const useAssignmentsStore = create(
       setLoading: (loading) => set({ isLoading: loading }),
       setError: (error) => set({ error })
     }),
-    { name: 'shiori-assignments' }
+    { name: 'studypulse-assignments' }
   )
 )
 
@@ -670,7 +657,7 @@ export const useGradesStore = create(
 
       setLoading: (loading) => set({ isLoading: loading })
     }),
-    { name: 'shiori-grades' }
+    { name: 'studypulse-grades' }
   )
 )
 
@@ -741,7 +728,7 @@ export const useFlashcardsStore = create(
         }
       },
     }),
-    { name: 'shiori-flashcards' }
+    { name: 'studypulse-flashcards' }
   )
 )
 
@@ -799,7 +786,7 @@ export const useNotesStore = create(
         }
       },
     }),
-    { name: 'shiori-notes' }
+    { name: 'studypulse-notes' }
   )
 )
 
@@ -882,7 +869,7 @@ export const usePomodoroStore = create(
         sessionCount: 0, totalFocusMinutes: 0, dailyFocusLog: {}, activeAssignment: null,
       })),
     }),
-    { name: 'shiori-pomodoro' }
+    { name: 'studypulse-pomodoro' }
   )
 )
 
@@ -927,7 +914,7 @@ export const useUIStore = create(
       }))
     }),
     {
-      name: 'shiori-ui',
+      name: 'studypulse-ui',
       // Persist only durable prefs — transient UI (open panels, toasts) must reset on reload.
       partialize: (state) => ({
         theme: state.theme,
@@ -997,7 +984,7 @@ export const useXPStore = create(
         return { pct: Math.round((xpInLevel / xpToNext) * 100), cur, next, xpInLevel, xpToNext }
       },
     }),
-    { name: 'shiori-xp' }
+    { name: 'studypulse-xp' }
   )
 )
 
@@ -1065,7 +1052,7 @@ export const useHabitsStore = create(
         }
       },
     }),
-    { name: 'shiori-habits' }
+    { name: 'studypulse-habits' }
   )
 )
 
@@ -1100,7 +1087,7 @@ export const useStudyPlansStore = create(
         if (!isDemoMode()) dbDeleteStudyPlan(id)
       },
     }),
-    { name: 'shiori-study-plans' }
+    { name: 'studypulse-study-plans' }
   )
 )
 
@@ -1118,8 +1105,8 @@ function clearAllStores() {
   useStudyPlansStore.getState().setStudyPlans([])
   // These two are written to localStorage directly (not via a zustand store).
   try {
-    localStorage.removeItem('shiori-quiz-history')
-    localStorage.removeItem('shiori-leaderboard')
+    localStorage.removeItem('studypulse-quiz-history')
+    localStorage.removeItem('studypulse-leaderboard')
   } catch {}
 }
 export { clearAllStores }

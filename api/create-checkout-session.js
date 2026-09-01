@@ -7,7 +7,7 @@ const PRICES = {
   annual: process.env.STRIPE_PRICE_ANNUAL,
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://shiorii.tech'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://studypulse.app'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
       subscription_data: {
         trial_period_days: 7,
         metadata: {
-          plan: 'shiori_pro',
+          plan: 'studypulse_pro',
           billing,
           supabase_user_id: supabaseUserId || '',
         },

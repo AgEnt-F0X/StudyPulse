@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Shiori are documented here.
+All notable changes to StudyPulse are documented here.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
@@ -10,7 +10,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Planned
 - Firefox extension + Chrome Web Store release
-- Shiori Cloud — fully hosted, no setup
+- StudyPulse Cloud — fully hosted, no setup
 - Mobile app — React Native / Expo
 
 ---
@@ -19,12 +19,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **Complete landing page redesign** — cinematic dark-minimal, product-first (huashu-design principles). Replaces 1115-line table-of-features with: animated app preview mockup, feature cards, 3-step onboarding, testimonials, pricing tiers
-- **Custom domain** — live at [shiorii.tech](https://shiorii.tech)
+- **Custom domain** — live at [studypulse.app](https://studypulse.app)
 
 ### Fixed
 - **Demo blank screen on refresh** — `Demo.jsx` now always re-initializes demo data regardless of persisted `isAuthenticated:true` in auth store. Guard changed from `if (isAuthenticated)` to `if (isAuthenticated && !isDemo)`. This fixes the root cause: non-persistent stores (assignments, events) were reset by page refresh while auth store persisted demo state
 - **Login + Signup demo clicks** now route to `/demo` (consistent behavior, no duplicate data-loading logic)
-- **URL migration** — all hardcoded `shiori-v1.vercel.app` replaced with `shiorii.tech` across 16 files: index.html, OG tags, sitemap, robots.txt, og-image.svg, FUNDING.yml, Stripe webhook, extension popup, API callbacks, LAUNCH.md
+- **URL migration** — all hardcoded `studypulse.vercel.app` replaced with `studypulse.app` across 16 files: index.html, OG tags, sitemap, robots.txt, og-image.svg, FUNDING.yml, Stripe webhook, extension popup, API callbacks, LAUNCH.md
 
 ### Changed
 - `client/package.json` — removed dead `appwrite` dependency (tree-shaken but listed as dep)
@@ -93,14 +93,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Pro pricing page** (`/pro`) — Free vs Pro comparison, FAQ, annual/monthly billing toggle
 - **OG meta tags** — `og:title`, `og:description` for better social sharing
 - **Press Start 2P + VT323 fonts** — complete retro gaming aesthetic
-- **Vercel deployment** — live at [shiorii.tech](https://shiorii.tech)
+- **Vercel deployment** — live at [studypulse.app](https://studypulse.app)
 - **GitHub Actions CI** — automatic build verification on every push and PR
 - **Chunk splitting** — Vite manualChunks for vendor/motion/ui bundles (better load time)
 - **Security headers** — `X-Content-Type-Options`, `X-Frame-Options` via Vercel config
 
 ### Changed
 - Routing restructured: `/` now shows Landing page (public), `/home` is the authenticated app
-- `index.html` title updated to "Shiori — AI Study Companion"
+- `index.html` title updated to "StudyPulse — AI Study Companion"
 - README rewritten with architecture diagram, Pro tier table, and star history
 
 ### Fixed

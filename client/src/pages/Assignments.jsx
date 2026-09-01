@@ -5,6 +5,7 @@ import { useAssignmentsStore, useAuthStore, useUIStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost, chip } from '../utils/theme'
 import { PageHeader, Empty } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
+import { ALL_CBSE_SUBJECTS } from '../utils/cbseSubjects'
 
 const PRIORITIES = ['low', 'medium', 'high']
 const PRIORITY_COLOR = { low: C.green, medium: C.orange, high: C.pink }
@@ -208,7 +209,6 @@ export default function Assignments() {
         </h2>
         {[
           { label: 'Title', key: 'title', placeholder: 'e.g. Chapter 5 Essay', type: 'text' },
-          { label: 'Course', key: 'course', placeholder: 'e.g. English 101', type: 'text' },
           { label: 'Due Date', key: 'dueDate', placeholder: '', type: 'date' },
         ].map(f => (
           <div key={f.key} style={{ marginBottom: 14 }}>
@@ -224,6 +224,22 @@ export default function Assignments() {
             />
           </div>
         ))}
+        {/* Course field with CBSE subject autocomplete */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Subject / Course</label>
+          <input
+            list="cbse-subjects-list"
+            value={form.course}
+            placeholder="Type or pick a subject…"
+            onChange={e => setForm(p => ({ ...p, course: e.target.value }))}
+            style={inputStyle}
+            onFocus={e => { e.target.style.borderColor = C.blueDark }}
+            onBlur={e => { e.target.style.borderColor = C.border }}
+          />
+          <datalist id="cbse-subjects-list">
+            {ALL_CBSE_SUBJECTS.map(s => <option key={s} value={s} />)}
+          </datalist>
+        </div>
         <div style={{ marginBottom: 14 }}>
           <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Priority</label>
           <div style={{ display: 'flex', gap: 8 }}>

@@ -1,10 +1,12 @@
-import { useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ClipboardList, BarChart3, FileText, CheckCircle2,
   Target, Puzzle, Layers, ArrowRight, Zap,
+  Sparkles, RefreshCw, Brain, Loader2
 } from 'lucide-react'
-import { useAuthStore, useAssignmentsStore, useGradesStore, useNotesStore, useXPStore, useUIStore, pctToGPA } from '../stores'
+import { useAuthStore, useAssignmentsStore, useGradesStore, useNotesStore, useXPStore, useUIStore, usePomodoroStore, pctToGPA, calcStreak } from '../stores'
+import { hasClientKey, callGeminiClient, getKeyProvider } from '../utils/gemini'
 import { C, fonts, tint } from '../utils/theme'
 import { StatCard, SectionTitle, Card } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
@@ -64,6 +66,71 @@ export default function Home() {
     return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '—'
   }, [courses, courseGrades, calculateCourseGrade])
 
+  const { dailyFocusLog } = usePomodoroStore()
+  const streak = calcStreak(dailyFocusLog || {})
+
+  const todayKey = new Date().toISOString().split('T')[0]
+  const briefCacheKey = `studypulse-daily-brief-${todayKey}`
+
+  const [dailyBrief, setDailyBrief] = useState(() => {
+    try { return localStorage.getItem(briefCacheKey) || '' } catch { return '' }
+  })
+  const [briefLoading, setBriefLoading] = useState(false)
+
+  const generateBrief = async () => {
+    if (!hasClientKey()) return
+    setBriefLoading(true)
+    try {
+      const dueToday = todayAssignments.length
+      const dueThisWeek = (assignments || []).filter(a => {
+        if (a.completed) return false
+        const d = new Date(a.dueDate)
+        const now = new Date()
+        const weekEnd = new Date(now.getTime() + 7 * 86400000)
+        return d >= now && d <= weekEnd
+      }).length
+      const noteCount = notes?.length || 0
+      const focusStreak = streak
+
+      const context = `Student: ${name}, Level ${xpLevel?.level || 1}, ${xp} XP.
+Assignments due today: ${dueToday}. Due this week: ${dueThisWeek}.
+Total notes: ${noteCount}. Focus streak: ${focusStreak} days.
+Subjects: Physics, Chemistry, Mathematics, Biology, English (CBSE Class 11).
+Upcoming assignments: ${upcoming.slice(0, 3).map(a => `${a.title} (${a.course || a.courseName}, ${Math.ceil((new Date(a.dueDate) - new Date()) / 86400000)}d left)`).join('; ') || 'None'}`
+
+      const prompt = `You are a friendly AI study coach for a CBSE Class 11 student. Based on this data, write a SHORT personalized daily study brief (4-5 lines max).
+
+Rules:
+- Start with an encouraging opening line
+- Mention specific priorities for today (assignments due, subjects to focus on)
+- Give ONE specific actionable tip
+- End with a motivational closing
+- Keep it warm, concise, and actionable
+- Use emojis sparingly (1-2 max)
+- DO NOT use markdown headers or bullet points - just flowing text
+
+Student data:
+${context}`
+
+      const result = await callGeminiClient(prompt, { timeoutMs: 10000 })
+      if (result) {
+        setDailyBrief(result)
+        localStorage.setItem(briefCacheKey, result)
+      }
+    } catch (e) {
+      console.warn('Daily brief generation failed', e)
+    } finally {
+      setBriefLoading(false)
+    }
+  }
+
+  // Auto-generate on first load if no cached brief and key exists
+  useEffect(() => {
+    if (!dailyBrief && hasClientKey() && !briefLoading) {
+      generateBrief()
+    }
+  }, []) // eslint-disable-line
+
   const quickActions = [
     { icon: Target, label: 'Start Focus Mode', path: '/focus', color: C.blue },
     { icon: Puzzle, label: 'Take a Quiz', path: '/quiz', color: C.purple },
@@ -106,6 +173,50 @@ export default function Home() {
         <StatCard icon={FileText} label="Notes" value={notes?.length || 0} color={C.purple} />
         <StatCard icon={CheckCircle2} label="Completed" value={(assignments || []).filter(a => a.completed).length} color={C.green} />
       </div>
+
+      {/* AI Daily Study Brief */}
+      {hasClientKey() && (
+        <Card style={{ marginBottom: 24, padding: '18px 22px', background: `linear-gradient(135deg, ${tint(C.blue, 0.06)}, ${tint(C.purple, 0.06)})`, border: `1px solid ${tint(C.blue, 0.2)}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: dailyBrief ? 12 : 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: 'linear-gradient(135deg, #5a8bff, #b55cff)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Brain size={16} color="#0b0e14" />
+              </div>
+              <div>
+                <span style={{ fontFamily: fonts.heading, fontSize: 13, fontWeight: 700, color: C.text }}>Today's AI Study Brief</span>
+                <span style={{ fontSize: 11, color: C.textFaint, marginLeft: 8 }}>{getKeyProvider()}</span>
+              </div>
+            </div>
+            <button
+              onClick={generateBrief}
+              disabled={briefLoading}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px', borderRadius: 8,
+                background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`,
+                color: C.textMuted, fontSize: 11, cursor: briefLoading ? 'wait' : 'pointer',
+                fontFamily: fonts.heading, fontWeight: 600,
+              }}
+            >
+              {briefLoading ? <Loader2 size={11} className="spin" /> : <RefreshCw size={11} />}
+              {briefLoading ? 'Generating...' : 'Refresh'}
+            </button>
+          </div>
+          {dailyBrief ? (
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: C.text, margin: 0, whiteSpace: 'pre-wrap' }}>
+              {dailyBrief}
+            </p>
+          ) : briefLoading ? (
+            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>Analyzing your study data and generating today's brief...</p>
+          ) : (
+            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>AI brief will appear here once you add an API key in Settings.</p>
+          )}
+        </Card>
+      )}
 
       <div className="grid-2">
         {/* Upcoming assignments */}

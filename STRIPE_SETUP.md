@@ -1,4 +1,4 @@
-# Activate Stripe Payments for Shiori Pro
+# Activate Stripe Payments for StudyPulse Pro
 
 Four steps to turn on real ฿199/month billing.
 
@@ -14,13 +14,13 @@ Go to [dashboard.stripe.com](https://dashboard.stripe.com) → create account �
 
 In Stripe Dashboard → **Products** → **Add product**:
 
-**Shiori Pro — Monthly**
-- Name: `Shiori Pro`
+**StudyPulse Pro — Monthly**
+- Name: `StudyPulse Pro`
 - Pricing model: Recurring
 - Price: `199 THB / month`
 - Copy the **Price ID** → looks like `price_1ABC...`
 
-**Shiori Pro — Annual**
+**StudyPulse Pro — Annual**
 - Same product → Add another price
 - Price: `1,790 THB / year` (25% off)
 - Copy the **Price ID**
@@ -29,7 +29,7 @@ In Stripe Dashboard → **Products** → **Add product**:
 
 ## 3. Add environment variables to Vercel
 
-Go to [vercel.com/kaorii-kaoos-projects/shiori-v1/settings/environment-variables](https://vercel.com/kaorii-kaoos-projects/shiori-v1/settings/environment-variables) and add:
+Go to [vercel.com/kaorii-kaoos-projects/studypulse/settings/environment-variables](https://vercel.com/kaorii-kaoos-projects/studypulse/settings/environment-variables) and add:
 
 | Variable | Value |
 |---|---|
@@ -46,7 +46,7 @@ Go to [vercel.com/kaorii-kaoos-projects/shiori-v1/settings/environment-variables
 
 In Stripe Dashboard → **Developers** → **Webhooks** → **Add endpoint**:
 
-- URL: `https://shiori-v1.vercel.app/api/webhook`
+- URL: `https://studypulse.vercel.app/api/webhook`
 - Events to listen for:
   - `checkout.session.completed`
   - `customer.subscription.deleted`

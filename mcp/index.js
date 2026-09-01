@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 /**
- * Shiori MCP Server
- * Exposes your Shiori study data to Claude Code, Claude Desktop, and any MCP client.
+ * StudyPulse MCP Server
+ * Exposes your StudyPulse study data to Claude Code, Claude Desktop, and any MCP client.
  *
  * Setup:
  *   1. cd mcp && npm install
  *   2. Add to ~/.claude.json (Claude Code) or claude_desktop_config.json:
  *
- *   "shiori": {
+ *   "studypulse": {
  *     "command": "node",
- *     "args": ["/absolute/path/to/Shiori-v1/mcp/index.js"],
- *     "env": { "SHIORI_DATA_FILE": "/path/to/shiori-data.json" }
+ *     "args": ["/absolute/path/to/StudyPulse/mcp/index.js"],
+ *     "env": { "STUDYPULSE_DATA_FILE": "/path/to/studypulse-data.json" }
  *   }
  *
- *   3. Export your data from Shiori: Settings → Export Data
- *   4. Set SHIORI_DATA_FILE to the exported JSON path
+ *   3. Export your data from StudyPulse: Settings → Export Data
+ *   4. Set STUDYPULSE_DATA_FILE to the exported JSON path
  *
- * Or run against a live Shiori server:
- *   SHIORI_URL=http://localhost:3001 node index.js
+ * Or run against a live StudyPulse server:
+ *   STUDYPULSE_URL=http://localhost:3001 node index.js
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -26,8 +26,8 @@ import { z } from 'zod'
 import fs from 'fs'
 import path from 'path'
 
-const DATA_FILE = process.env.SHIORI_DATA_FILE || null
-const SHIORI_URL = process.env.SHIORI_URL || null
+const DATA_FILE = process.env.STUDYPULSE_DATA_FILE || null
+const STUDYPULSE_URL = process.env.STUDYPULSE_URL || null
 
 function loadData() {
   if (DATA_FILE && fs.existsSync(DATA_FILE)) {
@@ -43,9 +43,9 @@ function saveData(data) {
 }
 
 const server = new McpServer({
-  name: 'shiori',
+  name: 'studypulse',
   version: '1.1.0',
-  description: 'Access and manage your Shiori study data — assignments, grades, notes, flashcards, grade predictions, and study plans.',
+  description: 'Access and manage your StudyPulse study data — assignments, grades, notes, flashcards, grade predictions, and study plans.',
 })
 
 // ─── Tools ────────────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ server.tool(
     const courses = data.courses || []
     const courseGrades = data.courseGrades || {}
 
-    if (courses.length === 0) return { content: [{ type: 'text', text: 'No courses or grades found. Export your data from Shiori Settings.' }] }
+    if (courses.length === 0) return { content: [{ type: 'text', text: 'No courses or grades found. Export your data from StudyPulse Settings.' }] }
 
     let totalPts = 0, totalPoss = 0
     const lines = []
@@ -159,7 +159,7 @@ server.tool(
 
 server.tool(
   'add_assignment',
-  'Add a new assignment to Shiori.',
+  'Add a new assignment to StudyPulse.',
   {
     title: z.string().describe('Assignment title'),
     dueDate: z.string().describe('Due date in YYYY-MM-DD format'),
@@ -220,7 +220,7 @@ server.tool(
     const gpa = totalPoss > 0 ? ((totalPts / totalPoss) * 100).toFixed(1) : null
 
     const lines = [
-      `📊 **SHIORI STUDY SUMMARY** — ${now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`,
+      `📊 **STUDYPULSE STUDY SUMMARY** — ${now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`,
       '',
       `📋 Assignments: ${pending.length} pending, ${overdue.length} overdue, ${thisWeek.length} due this week`,
       gpa ? `🎓 Overall GPA: ${gpa}%` : '🎓 GPA: Not yet tracked',
@@ -388,20 +388,20 @@ server.tool(
 // ─── Resources ────────────────────────────────────────────────────────────────
 
 server.resource(
-  'shiori://assignments',
+  'studypulse://assignments',
   'All assignments as JSON',
   async () => {
     const data = loadData()
-    return { contents: [{ uri: 'shiori://assignments', mimeType: 'application/json', text: JSON.stringify(data.assignments || [], null, 2) }] }
+    return { contents: [{ uri: 'studypulse://assignments', mimeType: 'application/json', text: JSON.stringify(data.assignments || [], null, 2) }] }
   }
 )
 
 server.resource(
-  'shiori://grades',
+  'studypulse://grades',
   'All grades as JSON',
   async () => {
     const data = loadData()
-    return { contents: [{ uri: 'shiori://grades', mimeType: 'application/json', text: JSON.stringify(data.courseGrades || {}, null, 2) }] }
+    return { contents: [{ uri: 'studypulse://grades', mimeType: 'application/json', text: JSON.stringify(data.courseGrades || {}, null, 2) }] }
   }
 )
 

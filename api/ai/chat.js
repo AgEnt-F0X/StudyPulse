@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   const model = await getGemini()
   if (model) {
     try {
-      const systemContext = `You are Shiori (栞), a warm AI study companion. Student data:
+      const systemContext = `You are StudyPulse (栞), a warm AI study companion. Student data:
 - Pending: ${pending.length} assignments in ${subjects}
 - Upcoming: ${pending.map(a => `"${a.title}" (${a.courseName}) due ${new Date(a.dueDate).toLocaleDateString()}`).join('; ') || 'none'}
 Reply in 2-4 sentences. Be encouraging and specific to their data.`
@@ -37,7 +37,7 @@ Reply in 2-4 sentences. Be encouraging and specific to their data.`
       const chat = model.startChat({
         history: [
           { role: 'user', parts: [{ text: systemContext }] },
-          { role: 'model', parts: [{ text: 'Understood. I am Shiori, your AI study companion.' }] },
+          { role: 'model', parts: [{ text: 'Understood. I am StudyPulse, your AI study companion.' }] },
         ],
       })
       const result = await chat.sendMessage(message)

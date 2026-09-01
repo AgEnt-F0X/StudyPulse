@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Home, ClipboardList, CalendarDays, BarChart3, FileText, Layers,
   Puzzle, CheckCircle2, TrendingUp, BookOpen, Trophy, Target,
-  Upload, User, Settings, X,
+  Upload, User, Settings, X, Sparkles,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../stores'
 import { C, fonts, tint } from '../utils/theme'
@@ -21,6 +21,7 @@ const navSections = [
   {
     label: 'Study',
     items: [
+      { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
       { icon: FileText, label: 'Notes', path: '/notes' },
       { icon: Layers, label: 'Flashcards', path: '/flashcards' },
       { icon: Puzzle, label: 'Quiz', path: '/quiz' },
@@ -134,7 +135,7 @@ const Sidebar = () => {
               <div style={{
                 fontFamily: fonts.heading, fontWeight: 700, fontSize: 15,
                 color: C.text, letterSpacing: '0.06em',
-              }}>SHIORI</div>
+              }}>STUDYPULSE</div>
               <div style={{ fontFamily: fonts.body, fontSize: 11, color: C.textFaint }}>
                 Your study space
               </div>

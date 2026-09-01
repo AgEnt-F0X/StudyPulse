@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Download, X } from 'lucide-react'
 
-const DISMISSED_KEY = 'shiori-pwa-dismissed'
+const DISMISSED_KEY = 'studypulse-pwa-dismissed'
 
 const InstallBanner = () => {
   const [prompt, setPrompt] = useState(null)
@@ -59,7 +59,7 @@ const InstallBanner = () => {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 13, color: '#dfe2eb', marginBottom: 1 }}>
-              Install Shiori
+              Install StudyPulse
             </p>
             <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: '#606080' }}>
               Add to home screen — works offline

@@ -1,8 +1,8 @@
-# Shiori Complete Rebuild Implementation Plan
+# StudyPulse Complete Rebuild Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Transform Shiori into a fully functional, star-worthy open-source study companion with working demo, Supabase backend, polished UI on all pages, GitHub launch assets, and a Pro paid tier.
+**Goal:** Transform StudyPulse into a fully functional, star-worthy open-source study companion with working demo, Supabase backend, polished UI on all pages, GitHub launch assets, and a Pro paid tier.
 
 **Architecture:** 4-agent layered approach — Agent A (data layer + critical bug fixes) must complete before Agent B (UI rebuild) and Agent C (GitHub polish) which run in parallel, then Agent D (Pro/Stripe) last. All agents have non-overlapping file ownership.
 
@@ -100,8 +100,8 @@ export default function Demo() {
     Object.entries(DEMO_COURSE_WEIGHTS).forEach(([id, w]) => setCourseWeights(id, w))
     useNotesStore.getState().replaceNotes(DEMO_NOTES)
     useFlashcardsStore.getState().replaceDecks(DEMO_DECKS)
-    localStorage.setItem('shiori-quiz-history', JSON.stringify(DEMO_QUIZ_HISTORY))
-    localStorage.setItem('shiori-leaderboard', JSON.stringify(DEMO_LEADERBOARD))
+    localStorage.setItem('studypulse-quiz-history', JSON.stringify(DEMO_QUIZ_HISTORY))
+    localStorage.setItem('studypulse-leaderboard', JSON.stringify(DEMO_LEADERBOARD))
     setXP(620)
     navigate('/home', { replace: true })
   }, [])
@@ -251,7 +251,7 @@ mkdir -p supabase
 Create `supabase/schema.sql`:
 
 ```sql
--- Shiori Supabase Schema
+-- StudyPulse Supabase Schema
 -- Run this in your Supabase SQL Editor (Dashboard → SQL Editor → New Query)
 
 -- Enable UUID extension
@@ -488,7 +488,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { useAuthStore } from '../stores'
 
-function supabaseUserToShiori(sbUser) {
+function supabaseUserToStudyPulse(sbUser) {
   return {
     id: sbUser.id,
     name: sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || sbUser.email?.split('@')[0] || 'Student',
@@ -514,7 +514,7 @@ export default function AuthCallback() {
         navigate('/login?error=auth_failed')
         return
       }
-      const user = supabaseUserToShiori(session.user)
+      const user = supabaseUserToStudyPulse(session.user)
       useAuthStore.setState({
         user,
         token: session.access_token,
@@ -594,7 +594,7 @@ git commit -m "chore: remove Appwrite legacy files, fix AuthCallback for Supabas
 - [ ] **Step 1: Create theme.js**
 
 ```js
-// Shiori design tokens — import { colors, fonts, spacing } from '../utils/theme'
+// StudyPulse design tokens — import { colors, fonts, spacing } from '../utils/theme'
 export const colors = {
   bg: '#10141a',
   card: '#161b24',
@@ -714,7 +714,7 @@ export default function Sidebar() {
           <span style={{ color: 'white', fontWeight: 700, fontSize: 18, fontFamily: 'serif' }}>栞</span>
         </div>
         {!sidebarCollapsed && (
-          <span style={{ fontSize: 18, fontWeight: 700, color: colors.text, fontFamily: fonts.heading }}>Shiori</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: colors.text, fontFamily: fonts.heading }}>StudyPulse</span>
         )}
       </div>
 
@@ -1166,23 +1166,23 @@ Replace `README.md` with:
 
 ```markdown
 <div align="center">
-  <img src="docs/assets/shiori-banner.png" alt="Shiori" width="600" />
+  <img src="docs/assets/studypulse-banner.png" alt="StudyPulse" width="600" />
   
-  <h1>栞 Shiori</h1>
+  <h1>栞 StudyPulse</h1>
   <p><strong>The AI-powered study companion for serious students.</strong></p>
   
-  [![GitHub stars](https://img.shields.io/github/stars/kaorii-ako/Shiori-v1?style=flat-square&color=afc6ff)](https://github.com/kaorii-ako/Shiori-v1/stargazers)
+  [![GitHub stars](https://img.shields.io/github/stars/kaorii-ako/StudyPulse?style=flat-square&color=afc6ff)](https://github.com/kaorii-ako/StudyPulse/stargazers)
   [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
-  [![Live Demo](https://img.shields.io/badge/Live%20Demo-shiori--v1.vercel.app-ff6b9d?style=flat-square)](https://shiori-v1.vercel.app)
+  [![Live Demo](https://img.shields.io/badge/Live%20Demo-studypulse--v1.vercel.app-ff6b9d?style=flat-square)](https://studypulse.vercel.app)
   
-  [**Try Demo**](https://shiori-v1.vercel.app/demo) · [Report Bug](https://github.com/kaorii-ako/Shiori-v1/issues) · [Request Feature](https://github.com/kaorii-ako/Shiori-v1/issues)
+  [**Try Demo**](https://studypulse.vercel.app/demo) · [Report Bug](https://github.com/kaorii-ako/StudyPulse/issues) · [Request Feature](https://github.com/kaorii-ako/StudyPulse/issues)
 </div>
 
 ---
 
-## What is Shiori?
+## What is StudyPulse?
 
-Shiori (栞, *bookmark* in Japanese) is an open-source AI study companion built for students who take their grades seriously. It combines AI-powered study tools, gamification, and productivity features into one beautiful dark-mode app.
+StudyPulse (栞, *bookmark* in Japanese) is an open-source AI study companion built for students who take their grades seriously. It combines AI-powered study tools, gamification, and productivity features into one beautiful dark-mode app.
 
 **No subscription required.** Bring your own free Gemini API key. Self-hostable in 5 minutes.
 
@@ -1206,15 +1206,15 @@ Shiori (栞, *bookmark* in Japanese) is an open-source AI study companion built 
 
 ### Option 1: Try the live demo (no account needed)
 
-👉 **[shiori-v1.vercel.app/demo](https://shiori-v1.vercel.app/demo)**
+👉 **[studypulse.vercel.app/demo](https://studypulse.vercel.app/demo)**
 
 ### Option 2: Self-host in 5 minutes
 
 **Prerequisites:** Node.js 18+, a free [Supabase](https://supabase.com) project, a free [Gemini API key](https://aistudio.google.com/apikey)
 
 ```bash
-git clone https://github.com/kaorii-ako/Shiori-v1.git
-cd Shiori-v1
+git clone https://github.com/kaorii-ako/StudyPulse.git
+cd StudyPulse
 cp .env.example .env  # Fill in your keys
 npm install
 npm run dev
@@ -1239,11 +1239,11 @@ Open [http://localhost:5173](http://localhost:5173)
 - **AI:** Google Gemini 1.5 Flash (client-side, BYOK)
 - **Deployment:** Vercel (one-click deploy)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kaorii-ako/Shiori-v1)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kaorii-ako/StudyPulse)
 
 ## 🤝 Contributing
 
-Contributions are welcome! Check out [CONTRIBUTING.md](CONTRIBUTING.md) and our [good first issues](https://github.com/kaorii-ako/Shiori-v1/issues?q=label%3A%22good+first+issue%22).
+Contributions are welcome! Check out [CONTRIBUTING.md](CONTRIBUTING.md) and our [good first issues](https://github.com/kaorii-ako/StudyPulse/issues?q=label%3A%22good+first+issue%22).
 
 ## 📄 License
 
@@ -1254,7 +1254,7 @@ MIT — do whatever you want with it.
 <div align="center">
   Made with ❤️ by <a href="https://github.com/kaorii-ako">Tawin Tangsukson</a>
   <br/>
-  If Shiori helps you study, consider giving it a ⭐
+  If StudyPulse helps you study, consider giving it a ⭐
 </div>
 ```
 
@@ -1264,7 +1264,7 @@ MIT — do whatever you want with it.
 mkdir -p docs/assets
 ```
 
-Add placeholder note: `echo "Add screenshots here: shiori-banner.png, screenshot-home.png, screenshot-quiz.png" > docs/assets/README.md`
+Add placeholder note: `echo "Add screenshots here: studypulse-banner.png, screenshot-home.png, screenshot-quiz.png" > docs/assets/README.md`
 
 - [ ] **Step 3: Commit**
 
@@ -1416,15 +1416,15 @@ labels: good first issue
 Create `CONTRIBUTING.md`:
 
 ```markdown
-# Contributing to Shiori
+# Contributing to StudyPulse
 
 Thank you for helping make studying better for students everywhere!
 
 ## Setup
 
 ```bash
-git clone https://github.com/kaorii-ako/Shiori-v1.git
-cd Shiori-v1
+git clone https://github.com/kaorii-ako/StudyPulse.git
+cd StudyPulse
 cp .env.example .env
 npm install
 cd client && npm run dev
@@ -1452,7 +1452,7 @@ client/src/
 
 ## Finding Issues
 
-Check [good first issues](https://github.com/kaorii-ako/Shiori-v1/issues?q=label%3A%22good+first+issue%22).
+Check [good first issues](https://github.com/kaorii-ako/StudyPulse/issues?q=label%3A%22good+first+issue%22).
 
 ## Pull Requests
 
@@ -1546,7 +1546,7 @@ export default function Pro() {
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div style={{ fontSize: 13, color: colors.purple, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Shiori Pro</div>
+          <div style={{ fontSize: 13, color: colors.purple, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>StudyPulse Pro</div>
           <h1 style={{ margin: 0, fontSize: 40, fontWeight: 800, color: colors.text, fontFamily: fonts.heading }}>
             Unlock your full potential
           </h1>
@@ -1742,7 +1742,7 @@ export default function ProSuccess() {
       <div style={{ textAlign: 'center', padding: 48 }}>
         <div style={{ fontSize: 64, marginBottom: 24 }}>🎉</div>
         <h1 style={{ fontSize: 32, fontWeight: 800, color: colors.text, fontFamily: fonts.heading, margin: '0 0 12px' }}>
-          Welcome to Shiori Pro!
+          Welcome to StudyPulse Pro!
         </h1>
         <p style={{ color: colors.textMuted, fontSize: 16, marginBottom: 32 }}>
           Your subscription is active. Unlimited AI features unlocked.

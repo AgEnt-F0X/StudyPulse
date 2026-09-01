@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { useAuthStore, loadUserDataIntoStores, clearAllStores } from '../stores'
 
-function supabaseUserToShiori(sbUser) {
+function supabaseUserToStudyPulse(sbUser) {
   return {
     id: sbUser.id,
     name: sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || sbUser.email?.split('@')[0] || 'Student',
@@ -60,7 +60,7 @@ export default function AuthCallback() {
         navigate('/login?error=auth_failed')
         return
       }
-      const user = supabaseUserToShiori(session.user)
+      const user = supabaseUserToStudyPulse(session.user)
       const patch = {
         user, token: session.access_token,
         isAuthenticated: true, isLoading: false, isDemo: false, error: null,

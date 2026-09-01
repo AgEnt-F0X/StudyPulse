@@ -1,8 +1,8 @@
-# Shiori - AI-Assisted Productivity Desktop App
+# StudyPulse - AI-Assisted Productivity Desktop App
 
 ## Concept & Vision
 
-Shiori (栞) is a personal productivity companion with a distinctive **dark anime pixel art aesthetic**. It connects to Google Classroom, Gmail, and Calendar to automatically surface what matters — upcoming deadlines, pending assignments, emails from teachers — and generates AI-powered study plans. The visual style blends retro pixel art with modern glassmorphism, featuring neon pink/purple/blue accents against deep dark backgrounds.
+StudyPulse (栞) is a personal productivity companion with a distinctive **dark anime pixel art aesthetic**. It connects to Google Classroom, Gmail, and Calendar to automatically surface what matters — upcoming deadlines, pending assignments, emails from teachers — and generates AI-powered study plans. The visual style blends retro pixel art with modern glassmorphism, featuring neon pink/purple/blue accents against deep dark backgrounds.
 
 The app feels like a cozy nighttime study session in a neon-lit Tokyo arcade — nostalgic, focused, and slightly magical.
 
@@ -64,7 +64,7 @@ The app feels like a cozy nighttime study session in a neon-lit Tokyo arcade —
 ### App Shell
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  [Logo] Shiori          [Search]          [Notifications] [User] │
+│  [Logo] StudyPulse          [Search]          [Notifications] [User] │
 ├─────────────┬───────────────────────────────────────────────────┤
 │             │                                                    │
 │  Sidebar    │              Main Content Area                    │
@@ -293,7 +293,7 @@ interface StudySession {
 
 ### File Structure
 ```
-shiori/
+studypulse/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/     # Reusable UI components

@@ -41,7 +41,7 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   // Header
   ctx.fillStyle = '#c44dff'
   ctx.font = 'bold 14px monospace'
-  ctx.fillText('栞 SHIORI', 48, 52)
+  ctx.fillText('栞 STUDYPULSE', 48, 52)
 
   ctx.fillStyle = '#424754'
   ctx.font = '12px monospace'
@@ -167,7 +167,7 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   ctx.fillRect(0, 940, 800, 60)
   ctx.fillStyle = '#c44dff'
   ctx.font = 'bold 13px monospace'
-  ctx.fillText('shiorii.tech', 48, 976)
+  ctx.fillText('studypulse.app', 48, 976)
   ctx.fillStyle = '#424754'
   ctx.font = '12px monospace'
   ctx.fillText('Free AI study companion · Open source · MIT license', 280, 976)
@@ -233,12 +233,12 @@ export default function SemesterCard({ onClose }) {
   const download = () => {
     const a = document.createElement('a')
     a.href = preview
-    a.download = `shiori-semester-${new Date().toISOString().split('T')[0]}.png`
+    a.download = `studypulse-semester-${new Date().toISOString().split('T')[0]}.png`
     a.click()
   }
 
   const tweet = () => {
-    const text = `My semester stats with Shiori 📚\n\nGPA: ${gpa || '—'}% | ${completed}/${assignments.length} done | ${streak} day streak\n\nFree AI study companion 👇\nhttps://github.com/kaorii-ako/Shiori-v1\n\n#Shiori #StudyWithMe`
+    const text = `My semester stats with StudyPulse 📚\n\nGPA: ${gpa || '—'}% | ${completed}/${assignments.length} done | ${streak} day streak\n\nFree AI study companion 👇\nhttps://github.com/kaorii-ako/StudyPulse\n\n#StudyPulse #StudyWithMe`
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
   }
 
@@ -342,7 +342,7 @@ export default function SemesterCard({ onClose }) {
                 TWEET
               </button>
               <a
-                href="https://github.com/kaorii-ako/Shiori-v1"
+                href="https://github.com/kaorii-ako/StudyPulse"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

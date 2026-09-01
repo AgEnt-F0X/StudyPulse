@@ -1,12 +1,12 @@
-# Contributing to Shiori
+# Contributing to StudyPulse
 
-Thank you for helping make studying better for students! Shiori is open source and built by the community.
+Thank you for helping make studying better for students! StudyPulse is open source and built by the community.
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/kaorii-ako/Shiori-v1.git
-cd Shiori-v1
+git clone https://github.com/kaorii-ako/StudyPulse.git
+cd StudyPulse
 cp .env.example .env
 # Leave VITE_SUPABASE_URL empty for demo mode — no Supabase needed!
 npm install
@@ -66,8 +66,8 @@ Use conventional commits:
 
 ## Finding Issues
 
-Check [good first issues](https://github.com/kaorii-ako/Shiori-v1/issues?q=label%3A%22good+first+issue%22) for beginner-friendly tasks.
+Check [good first issues](https://github.com/kaorii-ako/StudyPulse/issues?q=label%3A%22good+first+issue%22) for beginner-friendly tasks.
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/kaorii-ako/Shiori-v1/discussions) or an issue.
+Open a [GitHub Discussion](https://github.com/kaorii-ako/StudyPulse/discussions) or an issue.

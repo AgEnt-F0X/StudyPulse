@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { initAuthSync } from './stores'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -26,6 +26,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Demo from './pages/Demo'
 import Profile from './pages/Profile'
+import AIAssistant from './pages/AIAssistant'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -37,8 +38,8 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          {/* Public */}
-          <Route path="/" element={<Landing />} />
+          {/* Redirect root to home */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/pro" element={<Pro />} />
           <Route path="/pro/success" element={<ProSuccess />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
@@ -55,6 +56,8 @@ function App() {
             }
           >
             <Route path="/home" element={<Home />} />
+            <Route path="/assistant" element={<AIAssistant />} />
+            <Route path="/ai" element={<AIAssistant />} />
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/grades" element={<Grades />} />

@@ -1,12 +1,12 @@
 // Content script for Google Classroom
-// Detects assignments on classroom.google.com and offers to import them into Shiori
+// Detects assignments on classroom.google.com and offers to import them into StudyPulse
 
 (function () {
-  if (document.getElementById('shiori-import-btn')) return
+  if (document.getElementById('studypulse-import-btn')) return
 
   const btn = document.createElement('button')
-  btn.id = 'shiori-import-btn'
-  btn.textContent = '栞 Import to Shiori'
+  btn.id = 'studypulse-import-btn'
+  btn.textContent = '栞 Import to StudyPulse'
   btn.style.cssText = `
     position: fixed; bottom: 24px; right: 24px; z-index: 99999;
     padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer;
@@ -53,9 +53,9 @@
 
     chrome.runtime.sendMessage({ type: 'IMPORT_ASSIGNMENTS', assignments: items }, (response) => {
       if (response?.success) {
-        showBanner(`✓ Imported ${response.count} assignment${response.count !== 1 ? 's' : ''} to Shiori!`, true)
+        showBanner(`✓ Imported ${response.count} assignment${response.count !== 1 ? 's' : ''} to StudyPulse!`, true)
       } else {
-        showBanner('Failed to import. Try opening the Shiori extension first.', false)
+        showBanner('Failed to import. Try opening the StudyPulse extension first.', false)
       }
     })
   })

@@ -6,7 +6,7 @@ const STEPS = [
   {
     icon: Sparkles,
     color: '#c44dff',
-    title: 'Welcome to Shiori',
+    title: 'Welcome to StudyPulse',
     subtitle: 'AI Study Companion',
     body: 'You\'re exploring a fully-loaded demo with sample courses, assignments, grades, and flashcards. Everything here is pre-filled — no account or setup needed.',
     hint: 'All your real data stays 100% local. No tracking.',
@@ -16,7 +16,7 @@ const STEPS = [
     color: '#afc6ff',
     title: 'AI Study Plans',
     subtitle: 'Gemini AI inside',
-    body: 'Add your Gemini API key (free at aistudio.google.com) in Settings → and Shiori will build a personalized day-by-day study schedule from your deadlines.',
+    body: 'Add your Gemini API key (free at aistudio.google.com) in Settings → and StudyPulse will build a personalized day-by-day study schedule from your deadlines.',
     hint: 'Or use Google Classroom sync to auto-import assignments.',
   },
   {
@@ -32,7 +32,7 @@ const STEPS = [
     color: '#ffd6a0',
     title: 'GPA Predictor',
     subtitle: 'Real-time calculation',
-    body: 'Enter grades with weighted categories and Shiori calculates your GPA in real time. Ask "what score do I need on the final to keep a B+" and get an exact answer.',
+    body: 'Enter grades with weighted categories and StudyPulse calculates your GPA in real time. Ask "what score do I need on the final to keep a B+" and get an exact answer.',
     hint: 'Supports 4.0 scale, percentage grades, and letter grades.',
   },
   {
@@ -40,7 +40,7 @@ const STEPS = [
     color: '#ff6b9d',
     title: 'Claude Code MCP',
     subtitle: 'AI-native integration',
-    body: 'Shiori has a built-in MCP server — add it to Claude Code and ask things like "what\'s due this week?" or "summarize my Calculus notes" without leaving your editor.',
+    body: 'StudyPulse has a built-in MCP server — add it to Claude Code and ask things like "what\'s due this week?" or "summarize my Calculus notes" without leaving your editor.',
     hint: 'See mcp/ folder for setup instructions.',
   },
   {
@@ -48,16 +48,16 @@ const STEPS = [
     color: '#e5b5ff',
     title: 'Open Source',
     subtitle: 'MIT licensed',
-    body: 'Shiori is fully open-source on GitHub. Self-host it, contribute features, or fork it for your school. 100% free forever for personal use.',
+    body: 'StudyPulse is fully open-source on GitHub. Self-host it, contribute features, or fork it for your school. 100% free forever for personal use.',
     hint: '⭐ Star the repo if you find it useful — it helps others discover it!',
     cta: {
       label: 'Star on GitHub',
-      href: 'https://github.com/kaorii-ako/Shiori-v1',
+      href: 'https://github.com/kaorii-ako/StudyPulse',
     },
   },
 ]
 
-const TOUR_KEY = 'shiori-demo-tour-seen'
+const TOUR_KEY = 'studypulse-demo-tour-seen'
 
 const DemoTour = () => {
   const [open, setOpen] = useState(false)

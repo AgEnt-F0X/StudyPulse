@@ -1,28 +1,28 @@
-# Shiori Browser Extension
+# StudyPulse Browser Extension
 
-Quick-access Chrome extension for the [Shiori AI Study Companion](https://shiorii.tech).
+Quick-access Chrome extension for the [StudyPulse AI Study Companion](https://studypulse.app).
 
 ## Features
 
 - **Pomodoro timer** — start focus sessions directly from your browser toolbar
 - **Quick add** — add assignments without opening the full app
 - **Upcoming assignments** — see your next 6 due tasks at a glance
-- **Google Classroom import** — visit classroom.google.com and click "Import to Shiori"
+- **Google Classroom import** — visit classroom.google.com and click "Import to StudyPulse"
 - **Due-date notifications** — get notified when assignments are due tomorrow
 
 ## Install (Developer Mode)
 
-1. Clone this repo or [download the ZIP](https://github.com/kaorii-ako/Shiori-v1/archive/refs/heads/master.zip)
+1. Clone this repo or [download the ZIP](https://github.com/kaorii-ako/StudyPulse/archive/refs/heads/master.zip)
 2. Open Chrome → `chrome://extensions`
 3. Enable **Developer mode** (top-right toggle)
 4. Click **Load unpacked** → select the `extension/` folder
-5. Pin the Shiori icon to your toolbar
+5. Pin the StudyPulse icon to your toolbar
 
-> Firefox support coming soon — see [issue #TODO](https://github.com/kaorii-ako/Shiori-v1/issues)
+> Firefox support coming soon — see [issue #TODO](https://github.com/kaorii-ako/StudyPulse/issues)
 
 ## How it works
 
-The extension stores assignments in `chrome.storage.local` using the same key format as the Shiori web app (`shiori-assignments`). Data is local — nothing is sent to any server.
+The extension stores assignments in `chrome.storage.local` using the same key format as the StudyPulse web app (`studypulse-assignments`). Data is local — nothing is sent to any server.
 
 ## Development
 

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Star, Github, Menu, Keyboard } from 'lucide-react'
+import { Menu, Keyboard } from 'lucide-react'
 import Sidebar from './Sidebar'
 import AIChat from './AIChat'
 import PomodoroTimer from './PomodoroTimer'
@@ -14,7 +14,7 @@ import { useUIStore, useAuthStore } from '../stores'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { C, fonts, tint } from '../utils/theme'
 
-const GITHUB_URL = 'https://github.com/kaorii-ako/Shiori-v1'
+
 
 const Layout = () => {
   const { aiChatOpen, toggleAIChat, toggleSidebarMobile, theme } = useUIStore()
@@ -22,8 +22,6 @@ const Layout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [showShortcuts, setShowShortcuts] = useState(false)
-  const [showStarPrompt, setShowStarPrompt] = useState(false)
-  const promptFired = useRef(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme || 'dark')
@@ -42,22 +40,7 @@ const Layout = () => {
 
   const handleExitDemo = () => {
     exitDemoMode()
-    navigate('/login')
-  }
-
-  useEffect(() => {
-    if (!isDemo || promptFired.current) return
-    if (sessionStorage.getItem('shiori-star-dismissed')) return
-    const timer = setTimeout(() => {
-      promptFired.current = true
-      setShowStarPrompt(true)
-    }, 40000)
-    return () => clearTimeout(timer)
-  }, [isDemo])
-
-  const dismissStarPrompt = () => {
-    sessionStorage.setItem('shiori-star-dismissed', '1')
-    setShowStarPrompt(false)
+    navigate('/home')
   }
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -95,24 +78,8 @@ const Layout = () => {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
               <span style={{ fontFamily: fonts.heading, fontSize: 13, fontWeight: 600, color: C.purple, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Demo mode — sign in to save your own data
+                Demo mode — your data is not saved
               </span>
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hide-mobile"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '2px 8px', borderRadius: 6,
-                  background: tint(C.purpleDark, 0.15),
-                  border: `1px solid ${tint(C.purpleDark, 0.3)}`,
-                  textDecoration: 'none', flexShrink: 0,
-                  fontFamily: fonts.heading, fontSize: 10, fontWeight: 600, color: C.purple,
-                }}
-              >
-                <Star size={10} /> Star on GitHub
-              </a>
             </div>
             <button
               onClick={handleExitDemo}
@@ -166,18 +133,6 @@ const Layout = () => {
                 borderRadius: 4, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`,
               }}>?</kbd>
             </button>
-            <a
-              href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
-              title="Shiori on GitHub" aria-label="GitHub"
-              style={{
-                display: 'flex', padding: 6, borderRadius: 8, color: C.textFaint,
-                border: `1px solid ${C.border}`, transition: 'color 0.15s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.color = C.text }}
-              onMouseLeave={e => { e.currentTarget.style.color = C.textFaint }}
-            >
-              <Github size={15} />
-            </a>
           </div>
         </header>
 
@@ -220,59 +175,8 @@ const Layout = () => {
       {isDemo && <DemoTour />}
       <ToastContainer />
 
-      {/* Star prompt */}
-      {showStarPrompt && (
-        <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 200, width: 'min(420px, 90vw)',
-          background: 'rgba(13,17,26,0.97)',
-          border: `1px solid ${tint(C.purpleDark, 0.4)}`,
-          borderRadius: 14, padding: '16px 20px',
-          boxShadow: '0 0 48px rgba(181,92,255,0.18), 0 16px 32px rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', gap: 14,
-        }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 4, flexShrink: 0,
-            background: tint(C.purpleDark, 0.18),
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Star size={18} style={{ color: C.purple }} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 2 }}>
-              Finding this useful?
-            </p>
-            <p style={{ fontFamily: fonts.body, fontSize: 12, color: C.textFaint }}>
-              Shiori is 100% free &amp; open source. ⭐ helps other students discover it.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={dismissStarPrompt}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '7px 12px', borderRadius: 4,
-                background: C.purpleDark,
-                color: '#fff', textDecoration: 'none',
-                fontFamily: fonts.heading, fontSize: 11, fontWeight: 700,
-              }}
-            >
-              <Github size={13} /> Star
-            </a>
-            <button
-              onClick={dismissStarPrompt}
-              style={{
-                padding: '7px 10px', borderRadius: 7, border: 'none', cursor: 'pointer',
-                background: 'rgba(255,255,255,0.06)', color: C.textFaint,
-                fontFamily: fonts.heading, fontSize: 11,
-              }}
-            >Later</button>
-          </div>
-        </div>
-      )}
+
+
 
       <style>{`
         .sidebar-spacer { width: 240px; }

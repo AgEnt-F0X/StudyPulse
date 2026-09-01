@@ -9,7 +9,7 @@ const api = axios.create({
 
 // Add token to requests if it exists
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('shiori-auth')
+  const token = localStorage.getItem('studypulse-auth')
   if (token) {
     try {
       const parsed = JSON.parse(token)

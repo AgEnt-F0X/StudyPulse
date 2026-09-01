@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Send, X, Sparkles, Zap } from 'lucide-react'
+import { Send, X, Sparkles, Zap, ArrowRight, FileText, CheckCircle2, Layers } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { generateAI, aiAvailable } from '../utils/ai'
-import { preloadLocalAI, useLocalAIStore } from '../utils/localAI'
 import { hasClientKey } from '../utils/gemini'
-import { useAuthStore, useAssignmentsStore } from '../stores'
+import { executeAIAssistantCommand } from '../utils/aiActions'
+import { useAuthStore, useAssignmentsStore, useNotesStore, useFlashcardsStore, useStudyPlansStore } from '../stores'
+import { tint, btnGhost } from '../utils/theme'
 
 const QUICK_PROMPTS = [
   "What's due this week?",
-  "Generate a study plan",
-  "Which assignment should I do first?",
-  "How are my grades looking?",
+  "Add assignment: Physics homework due Friday",
+  "Generate a 5-question quiz on Motion",
+  "Summarize key formulas for Chemistry",
 ]
 
 // Local heuristic responder — works on real or demo data with no API key.
@@ -53,12 +55,12 @@ const getLocalResponse = (message, assignments) => {
   }
 
   if (msg.includes('help') || msg.includes('what can') || msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
-    return `Hey! I'm Shiori (栞), your AI study companion. I can see you have ${pending.length} pending assignments right now.\n\nHere's what I can do:\n• Prioritize your tasks by deadline + weight\n• Generate personalized study plans\n• Track your grades and predict final scores\n• Answer questions about your schedule\n\nWhat would you like to tackle first?`
+    return `Hey! I'm StudyPulse (栞), your AI study companion. I can see you have ${pending.length} pending assignments right now.\n\nHere's what I can do:\n• Prioritize your tasks by deadline + weight\n• Generate personalized study plans\n• Track your grades and predict final scores\n• Answer questions about your schedule\n\nWhat would you like to tackle first?`
   }
 
   if (msg.includes('tip') || msg.includes('advice') || msg.includes('study')) {
     const tips = [
-      "The Pomodoro technique works great for your schedule — 25 min focused on one task, then a 5 min break. There's a timer built into Shiori!",
+      "The Pomodoro technique works great for your schedule — 25 min focused on one task, then a 5 min break. There's a timer built into StudyPulse!",
       "Space your study sessions across multiple days rather than cramming the night before. Your brain consolidates memory during sleep.",
       "For your Calculus assignments, try working through one example problem fully before moving to the next. Understanding > volume.",
       "Set your hardest task as the first thing you do — your willpower is highest in the morning.",
@@ -75,44 +77,41 @@ const getLocalResponse = (message, assignments) => {
 }
 
 const AIChat = ({ onClose }) => {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { assignments } = useAssignmentsStore()
-  const localAIStatus = useLocalAIStore(s => s.status)
-  const localAIProgress = useLocalAIStore(s => s.progress)
+  const { assignments, addAssignment } = useAssignmentsStore()
+  const { addNote } = useNotesStore()
+  const { addDeck, addCard } = useFlashcardsStore()
+  const { addStudyPlan } = useStudyPlansStore()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [generating, setGenerating] = useState(false)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
-    if (user?.isDemo && messages.length === 0 && assignments.length > 0) {
+    if (messages.length === 0 && (assignments || []).length > 0) {
       const pending = assignments.filter(a => a.status !== 'graded')
       const soonest = pending.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]
       setTimeout(() => {
         setMessages([{
           id: Date.now(),
           role: 'assistant',
-          content: `Hey! I'm Shiori (栞). I can see you have ${pending.length} pending assignments.\n\nMost urgent: **${soonest?.title}** (${soonest?.courseName}) due ${soonest ? new Date(soonest.dueDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) : 'soon'}.\n\nAsk me anything — I know your full schedule.`,
+          content: `Hey! I'm StudyPulse AI. I can see you have ${pending.length} pending assignments.\n\nMost urgent: **${soonest?.title}** (${soonest?.courseName || soonest?.course || 'CBSE'}) due ${soonest ? new Date(soonest.dueDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) : 'soon'}.\n\nAsk me about deadlines, revision tips, or say "generate a study plan"!`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         }])
-      }, 600)
+      }, 300)
     }
-  }, [user, assignments]) // eslint-disable-line
+  }, [assignments]) // eslint-disable-line
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  useEffect(() => {
-    // Warm up the on-device model in the background as soon as chat opens,
-    // so the first real question doesn't eat the download wait.
-    if (!user?.isDemo && !hasClientKey()) preloadLocalAI()
-  }, [user])
-
-  const addMessage = (role, content) => ({
+  const addMessage = (role, content, actionCard = null) => ({
     id: Date.now() + Math.random(),
     role,
     content,
+    actionCard,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   })
 
@@ -125,24 +124,9 @@ const AIChat = ({ onClose }) => {
     setInput('')
 
     try {
-      if (!user?.isDemo && aiAvailable()) {
-        // Real AI answer (Gemini, or the on-device model), grounded in the user's actual assignments.
-        const pending = assignments.filter(a => a.status !== 'graded')
-        const list = pending.slice(0, 20).map(a =>
-          `- ${a.title}${a.courseName ? ` (${a.courseName})` : ''}${a.dueDate ? ` due ${new Date(a.dueDate).toLocaleDateString()}` : ''}${a.priority ? ` [${a.priority}]` : ''}`
-        ).join('\n') || '(no pending assignments)'
-        const prompt = `You are Shiori, a friendly, concise AI study companion for a student. Use their data to answer.\n\nPending assignments:\n${list}\n\nStudent question: ${msgText}\n\nAnswer in 1-4 short sentences. Be specific and practical.`
-        const reply = await generateAI(prompt, { maxOutputTokens: 512 })
-        setMessages(prev => [...prev, addMessage('assistant', reply || getLocalResponse(msgText, assignments))])
-      } else {
-        // No AI available (or demo) — local heuristic responder over real data.
-        await new Promise(r => setTimeout(r, 500 + Math.random() * 600))
-        const reply = getLocalResponse(msgText, assignments)
-        const suffix = !user?.isDemo && !aiAvailable()
-          ? '\n\n_Tip: this browser can\'t run on-device AI — use Chrome/Edge for free offline AI, or add a Gemini key in Settings._'
-          : ''
-        setMessages(prev => [...prev, addMessage('assistant', reply + suffix)])
-      }
+      const stores = { addAssignment, addNote, addDeck, addCard, addStudyPlan, assignments }
+      const res = await executeAIAssistantCommand(msgText, stores, hasClientKey())
+      setMessages(prev => [...prev, addMessage('assistant', res.replyText, res.actionCard)])
     } catch {
       setMessages(prev => [...prev, addMessage('assistant', getLocalResponse(msgText, assignments))])
     }
@@ -173,15 +157,10 @@ const AIChat = ({ onClose }) => {
           </div>
           <div>
             <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.875rem', color: '#dfe2eb' }}>
-              Shiori AI
+              StudyPulse AI
             </p>
             <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: '0.7rem', color: '#606080' }}>
-              {user?.isDemo ? 'Demo Mode — offline AI' : (
-                hasClientKey() ? 'Powered by Gemini' :
-                localAIStatus === 'loading' ? `Downloading on-device model… ${Math.round(localAIProgress * 100)}%` :
-                localAIStatus === 'ready' ? 'Powered by on-device AI (offline)' :
-                aiAvailable() ? 'On-device AI' : 'Smart offline mode'
-              )}
+              {hasClientKey() ? '⚡ Gemini 2.0 Flash Active' : '✨ Instant Study Assistant'}
             </p>
           </div>
         </div>
@@ -244,7 +223,7 @@ const AIChat = ({ onClose }) => {
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[82%] px-4 py-3`}
+              className={`max-w-[85%] px-4 py-3 flex flex-col gap-2`}
               style={{
                 fontFamily: "'Manrope', sans-serif",
                 fontSize: '0.875rem',
@@ -257,7 +236,45 @@ const AIChat = ({ onClose }) => {
               }}
             >
               <p>{msg.content}</p>
-              <p style={{ fontSize: '0.65rem', marginTop: 4, opacity: 0.6 }}>{msg.timestamp}</p>
+              
+              {/* Action Cards */}
+              {msg.actionCard?.type === 'assignment' && (
+                <div style={{
+                  padding: '8px 12px', borderRadius: 8,
+                  background: 'rgba(77,255,145,0.1)', border: '1px solid rgba(77,255,145,0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckCircle2 size={14} color="#4dff91" />
+                    <span style={{ fontSize: 11, color: '#4dff91', fontWeight: 600 }}>
+                      Added (Due: {msg.actionCard.dueDate})
+                    </span>
+                  </div>
+                  <button onClick={() => navigate('/assignments')} style={{ ...btnGhost, fontSize: 10, padding: '2px 6px', color: '#afc6ff' }}>
+                    View <ArrowRight size={10} />
+                  </button>
+                </div>
+              )}
+
+              {msg.actionCard?.type === 'save_note' && (
+                <div style={{
+                  padding: '8px 12px', borderRadius: 8,
+                  background: 'rgba(82,141,255,0.1)', border: '1px solid rgba(82,141,255,0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontSize: 11, color: '#afc6ff', fontWeight: 600 }}>Summary Note</span>
+                  <button
+                    onClick={() => {
+                      addNote({ title: msg.actionCard.title, content: msg.actionCard.content, color: '#4daaff' })
+                    }}
+                    style={{ ...btnGhost, fontSize: 10, padding: '2px 6px', color: '#4daaff' }}
+                  >
+                    + Save to Notes
+                  </button>
+                </div>
+              )}
+
+              <p style={{ fontSize: '0.65rem', marginTop: 2, opacity: 0.6 }}>{msg.timestamp}</p>
             </div>
           </motion.div>
         ))}
@@ -296,7 +313,7 @@ const AIChat = ({ onClose }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask Shiori..."
+            placeholder="Ask StudyPulse..."
             rows={1}
             className="flex-1 bg-transparent resize-none outline-none min-h-[24px] text-sm"
             style={{ fontFamily: "'Manrope', sans-serif", color: '#dfe2eb' }}

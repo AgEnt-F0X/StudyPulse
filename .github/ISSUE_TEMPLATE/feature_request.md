@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an improvement to Shiori
+about: Suggest an improvement to StudyPulse
 labels: enhancement
 assignees: ''
 ---

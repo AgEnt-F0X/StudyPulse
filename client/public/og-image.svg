@@ -47,7 +47,7 @@
   <text x="106" y="157" font-family="serif" font-size="28" fill="#10141a" text-anchor="middle" font-weight="bold">栞</text>
 
   <!-- App name -->
-  <text x="148" y="148" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#dfe2eb">Shiori</text>
+  <text x="148" y="148" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#dfe2eb">StudyPulse</text>
   <text x="148" y="168" font-family="Manrope, sans-serif" font-size="14" fill="#606080">AI Study Companion</text>
 
   <!-- Main headline -->
@@ -76,7 +76,7 @@
   <text x="607" y="479" font-family="Space Grotesk, sans-serif" font-size="13" fill="#ff6b9d" text-anchor="middle" font-weight="600">Pomodoro Timer</text>
 
   <!-- URL -->
-  <text x="80" y="578" font-family="Space Grotesk, sans-serif" font-size="16" fill="#424754">github.com/kaorii-ako/Shiori-v1 · shiorii.tech</text>
+  <text x="80" y="578" font-family="Space Grotesk, sans-serif" font-size="16" fill="#424754">github.com/kaorii-ako/StudyPulse · studypulse.app</text>
 
   <!-- Right side: mini app mockup -->
   <rect x="760" y="60" width="380" height="510" rx="14" fill="rgba(10,14,20,0.9)" stroke="rgba(66,71,84,0.4)" stroke-width="1"/>
@@ -113,7 +113,7 @@
 
   <!-- AI insight box -->
   <rect x="772" y="220" width="352" height="68" rx="8" fill="rgba(82,141,255,0.08)" stroke="rgba(82,141,255,0.2)" stroke-width="1"/>
-  <text x="790" y="240" font-family="Space Grotesk, sans-serif" font-size="9" fill="#afc6ff" font-weight="600">✦ SHIORI AI INSIGHT</text>
+  <text x="790" y="240" font-family="Space Grotesk, sans-serif" font-size="9" fill="#afc6ff" font-weight="600">✦ STUDYPULSE AI INSIGHT</text>
   <text x="790" y="258" font-family="Manrope, sans-serif" font-size="10" fill="#8c90a0">You have 3 high-priority tasks this week.</text>
   <text x="790" y="274" font-family="Manrope, sans-serif" font-size="10" fill="#8c90a0">I've front-loaded Calculus prep — tackle it in the morning.</text>
 
@@ -140,12 +140,12 @@
 
   <!-- AI chat preview -->
   <rect x="952" y="432" width="172" height="70" rx="8" fill="rgba(24,28,34,0.6)" stroke="rgba(66,71,84,0.25)" stroke-width="1"/>
-  <text x="965" y="450" font-family="Space Grotesk, sans-serif" font-size="9" fill="#8c90a0">SHIORI AI</text>
+  <text x="965" y="450" font-family="Space Grotesk, sans-serif" font-size="9" fill="#8c90a0">STUDYPULSE AI</text>
   <rect x="965" y="458" width="148" height="34" rx="6" fill="rgba(82,141,255,0.1)"/>
   <text x="972" y="471" font-family="Manrope, sans-serif" font-size="9" fill="#afc6ff">Start with the Math quiz —</text>
   <text x="972" y="484" font-family="Manrope, sans-serif" font-size="9" fill="#afc6ff">it's worth 30% of your grade.</text>
 
   <!-- Bottom border line -->
   <line x1="760" y1="570" x2="1140" y2="570" stroke="rgba(66,71,84,0.25)" stroke-width="1"/>
-  <text x="950" y="590" font-family="Manrope, sans-serif" font-size="12" fill="#424754" text-anchor="middle">Try the demo → shiorii.tech</text>
+  <text x="950" y="590" font-family="Manrope, sans-serif" font-size="12" fill="#424754" text-anchor="middle">Try the demo → studypulse.app</text>
 </svg>

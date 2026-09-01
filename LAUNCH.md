@@ -1,4 +1,4 @@
-# Shiori — Launch Playbook
+# StudyPulse — Launch Playbook
 
 Ready-to-post content. Do these in order. Each takes < 10 minutes.
 
@@ -7,7 +7,7 @@ Ready-to-post content. Do these in order. Each takes < 10 minutes.
 ## 🔴 BEFORE POSTING — Do these first
 
 ### 1. Set Vercel env vars
-Go to vercel.com/dashboard → Shiori → Settings → Environment Variables:
+Go to vercel.com/dashboard → StudyPulse → Settings → Environment Variables:
 ```
 GEMINI_API_KEY        ← aistudio.google.com/apikey (free)
 GOOGLE_CLIENT_ID      ← Google Cloud Console
@@ -20,7 +20,7 @@ SESSION_SECRET        ← any random 32-char string
 After setting → click **Redeploy** on Vercel.
 
 ### 2. Add GitHub topics (2 min)
-github.com/kaorii-ako/Shiori-v1 → ⚙️ gear → Topics:
+github.com/kaorii-ako/StudyPulse → ⚙️ gear → Topics:
 `google-classroom ai-study-planner gemini react student open-source productivity pomodoro edtech`
 
 **2. Post the Twitter/X thread below** (5 min)
@@ -42,7 +42,7 @@ I built an AI study companion that connects to Google Classroom, Gmail, and Cale
 
 No more manually tracking deadlines across 5 tabs.
 
-Try it with zero setup → shiorii.tech/demo (no login, 1 click)
+Try it with zero setup → studypulse.app/demo (no login, 1 click)
 
 Open source. MIT license. 🧵
 ```
@@ -76,7 +76,7 @@ It's completely free to self-host.
 
 Just clone, add your Google + Gemini API keys, and run.
 
-GitHub: github.com/kaorii-ako/Shiori-v1
+GitHub: github.com/kaorii-ako/StudyPulse
 
 If this would've helped you in school, please ⭐ — it helps other students find it.
 ```
@@ -87,12 +87,12 @@ If this would've helped you in school, please ⭐ — it helps other students fi
 
 **Title (MCP angle — best for HN developer audience):**
 ```
-Show HN: Shiori – MCP server for student productivity (assignments, grades, notes from Claude Code)
+Show HN: StudyPulse – MCP server for student productivity (assignments, grades, notes from Claude Code)
 ```
 
 **Body:**
 ```
-I'm a student who built Shiori — an open-source study companion with a built-in MCP server so Claude Code and Claude Desktop can read your academic data directly.
+I'm a student who built StudyPulse — an open-source study companion with a built-in MCP server so Claude Code and Claude Desktop can read your academic data directly.
 
 The MCP server (8 tools):
 - get_study_summary — full snapshot: overdue work, this week's deadlines, GPA
@@ -107,10 +107,10 @@ The MCP server (8 tools):
 Config (4 lines in ~/.claude.json):
 {
   "mcpServers": {
-    "shiori": {
+    "studypulse": {
       "command": "node",
-      "args": ["/path/to/Shiori-v1/mcp/index.js"],
-      "env": { "SHIORI_DATA_FILE": "/path/to/shiori-data.json" }
+      "args": ["/path/to/StudyPulse/mcp/index.js"],
+      "env": { "STUDYPULSE_DATA_FILE": "/path/to/studypulse-data.json" }
     }
   }
 }
@@ -123,16 +123,16 @@ Beyond MCP, the web app (React + Gemini) has:
 - Weighted GPA calculator + final exam predictor
 - Pomodoro, habit tracker, student leaderboard, PWA
 
-Demo (1 click, no login): https://shiorii.tech/demo
-MCP server: https://github.com/kaorii-ako/Shiori-v1/tree/master/mcp
-GitHub: https://github.com/kaorii-ako/Shiori-v1
+Demo (1 click, no login): https://studypulse.app/demo
+MCP server: https://github.com/kaorii-ako/StudyPulse/tree/master/mcp
+GitHub: https://github.com/kaorii-ako/StudyPulse
 
 MIT licensed, self-hosting takes ~5 min.
 ```
 
 **Alternative title (broader appeal):**
 ```
-Show HN: Shiori – open-source AI study companion with MCP server (React + Gemini, MIT)
+Show HN: StudyPulse – open-source AI study companion with MCP server (React + Gemini, MIT)
 ```
 
 ---
@@ -146,11 +146,11 @@ Your AI study companion — syncs Google Classroom, Gmail + Calendar automatical
 
 **Description:**
 ```
-Shiori (栞 = "bookmark" in Japanese) connects to your Google ecosystem and eliminates the mental overhead of academic planning.
+StudyPulse (栞 = "bookmark" in Japanese) connects to your Google ecosystem and eliminates the mental overhead of academic planning.
 
 **The problem:** Students track assignments across Google Classroom, teacher emails, calendar events, and handwritten notes. Things fall through the gaps.
 
-**What Shiori does:**
+**What StudyPulse does:**
 🤖 Pulls every assignment from Google Classroom the moment it's posted
 📧 Scans Gmail for deadline emails teachers send outside Classroom
 📅 Reads your Calendar and slots study blocks into free time automatically
@@ -159,22 +159,22 @@ Shiori (栞 = "bookmark" in Japanese) connects to your Google ecosystem and elim
 📊 Grade calculator with weighted category support
 ⏱ Pomodoro timer integrated with your active assignment
 
-**Try it in 10 seconds** — one click at shiorii.tech/demo. No login. No setup. Full app with sample data.
+**Try it in 10 seconds** — one click at studypulse.app/demo. No login. No setup. Full app with sample data.
 
 **Self-host free forever** with your own Google + Gemini API keys. MIT licensed. Full source on GitHub.
 
-Shiori Pro (฿199/month) adds unlimited AI, email reminders, PDF export, and grade predictions for students who want the hosted version.
+StudyPulse Pro (฿199/month) adds unlimited AI, email reminders, PDF export, and grade predictions for students who want the hosted version.
 ```
 
 **First comment (post this yourself right after launch):**
 ```
 Hey Product Hunt! 👋
 
-I'm Tawin, a student who built Shiori because I kept missing assignments.
+I'm Tawin, a student who built StudyPulse because I kept missing assignments.
 
 The thing I'm most proud of is the AI chat — it actually knows your data. When you ask "what should I work on first?" it looks at your deadlines, the weights of assignments, and your estimated study hours. Not generic advice.
 
-Try the demo at shiorii.tech/demo (1 click, no login) and let me know what you think. What feature would make you actually use this daily?
+Try the demo at studypulse.app/demo (1 click, no login) and let me know what you think. What feature would make you actually use this daily?
 ```
 
 ---
@@ -189,8 +189,8 @@ I'm a student and built this because I kept missing assignments scattered across
 
 It uses Google Classroom API, Gmail API, and Calendar API to pull all your deadlines automatically, then Gemini AI builds a personalized study schedule.
 
-Demo (no login): shiorii.tech
-GitHub: github.com/kaorii-ako/Shiori-v1
+Demo (no login): studypulse.app
+GitHub: github.com/kaorii-ako/StudyPulse
 
 Tech: React + Vite + Express + Google Gemini + Supabase (PostgreSQL). MIT licensed.
 
@@ -209,7 +209,7 @@ The interesting parts technically:
 - Vercel serverless functions for AI endpoints
 - Framer Motion for the glassmorphism UI animations
 
-Live: shiorii.tech | GitHub: github.com/kaorii-ako/Shiori-v1
+Live: studypulse.app | GitHub: github.com/kaorii-ako/StudyPulse
 ```
 
 ---
@@ -233,12 +233,12 @@ PR to: https://github.com/awesome-xyz/awesome-productivity
 
 Add under **AI Assistants** section:
 ```
-- [Shiori](https://shiorii.tech) – AI study companion that syncs Google Classroom, Gmail, and Calendar to generate personalized day-by-day study plans. Open source, MIT. ([GitHub](https://github.com/kaorii-ako/Shiori-v1))
+- [StudyPulse](https://studypulse.app) – AI study companion that syncs Google Classroom, Gmail, and Calendar to generate personalized day-by-day study plans. Open source, MIT. ([GitHub](https://github.com/kaorii-ako/StudyPulse))
 ```
 
 Also add under **Pomodoro & Timers** section:
 ```
-- [Shiori](https://shiorii.tech) – Student productivity app with integrated Pomodoro timer that tracks which assignment you're currently studying. ([GitHub](https://github.com/kaorii-ako/Shiori-v1))
+- [StudyPulse](https://studypulse.app) – Student productivity app with integrated Pomodoro timer that tracks which assignment you're currently studying. ([GitHub](https://github.com/kaorii-ako/StudyPulse))
 ```
 
 ### 2. yantoumu/awesome-ai-tools-4
@@ -246,7 +246,7 @@ PR to: https://github.com/yantoumu/awesome-ai-tools-4
 
 Add under **Educational AI Tools** → Students subsection:
 ```
-| [Shiori](https://github.com/kaorii-ako/Shiori-v1) | Open-source AI study companion — syncs Google Classroom, Gmail & Calendar, generates personalized study plans via Gemini AI. Demo at shiorii.tech | 🆓 |
+| [StudyPulse](https://github.com/kaorii-ako/StudyPulse) | Open-source AI study companion — syncs Google Classroom, Gmail & Calendar, generates personalized study plans via Gemini AI. Demo at studypulse.app | 🆓 |
 ```
 
 ### 3. balavenkatesh3322/awesome-AI-toolkit
@@ -254,11 +254,11 @@ PR to: https://github.com/balavenkatesh3322/awesome-AI-toolkit
 
 Add under educational/productivity tools:
 ```
-| Shiori | AI-powered student study planner with Google Classroom sync, Gemini AI study plans, and Pomodoro timer | https://github.com/kaorii-ako/Shiori-v1 | — |
+| StudyPulse | AI-powered student study planner with Google Classroom sync, Gemini AI study plans, and Pomodoro timer | https://github.com/kaorii-ako/StudyPulse | — |
 ```
 
 ### 4. Add GitHub topics (do this NOW — 2 minutes)
-Go to: https://github.com/kaorii-ako/Shiori-v1
+Go to: https://github.com/kaorii-ako/StudyPulse
 Click the ⚙️ gear next to "About" → add these topics:
 ```
 google-classroom  ai-study-planner  gemini  react  student  open-source  productivity  study-planner  pomodoro  edtech
@@ -266,7 +266,7 @@ google-classroom  ai-study-planner  gemini  react  student  open-source  product
 Topics are how GitHub's Explore page surfaces repos. This alone can drive 20-50 stars/week.
 
 ### 5. nologin.tools directory (submit today — free, instant traffic)
-Shiori's demo mode qualifies: free, no login needed, education + productivity.
+StudyPulse's demo mode qualifies: free, no login needed, education + productivity.
 - Go to: https://nologin.tools (email them or find submit link in footer)
 - Category: **Education** or **Productivity**
 - Description to use:
@@ -274,7 +274,7 @@ Shiori's demo mode qualifies: free, no login needed, education + productivity.
 AI study companion that syncs Google Classroom, Gmail, and Calendar to build personalized study plans.
 Try the full app with demo data — no account, no API keys, no setup.
 ```
-- Link: https://shiorii.tech
+- Link: https://studypulse.app
 
 ### 6. AlternativeTo listing (90+ DA backlink = long-term organic traffic)
 - Go to: https://alternativeto.net/software/add/
@@ -283,17 +283,17 @@ Try the full app with demo data — no account, no API keys, no setup.
 
 ### 7. Bluesky (outperforms X for small products right now)
 ```
-Just shipped Shiori — an open source AI study companion for students.
+Just shipped StudyPulse — an open source AI study companion for students.
 
 It connects to your Google Classroom, Gmail, and Calendar. Gemini AI builds your study plan.
 
-Try it with zero setup → shiorii.tech/demo (1 click, no login)
+Try it with zero setup → studypulse.app/demo (1 click, no login)
 
-Code: github.com/kaorii-ako/Shiori-v1
+Code: github.com/kaorii-ako/StudyPulse
 ```
 
 ### 8. classroomio/classroomio community
-Star them + open a Discussion: "Built Shiori — an open-source student study companion that complements ClassroomIO"
+Star them + open a Discussion: "Built StudyPulse — an open-source student study companion that complements ClassroomIO"
 Link: https://github.com/classroomio/classroomio/discussions
 They have 1500+ stars and an active community of educators and students.
 
@@ -308,7 +308,7 @@ They have 1500+ stars and an active community of educators and students.
 ```
 Hey r/reactjs!
 
-Built Shiori (栞) — open-source AI study companion that replaces the chaos of managing deadlines across 5 tabs.
+Built StudyPulse (栞) — open-source AI study companion that replaces the chaos of managing deadlines across 5 tabs.
 
 What it does:
 - Google Classroom sync (assignments + due dates pulled automatically)
@@ -327,8 +327,8 @@ What it does:
 
 Stack: React 18, Vite, Framer Motion, Zustand, Express, Google Gemini AI
 
-Try it (no signup): https://shiorii.tech
-GitHub: https://github.com/kaorii-ako/Shiori-v1
+Try it (no signup): https://studypulse.app
+GitHub: https://github.com/kaorii-ako/StudyPulse
 ```
 
 Post same body to: r/webdev, r/learnprogramming, r/students
@@ -337,13 +337,13 @@ Post same body to: r/webdev, r/learnprogramming, r/students
 
 ## 🐦 Twitter/X Thread
 
-Tweet 1: "I built Shiori (栞) — open-source AI study companion that connects to your Google Classroom. No more juggling 5 tabs. Try free (no signup): shiorii.tech — GitHub: github.com/kaorii-ako/Shiori-v1 🧵"
+Tweet 1: "I built StudyPulse (栞) — open-source AI study companion that connects to your Google Classroom. No more juggling 5 tabs. Try free (no signup): studypulse.app — GitHub: github.com/kaorii-ako/StudyPulse 🧵"
 
 Tweet 2: "📚 Google Classroom sync → 🤖 Gemini AI study plans → 📊 Weighted grade calculator → 🎯 Final exam predictor ('What score do I need to get an A?')"
 
 Tweet 3: "🃏 Spaced repetition flashcards with 3D flip. AI reads your notes → creates flashcards automatically. Import from Quizlet/Anki via CSV."
 
-Tweet 4: "Also: Shareable GPA card • iCal export • PDF export • PWA • Markdown notes • Study analytics • Keyboard shortcuts. All free. All open source. ⭐ github.com/kaorii-ako/Shiori-v1"
+Tweet 4: "Also: Shareable GPA card • iCal export • PDF export • PWA • Markdown notes • Study analytics • Keyboard shortcuts. All free. All open source. ⭐ github.com/kaorii-ako/StudyPulse"
 
 ---
 
@@ -351,17 +351,17 @@ Tweet 4: "Also: Shareable GPA card • iCal export • PDF export • PWA • Ma
 
 Tagline: "The AI study companion that actually reads your Google Classroom"
 
-Description: "Shiori connects to Google Classroom + Gmail, Gemini AI builds a personalized study plan, spaced repetition flashcards + AI card generation from notes, weighted grade calculator, shareable GPA card. Full demo — no signup needed. Open source."
+Description: "StudyPulse connects to Google Classroom + Gmail, Gemini AI builds a personalized study plan, spaced repetition flashcards + AI card generation from notes, weighted grade calculator, shareable GPA card. Full demo — no signup needed. Open source."
 
-Maker comment: "Built this because I kept missing deadlines while managing 5 tabs. Most magical feature: click 'AI CARDS' in the Notes editor — Gemini reads your notes and creates flashcard Q&A pairs automatically. Looking for contributors! github.com/kaorii-ako/Shiori-v1"
+Maker comment: "Built this because I kept missing deadlines while managing 5 tabs. Most magical feature: click 'AI CARDS' in the Notes editor — Gemini reads your notes and creates flashcard Q&A pairs automatically. Looking for contributors! github.com/kaorii-ako/StudyPulse"
 
 ---
 
 ## 💰 Stripe Setup (฿199/month Pro)
 
-1. dashboard.stripe.com/products → New product → "Shiori Pro" → ฿199/month (THB)
+1. dashboard.stripe.com/products → New product → "StudyPulse Pro" → ฿199/month (THB)
 2. Copy price_* ID → STRIPE_PRICE_MONTHLY in Vercel
-3. dashboard.stripe.com/webhooks → Add endpoint: https://shiorii.tech/api/webhook
+3. dashboard.stripe.com/webhooks → Add endpoint: https://studypulse.app/api/webhook
 4. Events: checkout.session.completed + customer.subscription.deleted
 5. Copy webhook secret → STRIPE_WEBHOOK_SECRET in Vercel
 6. Redeploy on Vercel
@@ -375,12 +375,12 @@ At ฿3,990/month school tier: need 209 schools/year
 
 ### r/selfhosted (HIGHEST PRIORITY — this audience stars repos)
 ```
-Title: Shiori – self-hosted AI study planner with Docker + Supabase auth (Google Classroom sync, MCP server, MIT)
+Title: StudyPulse – self-hosted AI study planner with Docker + Supabase auth (Google Classroom sync, MCP server, MIT)
 
-I'm a student and built Shiori — an open-source study companion that connects to Google Classroom, Gmail, and Calendar. Ships with Docker and Supabase auth out of the box.
+I'm a student and built StudyPulse — an open-source study companion that connects to Google Classroom, Gmail, and Calendar. Ships with Docker and Supabase auth out of the box.
 
 Quick start:
-git clone https://github.com/kaorii-ako/Shiori-v1
+git clone https://github.com/kaorii-ako/StudyPulse
 cp .env.example .env  # fill in VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 docker compose up -d
 # Running at http://localhost
@@ -402,15 +402,15 @@ Features:
 
 All your data lives in your own Supabase instance. Bring-your-own Gemini API key (free tier).
 
-Demo (no login, 1 click): https://shiorii.tech/demo
-GitHub (MIT): https://github.com/kaorii-ako/Shiori-v1
+Demo (no login, 1 click): https://studypulse.app/demo
+GitHub (MIT): https://github.com/kaorii-ako/StudyPulse
 ```
 
 ### r/webdev (Docker + Supabase angle)
 ```
 Title: Migrated my React app from Appwrite to Supabase and added Docker — here's what changed
 
-Just shipped a big update to my open-source student productivity app (Shiori):
+Just shipped a big update to my open-source student productivity app (StudyPulse):
 
 - Replaced Appwrite with Supabase (PostgreSQL + Auth + RLS)
 - GitHub OAuth / Google OAuth now via supabase.auth.signInWithOAuth()
@@ -422,13 +422,13 @@ The Supabase migration was ~200 lines changed. The RLS policies make auth really
 
 If you're on Appwrite and considering switching, happy to share what tripped me up.
 
-GitHub: https://github.com/kaorii-ako/Shiori-v1
+GitHub: https://github.com/kaorii-ako/StudyPulse
 ```
 
 ### awesome-selfhosted PR text
 Fork: https://github.com/awesome-selfhosted/awesome-selfhosted
 Add under **Education and Science** section:
 ```
-- [Shiori](https://github.com/kaorii-ako/Shiori-v1) - AI study companion with Google Classroom sync, GPA calculator, spaced repetition flashcards, and AI study plan generator. `MIT` `Docker` `JavaScript`
+- [StudyPulse](https://github.com/kaorii-ako/StudyPulse) - AI study companion with Google Classroom sync, GPA calculator, spaced repetition flashcards, and AI study plan generator. `MIT` `Docker` `JavaScript`
 ```
 

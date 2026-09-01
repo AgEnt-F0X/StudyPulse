@@ -1,6 +1,6 @@
 {
-  "name": "Shiori — AI Study Companion",
-  "short_name": "Shiori",
+  "name": "StudyPulse — AI Study Companion",
+  "short_name": "StudyPulse",
   "description": "AI-powered study companion: Google Classroom sync, flashcards, grade tracking, and spaced repetition.",
   "start_url": "/home",
   "display": "standalone",

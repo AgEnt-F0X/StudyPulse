@@ -21,7 +21,7 @@ Key routing rules:
 - Resume context → invoke /context-restore
 - Author a backlog-ready spec/issue → invoke /spec
 
-# Shiori — Claude Code Guide
+# StudyPulse — Claude Code Guide
 
 Open-source AI study companion for students. React + Vite frontend, Express backend, Google Gemini AI.
 
@@ -50,7 +50,7 @@ cd client && npm run lint
 ## Architecture
 
 ```
-Shiori-v1/
+StudyPulse/
 ├── client/               # React 18 + Vite frontend
 │   └── src/
 │       ├── pages/        # 15 pages (Home, Assignments, Grades, Notes, Flashcards, Quiz, Leaderboard…)
@@ -124,8 +124,8 @@ To add demo content for a new feature, add it to the relevant `DEMO_*` constant 
 
 ## Good First Issues
 
-Check [GitHub Issues](https://github.com/kaorii-ako/Shiori-v1/issues?q=label%3A%22good+first+issue%22) for beginner-friendly tasks.
+Check [GitHub Issues](https://github.com/kaorii-ako/StudyPulse/issues?q=label%3A%22good+first+issue%22) for beginner-friendly tasks.
 
 ## Live Demo
 
-https://shiori-v1.vercel.app — click "TRY DEMO", no account needed.
+https://studypulse.vercel.app — click "TRY DEMO", no account needed.

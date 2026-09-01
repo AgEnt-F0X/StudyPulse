@@ -5,7 +5,7 @@ import { PageHeader, Card, Empty } from '../components/ui'
 
 const WEEK_DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const COLORS = [C.blue, C.purple, C.green, C.pink, C.orange]
-const STORAGE_KEY = 'shiori-habits'
+const STORAGE_KEY = 'studypulse-habits'
 
 const defaultHabits = [
   { id: '1', name: 'Read for 20 mins', streak: 5, color: C.blue, completedDays: [true, true, false, true, true, false, false] },
@@ -16,7 +16,12 @@ const defaultHabits = [
 function loadHabits() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
+      if (Array.isArray(parsed?.state?.habits)) return parsed.state.habits
+      if (Array.isArray(parsed?.habits)) return parsed.habits
+    }
   } catch { /* corrupted storage — fall back to defaults */ }
   return defaultHabits
 }
@@ -45,25 +50,30 @@ export default function Habits() {
   const [form, setForm] = useState({ name: '', color: C.blue })
   const todayIdx = (new Date().getDay() + 6) % 7 // 0=Mon
 
+  const safeHabits = Array.isArray(habits) ? habits : defaultHabits
+
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(habits)) } catch { /* storage full */ }
-  }, [habits])
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(safeHabits)) } catch { /* storage full */ }
+  }, [safeHabits])
 
   const toggleToday = (id) => {
-    setHabits(hs => hs.map(h => {
-      if (h.id !== id) return h
-      const days = [...h.completedDays]
-      days[todayIdx] = !days[todayIdx]
-      const streak = days[todayIdx] ? h.streak + 1 : Math.max(0, h.streak - 1)
-      return { ...h, completedDays: days, streak }
-    }))
+    setHabits(hs => {
+      const list = Array.isArray(hs) ? hs : defaultHabits
+      return list.map(h => {
+        if (h.id !== id) return h
+        const days = Array.isArray(h.completedDays) ? [...h.completedDays] : [false, false, false, false, false, false, false]
+        days[todayIdx] = !days[todayIdx]
+        const streak = days[todayIdx] ? (h.streak || 0) + 1 : Math.max(0, (h.streak || 0) - 1)
+        return { ...h, completedDays: days, streak }
+      })
+    })
   }
 
-  const deleteHabit = (id) => setHabits(hs => hs.filter(h => h.id !== id))
+  const deleteHabit = (id) => setHabits(hs => (Array.isArray(hs) ? hs : defaultHabits).filter(h => h.id !== id))
 
   const addHabit = () => {
     if (!form.name.trim()) return
-    setHabits(hs => [...hs, {
+    setHabits(hs => [...(Array.isArray(hs) ? hs : defaultHabits), {
       id: Date.now().toString(), name: form.name, streak: 0,
       color: form.color, completedDays: [false, false, false, false, false, false, false],
     }])
@@ -100,7 +110,7 @@ export default function Habits() {
         </div>
       </Card>
 
-      {habits.length === 0 ? (
+      {safeHabits.length === 0 ? (
         <Card style={{ padding: 0 }}>
           <Empty
             icon={CheckCircle2}
@@ -113,7 +123,7 @@ export default function Habits() {
         </Card>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {habits.map(h => (
+          {safeHabits.map(h => (
             <div key={h.id} className="hover-lift" style={{
               background: C.card,
               border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 20px',

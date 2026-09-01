@@ -1,6 +1,6 @@
-# Shiori — Setup Guide
+# StudyPulse — Setup Guide
 
-This gets you a **real, usable** Shiori: real accounts, Google Sign-In, and live
+This gets you a **real, usable** StudyPulse: real accounts, Google Sign-In, and live
 Google Classroom sync. The whole stack is **Supabase (auth + database) + a static
 client** — no always-on server required. You can run it locally or deploy to Vercel.
 
@@ -113,7 +113,7 @@ self-hosting / legacy endpoints.)
   never creates duplicates. Anything you mark done by hand stays done.
 - If the token has expired, the app will ask you to reconnect (one click). Imported
   assignments link back to Classroom and your grades feed into the GPA on the dashboard.
-- It's **read-only** — Shiori never changes anything in your Google Classroom.
+- It's **read-only** — StudyPulse never changes anything in your Google Classroom.
 
 ## Troubleshooting
 

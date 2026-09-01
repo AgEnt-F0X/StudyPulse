@@ -60,7 +60,7 @@ export default function ProSuccess() {
           fontSize: 26, fontWeight: 700,
           color: '#dfe2eb', marginBottom: 12, lineHeight: 1.3,
         }}>
-          You're now a Shiori Pro member.
+          You're now a StudyPulse Pro member.
         </div>
 
         {/* Subtext */}

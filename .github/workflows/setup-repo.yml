@@ -49,7 +49,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               description: 'AI study companion — syncs Google Classroom, Gmail & Calendar → personalized study plan via Gemini. Free & open source.',
-              homepage: 'https://shiorii.tech',
+              homepage: 'https://studypulse.app',
               has_issues: true,
               has_projects: false,
               has_wiki: false
@@ -74,12 +74,12 @@ jobs:
               },
               {
                 title: 'feat: export study plan to PDF and .ics calendar file',
-                body: `## Summary\n\nStudents want to print or import their Shiori study plan into Apple Calendar / Outlook.\n\n## PDF\n- Use \`jspdf\` or \`@react-pdf/renderer\`\n- Render current study plan as a printable layout\n\n## iCal (.ics)\n- Generate a \`.ics\` file client-side\n- Each study session = a VEVENT\n- Trigger download via \`URL.createObjectURL(new Blob([icsContent]))\`\n\n## Where\n- Add export buttons to \`client/src/pages/StudyPlans.jsx\`\n- Create \`client/src/utils/exportUtils.js\` for the logic\n\n**This is a v1.4 roadmap item. Client-side only, no backend needed.**`,
+                body: `## Summary\n\nStudents want to print or import their StudyPulse study plan into Apple Calendar / Outlook.\n\n## PDF\n- Use \`jspdf\` or \`@react-pdf/renderer\`\n- Render current study plan as a printable layout\n\n## iCal (.ics)\n- Generate a \`.ics\` file client-side\n- Each study session = a VEVENT\n- Trigger download via \`URL.createObjectURL(new Blob([icsContent]))\`\n\n## Where\n- Add export buttons to \`client/src/pages/StudyPlans.jsx\`\n- Create \`client/src/utils/exportUtils.js\` for the logic\n\n**This is a v1.4 roadmap item. Client-side only, no backend needed.**`,
                 labels: ['good first issue', 'enhancement', 'help wanted']
               },
               {
                 title: 'feat: dark/light theme toggle',
-                body: `## Summary\n\nShiori currently has a fixed dark theme ("Midnight Study Room"). Add a light theme option for users who prefer studying in bright environments.\n\n## Implementation\n\n1. Create a \`theme\` key in \`useUIStore\` (Zustand) — \`'dark' | 'light'\`\n2. Toggle a \`data-theme\` attribute on \`<html>\`\n3. Add CSS variables in \`index.css\` for light theme overrides\n4. Add toggle button in \`Settings.jsx\`\n\n## Light theme palette suggestion\n- Background: \`#f8f9fc\`\n- Surface: \`#ffffff\`\n- Text: \`#1a1d23\`\n- Accents: keep same blue/purple/green\n\n**Pure frontend. No API changes needed.**`,
+                body: `## Summary\n\nStudyPulse currently has a fixed dark theme ("Midnight Study Room"). Add a light theme option for users who prefer studying in bright environments.\n\n## Implementation\n\n1. Create a \`theme\` key in \`useUIStore\` (Zustand) — \`'dark' | 'light'\`\n2. Toggle a \`data-theme\` attribute on \`<html>\`\n3. Add CSS variables in \`index.css\` for light theme overrides\n4. Add toggle button in \`Settings.jsx\`\n\n## Light theme palette suggestion\n- Background: \`#f8f9fc\`\n- Surface: \`#ffffff\`\n- Text: \`#1a1d23\`\n- Accents: keep same blue/purple/green\n\n**Pure frontend. No API changes needed.**`,
                 labels: ['good first issue', 'enhancement']
               }
             ];

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Shiori — Supabase schema
+-- StudyPulse — Supabase schema
 -- ============================================================================
 -- Run in your Supabase project: Dashboard → SQL Editor → New query → Run.
 -- Safe to re-run. If you ran an OLDER version of this file, the "fix-ups"

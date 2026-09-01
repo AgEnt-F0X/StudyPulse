@@ -131,11 +131,11 @@ export default function Landing() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, color: '#0b0e14',
             }}>栞</motion.div>
-          <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, letterSpacing: '0.05em' }}>SHIORI</span>
+          <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, letterSpacing: '0.05em' }}>STUDYPULSE</span>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <a
-            href="https://github.com/kaorii-ako/Shiori-v1" target="_blank" rel="noopener noreferrer"
+            href="https://github.com/kaorii-ako/StudyPulse" target="_blank" rel="noopener noreferrer"
             aria-label="GitHub"
             style={{ display: 'flex', padding: 8, color: C.textMuted }}
           ><Github size={17} /></a>
@@ -180,7 +180,7 @@ export default function Landing() {
           </h1>
 
           <p data-hero style={{ fontSize: 17, color: C.textMuted, lineHeight: 1.7, maxWidth: 540, margin: '0 auto 38px' }}>
-            Shiori pulls your assignments and grades straight from Google Classroom,
+            StudyPulse pulls your assignments and grades straight from Google Classroom,
             then helps you study smarter with AI flashcards, focus timers, and grade tracking.
           </p>
 
@@ -298,12 +298,12 @@ export default function Landing() {
             <div style={{ flex: 1, minWidth: 260 }}>
               <h2 style={{ fontFamily: fonts.heading, fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Built with schools in mind</h2>
               <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, marginBottom: 14 }}>
-                Shiori is open source (MIT), free for students, and uses Google sign-in — so it works with
+                StudyPulse is open source (MIT), free for students, and uses Google sign-in — so it works with
                 the school accounts students already have. Your data stays in your own Google account and
                 the app only requests read access to Classroom. Schools can also self-host the whole thing.
               </p>
               <a
-                href="https://github.com/kaorii-ako/Shiori-v1" target="_blank" rel="noopener noreferrer"
+                href="https://github.com/kaorii-ako/StudyPulse" target="_blank" rel="noopener noreferrer"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: C.green, fontSize: 13.5, fontWeight: 700, textDecoration: 'none', fontFamily: fonts.heading }}
               >View the source on GitHub <ArrowRight size={14} /></a>
             </div>
@@ -330,12 +330,12 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, position: 'relative',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 13 }}>栞 Shiori</span>
+          <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 13 }}>栞 StudyPulse</span>
           <span style={{ fontSize: 12, color: C.textFaint }}>· MIT License · Open source · Made by a student</span>
         </div>
         <div style={{ display: 'flex', gap: 18 }}>
           <button onClick={() => navigate('/demo')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: C.textMuted, fontFamily: fonts.body }}>Demo</button>
-          <a href="https://github.com/kaorii-ako/Shiori-v1" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.textMuted, textDecoration: 'none' }}>GitHub ↗</a>
+          <a href="https://github.com/kaorii-ako/StudyPulse" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.textMuted, textDecoration: 'none' }}>GitHub ↗</a>
         </div>
       </footer>
     </div>

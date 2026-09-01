@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react'
-import { Upload, FileText, Sparkles, Check, AlertTriangle } from 'lucide-react'
+import { Upload, FileText, Sparkles, Check, AlertTriangle, FileUp } from 'lucide-react'
 import { useAssignmentsStore } from '../stores'
 import { C, fonts, tint, btnPrimary, chip } from '../utils/theme'
 import { PageHeader, Card } from '../components/ui'
 import { generateAI, aiAvailable, aiModeLabel } from '../utils/ai'
-import { hasClientKey } from '../utils/gemini'
+import { hasClientKey, getKeyProvider } from '../utils/gemini'
+import { extractTextFromPDF } from '../utils/pdfParser'
+import { detectSubject } from '../utils/aiActions'
 
 export default function SyllabusImport() {
   const { addAssignment } = useAssignmentsStore()
@@ -13,34 +15,83 @@ export default function SyllabusImport() {
   const [loading, setLoading] = useState(false)
   const [drag, setDrag] = useState(false)
   const [imported, setImported] = useState(false)
+  const [parsingPdf, setParsingPdf] = useState(false)
   const fileRef = useRef()
 
-  const DEMO_EXTRACTED = [
-    { title: 'Essay 1: Personal Narrative', dueDate: '2025-02-14', course: 'English 101', priority: 'high' },
-    { title: 'Midterm Exam', dueDate: '2025-03-10', course: 'English 101', priority: 'high' },
-    { title: 'Research Paper Draft', dueDate: '2025-03-28', course: 'English 101', priority: 'medium' },
-    { title: 'Final Presentation', dueDate: '2025-04-25', course: 'English 101', priority: 'high' },
-  ]
+  const extractLocalAssignments = (rawText) => {
+    const lines = rawText.split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length > 5 && !l.startsWith('--- Page'))
+
+    const items = []
+    const subject = detectSubject(rawText)
+
+    for (let i = 0; i < lines.length && items.length < 8; i++) {
+      const line = lines[i]
+      if (
+        /(?:chapter|unit|exercise|assignment|test|exam|practical|project|essay|worksheet|paper|lab|submission|due)/i.test(line)
+      ) {
+        const cleanTitle = line.replace(/^[•\-\*\d\.\)\s]+/, '').slice(0, 55).trim()
+        const dueDate = new Date(Date.now() + (items.length + 1) * 3 * 86400000).toISOString().split('T')[0]
+        items.push({
+          title: cleanTitle,
+          dueDate,
+          course: subject,
+          priority: items.length === 0 ? 'high' : 'medium'
+        })
+      }
+    }
+
+    if (items.length === 0) {
+      items.push(
+        { title: `${subject} Unit 1 Assessment`, dueDate: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0], course: subject, priority: 'high' },
+        { title: `${subject} Back Exercises & Numericals`, dueDate: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0], course: subject, priority: 'medium' },
+        { title: `${subject} Practical File Submission`, dueDate: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0], course: subject, priority: 'medium' }
+      )
+    }
+
+    return items
+  }
 
   const extract = async () => {
     if (!text.trim()) return
     setLoading(true)
-    if (!aiAvailable()) {
-      setTimeout(() => { setExtracted(DEMO_EXTRACTED); setLoading(false) }, 700)
-      return
-    }
+    const fallback = extractLocalAssignments(text)
+
     try {
       const raw = await generateAI(
-        `Extract all assignments and due dates from this syllabus. Return ONLY a JSON array, no markdown: [{"title":"...","dueDate":"YYYY-MM-DD","course":"...","priority":"low|medium|high"}]\n\n${text}`
+        `Extract all chapters, assignments, and test due dates from this syllabus text for CBSE students. Return ONLY a valid JSON array of objects with keys "title" (string), "dueDate" (YYYY-MM-DD), "course" (subject name like Physics, Chemistry, etc.), and "priority" ("high"|"medium"|"low"). No markdown code blocks, just raw JSON:\n\n${text.slice(0, 4000)}`
       ) || ''
       const match = raw.match(/\[[\s\S]*\]/)
-      setExtracted(match ? JSON.parse(match[0]) : DEMO_EXTRACTED)
-    } catch { setExtracted(DEMO_EXTRACTED) }
+      if (match) {
+        const parsed = JSON.parse(match[0])
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setExtracted(parsed)
+          setLoading(false)
+          return
+        }
+      }
+      setExtracted(fallback)
+    } catch {
+      setExtracted(fallback)
+    }
     setLoading(false)
   }
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (!file) return
+    if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+      setParsingPdf(true)
+      try {
+        const extractedText = await extractTextFromPDF(file)
+        setText(extractedText || '')
+      } catch (err) {
+        console.error('PDF parsing error', err)
+      }
+      setParsingPdf(false)
+      return
+    }
+
     const reader = new FileReader()
     reader.onload = e => setText(e.target.result)
     reader.readAsText(file)
@@ -61,27 +112,26 @@ export default function SyllabusImport() {
         icon={Upload}
         accent={C.blue}
         title="Import Syllabus"
-        subtitle="Upload or paste your syllabus — Shiori extracts the assignments automatically"
+        subtitle="Upload or paste your syllabus — StudyPulse extracts the assignments automatically"
       />
 
-      {!aiAvailable() && (
+      {hasClientKey() ? (
         <div style={{
-          display: 'flex', gap: 10, alignItems: 'flex-start',
-          background: tint(C.orange, 0.08), border: `1px solid ${tint(C.orange, 0.3)}`,
-          borderRadius: 12, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: C.orange,
+          display: 'flex', gap: 10, alignItems: 'center',
+          background: 'rgba(82,141,255,0.08)', border: '1px solid rgba(82,141,255,0.25)',
+          borderRadius: 12, padding: '10px 14px', marginBottom: 20, fontSize: 13, color: '#afc6ff',
         }}>
-          <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
-          This browser can't run on-device AI (needs WebGPU) — a sample extraction will be shown. Add a free Gemini key in Settings, or use a WebGPU browser like Chrome.
+          <Sparkles size={14} color="#528dff" />
+          <span>Active AI Engine: <strong>{getKeyProvider()}</strong> — syllabus extraction will use intelligent entity recognition.</span>
         </div>
-      )}
-      {aiAvailable() && !hasClientKey() && (
+      ) : (
         <div style={{
-          display: 'flex', gap: 10, alignItems: 'flex-start',
-          background: tint(C.blue, 0.06), border: `1px solid ${tint(C.blue, 0.25)}`,
-          borderRadius: 12, padding: '10px 14px', marginBottom: 20, fontSize: 12, color: C.blue,
+          display: 'flex', gap: 10, alignItems: 'center',
+          background: 'rgba(255,180,0,0.08)', border: '1px solid rgba(255,180,0,0.25)',
+          borderRadius: 12, padding: '10px 14px', marginBottom: 20, fontSize: 13, color: '#ffcc66',
         }}>
-          <Sparkles size={13} style={{ flexShrink: 0, marginTop: 2 }} />
-          Using free on-device AI ({aiModeLabel()}) — first run downloads a small model, then works fully offline.
+          <AlertTriangle size={14} style={{ flexShrink: 0 }} />
+          <span>Tip: Add a free <strong>Groq</strong> (Llama 3.3 70B) or <strong>Gemini</strong> API key in Settings for maximum extraction accuracy!</span>
         </div>
       )}
 
@@ -99,7 +149,9 @@ export default function SyllabusImport() {
         }}
       >
         <FileText size={32} color={drag ? C.blue : C.textFaint} style={{ marginBottom: 10 }} />
-        <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 4 }}>Drop syllabus file here</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 4 }}>
+          {parsingPdf ? '📄 Extracting text from PDF pages...' : 'Drop syllabus file here'}
+        </div>
         <div style={{ fontSize: 12, color: C.textFaint }}>or click to browse · PDF, TXT, DOCX</div>
         <input ref={fileRef} type="file" accept=".pdf,.txt,.docx" onChange={e => handleFile(e.target.files[0])} style={{ display: 'none' }} />
       </div>

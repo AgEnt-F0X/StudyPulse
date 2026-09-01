@@ -11,7 +11,7 @@ if (isSupabaseConfigured()) {
   try {
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   } catch (e) {
-    console.warn('[Shiori] Supabase init failed, running without auth:', e.message)
+    console.warn('[StudyPulse] Supabase init failed, running without auth:', e.message)
   }
 }
 

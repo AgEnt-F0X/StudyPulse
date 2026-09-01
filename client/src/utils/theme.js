@@ -1,4 +1,4 @@
-// Shiori design tokens — single source of truth for the inline-style system.
+// StudyPulse design tokens — single source of truth for the inline-style system.
 // Every page/component imports `C` (colors) and the style helpers below.
 
 export const C = {

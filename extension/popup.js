@@ -1,7 +1,7 @@
-// Storage keys (mirror what the Shiori web app uses via localStorage)
+// Storage keys (mirror what the StudyPulse web app uses via localStorage)
 const KEYS = {
-  assignments: 'shiori-assignments',
-  pomodoro: 'shiori-pomodoro',
+  assignments: 'studypulse-assignments',
+  pomodoro: 'studypulse-pomodoro',
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ async function loadAssignments() {
   const data = await getStorage(KEYS.assignments)
   const list = document.getElementById('assignmentList')
 
-  // Try to read from the Shiori web app's localStorage via background message
+  // Try to read from the StudyPulse web app's localStorage via background message
   let assignments = data?.state?.assignments || []
 
   // Filter to pending/in-progress, sort by due date, take top 6
@@ -116,7 +116,7 @@ document.getElementById('addBtn').addEventListener('click', async () => {
   await setStorage(KEYS.assignments, { state: { ...data.state, assignments } })
   document.getElementById('taskTitle').value = ''
   document.getElementById('taskDue').value = ''
-  showToast('Added to Shiori!')
+  showToast('Added to StudyPulse!')
   loadAssignments()
 })
 

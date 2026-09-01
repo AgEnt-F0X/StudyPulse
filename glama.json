@@ -1,9 +1,9 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "Shiori MCP Server",
-  "description": "MCP server for Shiori — open-source AI study companion. Access assignments, grades, notes, and flashcards from Claude Code or Claude Desktop. Ask Claude what's due, calculate the grade you need, or summarize your notes.",
+  "name": "StudyPulse MCP Server",
+  "description": "MCP server for StudyPulse — open-source AI study companion. Access assignments, grades, notes, and flashcards from Claude Code or Claude Desktop. Ask Claude what's due, calculate the grade you need, or summarize your notes.",
   "license": "MIT",
-  "homepage": "https://github.com/kaorii-ako/Shiori-v1",
+  "homepage": "https://github.com/kaorii-ako/StudyPulse",
   "maintainers": [
     "kaorii-ako"
   ],

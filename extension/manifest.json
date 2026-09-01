@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Shiori — AI Study Companion",
+  "name": "StudyPulse — AI Study Companion",
   "version": "1.0.0",
-  "description": "Quick access to your Shiori dashboard: upcoming assignments, Pomodoro timer, and quick task capture.",
+  "description": "Quick access to your StudyPulse dashboard: upcoming assignments, Pomodoro timer, and quick task capture.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -17,7 +17,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "Shiori Study Companion"
+    "default_title": "StudyPulse Study Companion"
   },
   "permissions": ["storage", "alarms", "notifications"],
   "background": {

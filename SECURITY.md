@@ -29,7 +29,7 @@ Include in your report:
 - User data is stored in your own Appwrite instance — we have no access to it
 - Refresh tokens are stored in Appwrite's encrypted database
 
-### Shiori Cloud (coming in v2.0)
+### StudyPulse Cloud (coming in v2.0)
 - All data encrypted at rest (AES-256)
 - HTTPS enforced via Vercel
 - OAuth tokens stored encrypted, never logged

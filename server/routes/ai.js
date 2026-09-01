@@ -22,7 +22,7 @@ async function callGemini(model, systemContext, userMessage) {
   const chat = model.startChat({
     history: [
       { role: 'user', parts: [{ text: systemContext }] },
-      { role: 'model', parts: [{ text: 'Understood. I am Shiori, your AI study companion. I will help you stay on top of your academics.' }] }
+      { role: 'model', parts: [{ text: 'Understood. I am StudyPulse, your AI study companion. I will help you stay on top of your academics.' }] }
     ]
   })
   const result = await chat.sendMessage(userMessage)
@@ -50,7 +50,7 @@ router.post('/chat', async (req, res) => {
 
     const model = await getGemini()
     if (model) {
-      const systemContext = `You are Shiori (栞), a warm and knowledgeable AI study companion for students. You have access to the student's current academic data:
+      const systemContext = `You are StudyPulse (栞), a warm and knowledgeable AI study companion for students. You have access to the student's current academic data:
 - Total assignments: ${assignments.length}
 - Pending assignments: ${pendingAssignments.length}
 - Subjects: ${subjectsText}
@@ -112,7 +112,7 @@ Keep responses concise (2-4 sentences), encouraging, and actionable. You can sug
       const status = pendingAssignments.length > 0
         ? `You have ${pendingAssignments.length} tasks pending.`
         : "You're all caught up!"
-      response = `Hey! I'm Shiori, your AI study companion. ${status} How can I help you today?`
+      response = `Hey! I'm StudyPulse, your AI study companion. ${status} How can I help you today?`
     } else if (lowerMessage.includes('help')) {
       response = `I can help with:\n• Analyzing your ${assignments.length} assignments across ${subjectsText}\n• Creating personalized study plans\n• Tracking grades and GPA\n• Managing deadlines\n\nJust ask, or say "generate study plan" to get started!`
     }

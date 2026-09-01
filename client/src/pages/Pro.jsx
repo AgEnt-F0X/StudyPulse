@@ -10,19 +10,19 @@ import {
 
 const PRO_FEATURES = [
   { icon: Brain, title: 'Unlimited AI Study Plans', desc: 'Generate as many plans as you need, recalculated every time your deadlines change.' },
-  { icon: Sparkles, title: 'Unlimited AI Chat', desc: 'No daily message cap. Ask Shiori anything, anytime.' },
+  { icon: Sparkles, title: 'Unlimited AI Chat', desc: 'No daily message cap. Ask StudyPulse anything, anytime.' },
   { icon: Zap, title: 'Smart Priority Scoring', desc: 'AI ranks your tasks by weight, deadline, and difficulty — not just due date.' },
   { icon: FileText, title: 'PDF & iCal Export', desc: 'Export your study plans to PDF or sync to any calendar app via .ics.' },
   { icon: Bell, title: 'Email Deadline Reminders', desc: '24h and 2h reminders sent to your inbox. Never miss a submission again.' },
   { icon: TrendingUp, title: 'Grade Predictions', desc: 'AI estimates your final grade based on current scores and remaining assignments.' },
-  { icon: Calendar, title: 'Smart Calendar Blocking', desc: 'Shiori blocks study time in Google Calendar automatically, respecting your existing events.' },
+  { icon: Calendar, title: 'Smart Calendar Blocking', desc: 'StudyPulse blocks study time in Google Calendar automatically, respecting your existing events.' },
   { icon: BarChart3, title: 'Progress Analytics', desc: 'Track your study consistency, assignment completion rate, and grade trends over time.' },
 ]
 
 const FAQ = [
   {
     q: 'Is the free tier really free forever?',
-    a: 'Yes. Shiori is MIT-licensed open source. Self-host it forever at zero cost. Shiori Pro/Cloud is a hosted version that handles setup and adds premium AI features.',
+    a: 'Yes. StudyPulse is MIT-licensed open source. Self-host it forever at zero cost. StudyPulse Pro/Cloud is a hosted version that handles setup and adds premium AI features.',
   },
   {
     q: 'What happens when my trial ends?',
@@ -30,10 +30,10 @@ const FAQ = [
   },
   {
     q: 'Do you store my Google data?',
-    a: 'On the self-hosted version: never. On Shiori Cloud, assignment metadata is stored encrypted to power AI features, and you can delete it anytime.',
+    a: 'On the self-hosted version: never. On StudyPulse Cloud, assignment metadata is stored encrypted to power AI features, and you can delete it anytime.',
   },
   {
-    q: 'Can I use Shiori without Google Classroom?',
+    q: 'Can I use StudyPulse without Google Classroom?',
     a: 'Yes. You can add assignments manually and still use all AI features including study plans and chat.',
   },
   {
@@ -116,7 +116,7 @@ const Pro = () => {
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 18 }}>栞</span>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 16, color: '#dfe2eb' }}>Shiori Pro</span>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 16, color: '#dfe2eb' }}>StudyPulse Pro</span>
             <Crown size={14} style={{ color: '#e5b5ff' }} />
           </div>
           <Link to="/login" style={{
@@ -149,7 +149,7 @@ const Pro = () => {
               fontSize: 11, fontWeight: 600, color: '#e5b5ff',
               letterSpacing: '0.08em', marginBottom: 24,
             }}>
-              <Crown size={11} /> SHIORI PRO
+              <Crown size={11} /> STUDYPULSE PRO
             </div>
             <div style={{
               fontFamily: "'Press Start 2P', monospace",
@@ -169,7 +169,7 @@ const Pro = () => {
               fontFamily: "'Manrope', sans-serif", fontSize: 16, color: '#8c90a0',
               maxWidth: 480, margin: '0 auto', lineHeight: 1.7,
             }}>
-              Shiori Pro gives you unlimited AI, automatic scheduling, grade predictions,
+              StudyPulse Pro gives you unlimited AI, automatic scheduling, grade predictions,
               and everything else you need to actually ace your exams.
             </p>
           </motion.div>
@@ -456,7 +456,7 @@ const Pro = () => {
         textAlign: 'center',
       }}>
         <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: '#424754' }}>
-          栞 Shiori · Made with care for students
+          栞 StudyPulse · Made with care for students
         </div>
       </footer>
     </div>

@@ -91,24 +91,24 @@
 
 /* ===== Motion & layout helpers (inline-style system) ===== */
 
-@keyframes shioriFadeUp {
+@keyframes studypulseFadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes shioriFadeIn {
+@keyframes studypulseFadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@keyframes shioriPulse {
+@keyframes studypulsePulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.45; }
 }
-@keyframes shioriSpin {
+@keyframes studypulseSpin {
   to { transform: rotate(360deg); }
 }
 
 .page-enter {
-  animation: shioriFadeUp 0.35s ease-out both;
+  animation: studypulseFadeUp 0.35s ease-out both;
 }
 
 .hover-lift {
@@ -128,8 +128,8 @@
   background: rgba(90,139,255,0.06);
 }
 
-.spin { animation: shioriSpin 0.9s linear infinite; }
-.pulse { animation: shioriPulse 1.6s ease-in-out infinite; }
+.spin { animation: studypulseSpin 0.9s linear infinite; }
+.pulse { animation: studypulsePulse 1.6s ease-in-out infinite; }
 
 /* Responsive grids for inline-styled pages */
 .grid-2 {

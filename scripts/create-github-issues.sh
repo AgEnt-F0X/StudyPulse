@@ -3,7 +3,7 @@
 # Get a token: github.com/settings/tokens → New classic token → check "repo" scope
 
 OWNER="kaorii-ako"
-REPO="Shiori-v1"
+REPO="StudyPulse"
 API="https://api.github.com/repos/$OWNER/$REPO/issues"
 AUTH="Authorization: token $GITHUB_TOKEN"
 
@@ -18,7 +18,7 @@ create() {
     | python3 -c "import json,sys; d=json.load(sys.stdin); print('✅', d.get('number','?'), d.get('title','ERR')[:60])"
 }
 
-echo "Creating good-first-issue tickets for Shiori..."
+echo "Creating good-first-issue tickets for StudyPulse..."
 
 create \
   "feat: confetti animation when all assignments are marked complete" \
@@ -28,7 +28,7 @@ create \
 create \
   "feat: PWA install prompt banner for mobile users" \
   '["good first issue","enhancement"]' \
-  "## Summary\n\nShow a dismissible bottom banner on mobile: 'Install Shiori — study anywhere, offline.'\n\n## Details\n- Listen for \`beforeinstallprompt\`, store it\n- Banner: tap → \`deferredPrompt.prompt()\`\n- Dismiss state in localStorage\n\n## Files\n- \`client/src/components/InstallBanner.jsx\` (new)\n- \`client/src/components/Layout.jsx\`\n\n**Difficulty:** Easy"
+  "## Summary\n\nShow a dismissible bottom banner on mobile: 'Install StudyPulse — study anywhere, offline.'\n\n## Details\n- Listen for \`beforeinstallprompt\`, store it\n- Banner: tap → \`deferredPrompt.prompt()\`\n- Dismiss state in localStorage\n\n## Files\n- \`client/src/components/InstallBanner.jsx\` (new)\n- \`client/src/components/Layout.jsx\`\n\n**Difficulty:** Easy"
 
 create \
   "feat: export flashcards to Anki tab-separated format (.txt import)" \

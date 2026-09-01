@@ -59,7 +59,7 @@ router.post('/create-checkout-session', async (req, res) => {
       })
     }
 
-    const origin = req.get('origin') || req.headers.referer?.replace(/\/$/, '') || 'https://shiorii.tech'
+    const origin = req.get('origin') || req.headers.referer?.replace(/\/$/, '') || 'https://studypulse.app'
 
     const sessionParams = {
       mode: 'subscription',
@@ -70,7 +70,7 @@ router.post('/create-checkout-session', async (req, res) => {
       allow_promotion_codes: true,
       subscription_data: {
         trial_period_days: 7,
-        metadata: { source: 'shiori-web' },
+        metadata: { source: 'studypulse-web' },
       },
       metadata: {
         supabaseUserId: supabaseUserId || '',

@@ -2,7 +2,7 @@ import { Client, ID, Databases, Query } from 'appwrite'
 
 const client = new Client()
   .setEndpoint(process.env.APPWRITE_ENDPOINT || 'https://sgp.cloud.appwrite.io/v1')
-  .setProject(process.env.APPWRITE_PROJECT_ID || 'shiori-dev')
+  .setProject(process.env.APPWRITE_PROJECT_ID || 'studypulse-dev')
 
 // For server-side API key authentication
 client.config.headers = {
@@ -11,7 +11,7 @@ client.config.headers = {
 
 const databases = new Databases(client)
 
-const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'shiori_db'
+const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'studypulse_db'
 
 const COLLECTIONS = {
   STUDENTS: process.env.APPWRITE_STUDENTS_COLLECTION || 'students',

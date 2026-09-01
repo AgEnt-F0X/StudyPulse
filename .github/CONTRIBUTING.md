@@ -1,11 +1,11 @@
-# Contributing to Shiori
+# Contributing to StudyPulse
 
-First off — thank you for taking the time to contribute! Shiori is a student project built for students, and every contribution helps make it better for everyone.
+First off — thank you for taking the time to contribute! StudyPulse is a student project built for students, and every contribution helps make it better for everyone.
 
 ## Ways to Contribute
 
-- **Bug reports** — Found something broken? [Open an issue](https://github.com/kaorii-ako/Shiori-v1/issues/new?template=bug_report.md)
-- **Feature requests** — Have an idea? [Request it](https://github.com/kaorii-ako/Shiori-v1/issues/new?template=feature_request.md)
+- **Bug reports** — Found something broken? [Open an issue](https://github.com/kaorii-ako/StudyPulse/issues/new?template=bug_report.md)
+- **Feature requests** — Have an idea? [Request it](https://github.com/kaorii-ako/StudyPulse/issues/new?template=feature_request.md)
 - **Code** — Fix bugs, add features, improve performance
 - **Design** — UI/UX improvements, new themes, accessibility
 - **Docs** — Better README sections, setup guides, comments
@@ -14,8 +14,8 @@ First off — thank you for taking the time to contribute! Shiori is a student p
 ## Development Setup
 
 ```bash
-git clone https://github.com/kaorii-ako/Shiori-v1.git
-cd Shiori-v1
+git clone https://github.com/kaorii-ako/StudyPulse.git
+cd StudyPulse
 npm install
 cp .env.example .env
 # Fill in your credentials, then:
@@ -40,8 +40,8 @@ npm run dev
 
 ## Good First Issues
 
-Look for issues tagged [`good first issue`](https://github.com/kaorii-ako/Shiori-v1/issues?q=label%3A%22good+first+issue%22) — these are intentionally scoped to be approachable for new contributors.
+Look for issues tagged [`good first issue`](https://github.com/kaorii-ako/StudyPulse/issues?q=label%3A%22good+first+issue%22) — these are intentionally scoped to be approachable for new contributors.
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/kaorii-ako/Shiori-v1/discussions) or an issue — we're friendly!
+Open a [GitHub Discussion](https://github.com/kaorii-ako/StudyPulse/discussions) or an issue — we're friendly!

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generates PNG icons for the Shiori Chrome extension — zero dependencies
+// Generates PNG icons for the StudyPulse Chrome extension — zero dependencies
 // Usage: node generate-icons.js (run from inside extension/)
 
 const fs = require('fs')
@@ -123,4 +123,4 @@ for (const size of [16, 32, 48, 128]) {
   fs.writeFileSync(file, makePNG(size))
   console.log(`✓ icons/icon${size}.png (${size}×${size})`)
 }
-console.log('\nShiori icons generated! Ready for Chrome Web Store submission.')
+console.log('\nStudyPulse icons generated! Ready for Chrome Web Store submission.')

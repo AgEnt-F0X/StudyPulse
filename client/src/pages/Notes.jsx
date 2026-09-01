@@ -1,13 +1,28 @@
-import { useState, useMemo } from 'react'
-import { FileText, Plus, Search, Eye, Pencil, Trash2 } from 'lucide-react'
-import { useNotesStore } from '../stores'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { FileText, Plus, Search, Eye, Pencil, Trash2, Sparkles, Wand2, Loader2, BookOpen, Calculator } from 'lucide-react'
+import { useNotesStore, useUIStore } from '../stores'
 import { C, fonts, tint, btnPrimary } from '../utils/theme'
+import { callGeminiClient, hasClientKey } from '../utils/gemini'
 
 export default function Notes() {
   const { notes, addNote, updateNote, deleteNote } = useNotesStore()
+  const { addToast } = useUIStore()
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
   const [preview, setPreview] = useState(false)
+  const [aiMenu, setAiMenu] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const aiMenuRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (aiMenuRef.current && !aiMenuRef.current.contains(event.target)) {
+        setAiMenu(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -22,6 +37,65 @@ export default function Notes() {
     const n = { id: Date.now().toString(), title: 'Untitled Note', content: '', createdAt: new Date().toISOString() }
     addNote(n)
     setSelected(n.id)
+  }
+
+  const handleAI = async (action) => {
+    setAiMenu(false)
+    if (!active?.content?.trim()) {
+      addToast({ type: 'error', message: 'Write some notes first, then enhance with AI.' })
+      return
+    }
+    if (!hasClientKey()) {
+      addToast({ type: 'error', message: 'Add an AI API key in Settings to use this feature.' })
+      return
+    }
+    setAiLoading(true)
+    try {
+      let prompt = ''
+      if (action === 'enhance') {
+        prompt = `You are a CBSE Class 11 study notes expert. Restructure these rough class notes into clean, exam-ready study material.
+
+Rules:
+- Add clear ## headings and ### subheadings
+- Bold all **key terms** and **definitions**
+- Put formulas in separate lines with clear labels
+- Add bullet points for lists
+- Add a 3-line "## Quick Summary" at the very top
+- Keep all original information, just organize it better
+- Use simple language a Class 11 student would understand
+
+Original notes:\n${active.content}`
+      } else if (action === 'explain') {
+        prompt = `You are a friendly CBSE teacher. Read these student notes and explain every concept mentioned in simple, easy-to-understand language. Use examples, analogies, and real-life connections. Format with clear headings.
+
+Student's notes:\n${active.content}`
+      } else if (action === 'formulas') {
+        prompt = `Extract ONLY the formulas, theorems, key definitions, and important constants from these notes. Format as a clean reference sheet:
+
+- Use ## headings to group by topic
+- Each formula on its own line with a clear label
+- Include SI units where applicable
+- Add "Where:" explanations for each variable
+- If there are no explicit formulas, derive the key formulas related to the topics mentioned
+
+Notes:\n${active.content}`
+      }
+      const result = await callGeminiClient(prompt, { timeoutMs: 15000 })
+      if (result) {
+        if (action === 'explain' || action === 'formulas') {
+          // Append as a new section
+          const separator = action === 'explain' ? '\n\n---\n\n## 💡 AI Explanation\n\n' : '\n\n---\n\n## 📐 Extracted Formulas & Key Points\n\n'
+          updateNote(active.id, { content: active.content + separator + result })
+        } else {
+          updateNote(active.id, { content: result })
+        }
+        addToast({ type: 'success', message: action === 'enhance' ? 'Notes enhanced! ✨' : action === 'explain' ? 'Explanation added! 💡' : 'Formulas extracted! 📐' })
+      }
+    } catch (e) {
+      addToast({ type: 'error', message: 'AI processing failed. Try again.' })
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   const panel = {
@@ -134,6 +208,59 @@ export default function Notes() {
               }}>
                 {preview ? <><Pencil size={11} /> Edit</> : <><Eye size={11} /> Preview</>}
               </button>
+
+              {/* AI Enhance Button */}
+              <div style={{ position: 'relative' }} ref={aiMenuRef}>
+                <button
+                  onClick={() => setAiMenu(m => !m)}
+                  disabled={aiLoading}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '6px 12px', borderRadius: 8,
+                    border: `1px solid ${tint(C.purple, 0.4)}`,
+                    background: tint(C.purple, 0.1),
+                    color: C.purple,
+                    cursor: aiLoading ? 'wait' : 'pointer',
+                    fontSize: 11, fontFamily: fonts.heading, fontWeight: 600,
+                  }}
+                >
+                  {aiLoading ? <Loader2 size={11} className="spin" /> : <Wand2 size={11} />} AI Magic
+                </button>
+                {aiMenu && (
+                  <div style={{
+                    position: 'absolute', top: '100%', right: 0, marginTop: 6,
+                    background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
+                    padding: 6, zIndex: 50, minWidth: 200,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  }}>
+                    {[
+                      { key: 'enhance', icon: Sparkles, label: '✨ Enhance Notes', desc: 'Clean up & structure', color: C.blue },
+                      { key: 'explain', icon: BookOpen, label: '💡 Explain This', desc: 'Simple explanations', color: C.green },
+                      { key: 'formulas', icon: Calculator, label: '📐 Extract Formulas', desc: 'Pull out key formulas', color: C.orange },
+                    ].map(opt => (
+                      <button
+                        key={opt.key}
+                        onClick={() => handleAI(opt.key)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                          padding: '10px 12px', borderRadius: 8,
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          color: C.text, fontSize: 13, textAlign: 'left',
+                          transition: 'background 0.15s ease',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = tint(opt.color, 0.1)}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <opt.icon size={15} color={opt.color} />
+                        <div>
+                          <div style={{ fontWeight: 600, fontFamily: fonts.heading }}>{opt.label}</div>
+                          <div style={{ fontSize: 11, color: C.textMuted }}>{opt.desc}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button onClick={() => { deleteNote(active.id); setSelected(null) }} aria-label="Delete note" style={{
                 padding: '6px 9px', borderRadius: 8, border: `1px solid ${C.border}`,
                 background: 'transparent', color: C.textFaint, cursor: 'pointer', display: 'flex',

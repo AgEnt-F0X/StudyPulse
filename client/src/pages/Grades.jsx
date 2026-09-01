@@ -3,6 +3,7 @@ import { BarChart3, Calculator, Plus } from 'lucide-react'
 import { useGradesStore, useAssignmentsStore, pctToGPA } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme'
 import { PageHeader, Card, SectionTitle, Empty } from '../components/ui'
+import { CBSE_CLASS_GROUPS } from '../utils/cbseSubjects'
 
 function Modal({ open, onClose, children }) {
   if (!open) return null
@@ -271,16 +272,45 @@ export default function Grades() {
 
       {/* Add course modal */}
       <Modal open={showAddCourse} onClose={() => setShowAddCourse(false)}>
-        <h2 style={{ fontFamily: fonts.heading, fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 18 }}>Add Course</h2>
-        <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Course Name</label>
+        <h2 style={{ fontFamily: fonts.heading, fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 4 }}>Add Subject</h2>
+        <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 16 }}>Pick a CBSE subject or type your own below.</p>
+
+        {/* CBSE quick-pick groups */}
+        {CBSE_CLASS_GROUPS.map(group => (
+          <div key={group.label} style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.textFaint, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 7 }}>
+              {group.label}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {group.subjects.map(sub => (
+                <button
+                  key={sub}
+                  onClick={() => setCourseForm(f => ({ ...f, name: sub }))}
+                  style={{
+                    padding: '5px 12px', borderRadius: 99,
+                    border: `1px solid ${courseForm.name === sub ? tint(C.blue, 0.5) : C.border}`,
+                    background: courseForm.name === sub ? tint(C.blue, 0.14) : 'transparent',
+                    color: courseForm.name === sub ? C.blue : C.textMuted,
+                    cursor: 'pointer', fontSize: 12, fontFamily: fonts.body,
+                    transition: 'all 0.12s ease',
+                  }}
+                >{sub}</button>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div style={{ height: 1, background: C.border, margin: '16px 0' }} />
+
+        <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Subject Name (editable)</label>
         <input
           value={courseForm.name}
           onChange={e => setCourseForm(f => ({ ...f, name: e.target.value }))}
-          placeholder="e.g. AP Biology"
+          placeholder="Type any subject name…"
           onKeyDown={e => e.key === 'Enter' && handleAddCourse()}
           style={{ ...inputStyle, marginBottom: 14 }}
         />
-        <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Credits</label>
+        <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Credits / Weight</label>
         <input
           type="number" min={0} step={0.5}
           value={courseForm.credits}
@@ -289,7 +319,7 @@ export default function Grades() {
         />
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <button onClick={() => setShowAddCourse(false)} style={{ ...btnGhost, color: C.textMuted }}>Cancel</button>
-          <button onClick={handleAddCourse} style={btnPrimary}>Add Course</button>
+          <button onClick={handleAddCourse} disabled={!courseForm.name.trim()} style={{ ...btnPrimary, opacity: courseForm.name.trim() ? 1 : 0.5 }}>Add Subject</button>
         </div>
       </Modal>
 

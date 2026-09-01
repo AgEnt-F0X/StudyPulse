@@ -1,6 +1,6 @@
-# Shiori MCP Server
+# StudyPulse MCP Server
 
-Use your Shiori study data directly inside **Claude Code**, **Claude Desktop**, and any MCP-compatible client.
+Use your StudyPulse study data directly inside **Claude Code**, **Claude Desktop**, and any MCP-compatible client.
 
 ```
 "What's due this week?"
@@ -24,9 +24,9 @@ Use your Shiori study data directly inside **Claude Code**, **Claude Desktop**, 
 
 ## Setup (2 min)
 
-### 1. Export your data from Shiori
+### 1. Export your data from StudyPulse
 
-Open the Shiori app → **Settings → Export Data** → save as `shiori-data.json`
+Open the StudyPulse app → **Settings → Export Data** → save as `studypulse-data.json`
 
 ### 2. Install dependencies
 
@@ -40,11 +40,11 @@ npm install
 ```json
 {
   "mcpServers": {
-    "shiori": {
+    "studypulse": {
       "command": "node",
-      "args": ["/absolute/path/to/Shiori-v1/mcp/index.js"],
+      "args": ["/absolute/path/to/StudyPulse/mcp/index.js"],
       "env": {
-        "SHIORI_DATA_FILE": "/absolute/path/to/shiori-data.json"
+        "STUDYPULSE_DATA_FILE": "/absolute/path/to/studypulse-data.json"
       }
     }
   }
@@ -59,11 +59,11 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 ```json
 {
   "mcpServers": {
-    "shiori": {
+    "studypulse": {
       "command": "node",
-      "args": ["C:/path/to/Shiori-v1/mcp/index.js"],
+      "args": ["C:/path/to/StudyPulse/mcp/index.js"],
       "env": {
-        "SHIORI_DATA_FILE": "C:/path/to/shiori-data.json"
+        "STUDYPULSE_DATA_FILE": "C:/path/to/studypulse-data.json"
       }
     }
   }
@@ -72,7 +72,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 
 ### 5. Restart Claude — done
 
-Claude now has `shiori_*` tools. Try: **"What's my study status today?"**
+Claude now has `studypulse_*` tools. Try: **"What's my study status today?"**
 
 ## Example prompts
 
@@ -110,4 +110,4 @@ To reach 90%: score at least 94.2% on the remaining 2 assignment(s) (60 points).
 
 ## Data stays local
 
-Your `shiori-data.json` never leaves your machine. The MCP server reads the file locally — no network requests.
+Your `studypulse-data.json` never leaves your machine. The MCP server reads the file locally — no network requests.

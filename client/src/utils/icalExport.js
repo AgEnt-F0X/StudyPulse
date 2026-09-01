@@ -18,7 +18,7 @@ export const exportAssignmentsToICal = (assignments) => {
 
     return [
       'BEGIN:VEVENT',
-      `UID:shiori-${a.id}@shiori-app`,
+      `UID:studypulse-${a.id}@studypulse-app`,
       `DTSTAMP:${now}`,
       `DTSTART:${dtstart}`,
       `DTEND:${dtstart}`,
@@ -32,10 +32,10 @@ export const exportAssignmentsToICal = (assignments) => {
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Shiori//AI Study Companion//EN',
+    'PRODID:-//StudyPulse//AI Study Companion//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Shiori Deadlines',
+    'X-WR-CALNAME:StudyPulse Deadlines',
     'X-WR-TIMEZONE:UTC',
     ...events,
     'END:VCALENDAR',
@@ -45,7 +45,7 @@ export const exportAssignmentsToICal = (assignments) => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `shiori-deadlines-${new Date().toISOString().split('T')[0]}.ics`
+  a.download = `studypulse-deadlines-${new Date().toISOString().split('T')[0]}.ics`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)

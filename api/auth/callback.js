@@ -1,4 +1,4 @@
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://shiorii.tech'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://studypulse.app'
 
 export default async function handler(req, res) {
   const { code, error } = req.query

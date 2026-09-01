@@ -1,6 +1,6 @@
 ---
 name: Good first issue
-about: A great task for first-time contributors to Shiori
+about: A great task for first-time contributors to StudyPulse
 labels: good first issue
 assignees: ''
 ---
