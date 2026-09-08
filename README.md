@@ -1,7 +1,7 @@
 # StudyPulse 🎓
 
-> **An AI-powered academic companion & productivity dashboard built for students.**  
-> Features real-time AI study assistance, CBSE-aligned exam prep, step-by-step doubt solving, subjective answer grading, magic note enhancement, formula extraction, and spaced repetition — powered by free, ultra-fast AI models with a sleek, distraction-free modern UI.
+> **An AI-powered academic companion & study system built for students.**  
+> Features real-time AI study coaching, CBSE-aligned exam preparation, step-by-step doubt solving, subjective answer grading, magic note enhancement, formula extraction, syllabus PDF import, and spaced repetition — powered by free, ultra-fast AI models.
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -13,39 +13,44 @@
 
 ---
 
-## ✨ Features Overview
+## ✨ Features
 
-### 🎨 Modern Academic UI & UX
-* **🖥️ Distraction-Free Workspace:** Sleek dark and light theme palette (`#0a120e` deep pine, `#10b981` emerald action, warm brass rewards) with zero visible scrollbar clutter.
-* **⚡ Collapsible Sidebar Rail:** Collapses into a clean 60px icon rail with exact vertical plumb-line alignment. Toggle quickly with `⌘B` / `Ctrl+B` or the header toggle.
-* **🔍 Command Palette (`⌘K` / `Ctrl+K`):** Global quick navigation and action search across all courses, tools, and views.
-* **📝 Rich Notes Formatting Toolbar:** Full Markdown and KaTeX math toolbar (Bold, Italic, H1/H2 headings, bullet & numbered lists, checklists, formulas, code, blockquotes).
-* **💬 Formatted AI Outputs:** AI study notes, flashcards, and explanations render directly into rich formatted text and KaTeX equations without raw Markdown hashtags or symbols.
-
-### 🤖 Intelligent AI Capabilities (100% Free & Fast)
+### 🤖 Intelligent AI Study Assistant
 * **⚡ Multi-Provider AI Engine:** Direct client-side integration supporting:
-  * **Groq Cloud:** `llama-3.3-70b-versatile` & `deepseek-r1-distill-llama-70b` at blazing speeds (~300 tokens/sec).
+  * **Groq Cloud:** `llama-3.3-70b-versatile` & `deepseek-r1-distill-llama-70b` at blazing inference speeds (~300 tokens/sec).
   * **Google Gemini:** `gemini-2.0-flash`.
-  * **OpenRouter:** Free tier models.
-  * *Auto-detects provider based on key prefix (`gsk_...`, `AIza...`, `sk-or-...`).*
-* **🎓 Conversational AI Study Assistant (`/assistant`):** Natural language study assistant capable of answering questions, extracting deadlines, building 4-week study plans, and dispatching in-app actions.
-* **✅ CBSE Answer Evaluator:** Submit subjective answers and receive CBSE marking scheme grading (out of 5), highlighted correct points, missing points, and model answers.
-* **🧮 Step-by-Step Doubt Solver:** Comprehensive breakdowns for derivations, conceptual doubts, and numerical problems (`Given → Formula → Substitution → Answer with SI units`).
-* **✨ Magic Notes (AI Note Enhancer):** One-click note restructuring into exam-ready study material, concept explanations, and formula extraction.
-* **🧠 Daily AI Study Brief:** Automatically generates a personalized morning brief on the dashboard analyzing upcoming deadlines, focus streaks, and daily priorities.
-* **📐 Formula & Key Points Extractor:** Extracts formulas, constants, and theorems into clean reference cards with LaTeX math notation.
-* **📄 PDF Syllabus Importer (`/import`):** Upload CBSE / school syllabus PDFs to automatically parse chapter topics and populate assignments using `pdfjs-dist`.
+  * **OpenRouter:** Free-tier open models.
+  * *Auto-detects provider instantly based on API key prefix (`gsk_...`, `AIza...`, `sk-or-...`).*
+* **🎓 Conversational AI Study Coach (`/assistant`):** Natural language study assistant capable of explaining complex topics, resolving doubts, generating study plans, and executing in-app tasks directly from chat.
+* **🧮 Step-by-Step Doubt & Numerical Solver:** Comprehensive breakdowns for derivations, scientific concepts, and mathematical problems with structured stages (`Given → Formula → Substitution → Final Answer with SI Units`).
+* **✅ CBSE Subjective Answer Evaluator:** Submit handwritten or typed answers to receive CBSE marking scheme grading (score out of 5), point-by-point breakdown of covered vs. missed concepts, and model answers.
+* **🧠 Daily AI Morning Brief:** Automatically synthesizes a personalized morning briefing on your dashboard analyzing upcoming deadlines, focus streaks, and daily high-priority tasks.
+* **📐 Formula & Key Points Extractor:** Automatically extracts core formulas, physical constants, definitions, and theorems into clean reference cards with LaTeX math notation.
 
 ---
 
-### 📊 Academic Productivity Suite
-* **📅 Assignment & Homework Manager:** Organize assignments with natural language date input, priority indicators, and subject tags.
-* **🧩 Interactive Quizzes (`/quiz`):** AI-generated or syllabus-aligned multiple choice quizzes with real-time scoring and answer explanations.
-* **🗂️ Spaced Repetition Flashcards (`/flashcards`):** Study decks categorized by difficulty (Easy to Olympic tier) with active recall tracking.
-* **⏱️ Pomodoro Focus Mode (`/focus`):** Customizable focus & break intervals (25/5, 50/10, 90/20) linked to task tracking.
-* **📈 Academic Analytics & GPA Predictor (`/analytics`):** Track course completion rates, weekly study hours, XP progression, and estimated GPA.
-* **🔥 Habit Tracker (`/habits`):** Daily streak counters and weekly check-in grids to build consistent study routines.
-* **🏆 Leaderboard & XP Leveling (`/leaderboard`):** Gamified study experience with levels, badges, and progress milestones.
+### 📝 Notes & Knowledge Management
+* **✍️ Rich Markdown & LaTeX Math Editor:** Full formatting support for headings, bold/italic text, bulleted lists, numbered sequences, task checklists, blockquotes, code blocks, and inline/block math equations.
+* **✨ Magic Notes (AI Note Enhancer):** Transform raw lecture notes into structured, exam-ready study guides with one click.
+* **🗂️ Instant Deck & Quiz Generation:** Convert any note into a spaced repetition flashcard deck or an interactive practice quiz automatically.
+* **💾 Local Persistence & Export:** All notes are persisted offline and can be exported for studying anytime.
+
+---
+
+### 📚 Curriculum, Revision & Exam Prep
+* **📄 PDF Syllabus Importer (`/import`):** Upload CBSE, school, or university syllabus PDFs to automatically parse chapters, extract sub-topics, and populate organized assignment schedules using client-side `pdfjs-dist`.
+* **🧩 Interactive AI Quiz Generator (`/quiz`):** Generate customized multiple-choice practice tests by topic or from uploaded notes with instant scoring, timer modes, and detailed answer explanations.
+* **🗂️ Spaced Repetition Flashcards (`/flashcards`):** Active recall flashcard system categorized by difficulty levels (Foundation to Olympic tier) with mastery tracking and review intervals.
+
+---
+
+### ⏱️ Academic Productivity & Habit Building
+* **📅 Assignment & Task Manager:** Organize homework, projects, and lab reports with natural language date parsing, priority flags, and subject categorizations.
+* **⏱️ Pomodoro Focus Mode (`/focus`):** Dedicated focus sessions with customizable study and break intervals (25/5, 50/10, 90/20) and integrated task tracking.
+* **🔥 Habit Tracker (`/habits`):** Daily streak counters and weekly completion grids to cultivate consistent study routines.
+* **📈 Academic Analytics & Performance Tracker (`/analytics`):** Track total study time, assignment completion rates, weekly subject distribution, and projected GPA.
+* **🏆 Gamified XP & Study Levels (`/leaderboard`):** Earn experience points (XP), build continuous study streaks, unlock achievement badges, and level up your student profile.
+* **🔍 Global Command Palette (`⌘K` / `Ctrl+K`):** Jump to any course, tool, note, or action instantly via keyboard search.
 
 ---
 
@@ -128,8 +133,8 @@ StudyPulse/
 ├── client/                     # Frontend React + Vite SPA
 │   ├── public/                 # Static assets & Netlify _redirects
 │   ├── src/
-│   │   ├── components/         # Reusable UI (Sidebar, AIChat, Card, etc.)
-│   │   ├── pages/              # Application views
+│   │   ├── components/         # Reusable components (AIChat, PomodoroTimer, etc.)
+│   │   ├── pages/              # Application feature views
 │   │   │   ├── AIAssistant.jsx # Conversational AI Study Coach
 │   │   │   ├── Home.jsx        # Dashboard with AI Daily Brief & stats
 │   │   │   ├── Notes.jsx       # Notes editor with AI Magic enhancer
