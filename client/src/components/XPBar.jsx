@@ -27,23 +27,24 @@ const LevelUpOverlay = ({ level, onClose }) => {
         initial={{ y: 30 }}
         animate={{ y: 0 }}
         style={{
-          textAlign: 'center', padding: '48px 64px',
-          background: '#14181e',
-          border: `2px solid ${level.color}`,
-          borderRadius: 8,
+          textAlign: 'center', padding: '40px 52px',
+          background: 'var(--bg-card, #101c17)',
+          border: `1px solid ${level.color}`,
+          borderRadius: 16,
+          boxShadow: `0 0 40px ${level.color}30, 0 24px 64px rgba(0,0,0,0.7)`,
         }}
       >
-        <div style={{ fontFamily: '"Press Start 2P"', fontSize: 11, color: '#8c90a0', marginBottom: 12 }}>
-          LEVEL UP!
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.01em', textTransform: 'none', color: 'var(--text-muted, #64748b)', marginBottom: 8 }}>
+          Level up!
         </div>
-        <div style={{ fontFamily: '"Press Start 2P"', fontSize: 32, color: level.color, marginBottom: 8 }}>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 44, fontWeight: 800, color: level.color, letterSpacing: '-0.02em', marginBottom: 4 }}>
           {level.level}
         </div>
-        <div style={{ fontFamily: 'VT323', fontSize: 28, color: '#dfe2eb' }}>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', marginBottom: 12 }}>
           {level.title}
         </div>
-        <div style={{ fontFamily: 'VT323', fontSize: 16, color: '#606080', marginTop: 16 }}>
-          click to continue
+        <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)' }}>
+          Click anywhere to continue
         </div>
       </motion.div>
     </motion.div>
@@ -64,14 +65,14 @@ const XPBar = ({ collapsed }) => {
 
       <div style={{ padding: collapsed ? '8px 4px' : '8px 12px' }}>
         {!collapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Zap size={11} color={cur.color} />
-              <span style={{ fontFamily: '"Press Start 2P"', fontSize: 8, color: cur.color }}>
+              <Zap size={12} color={cur.color} />
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: cur.color }}>
                 LV{cur.level} {cur.title}
               </span>
             </div>
-            <span style={{ fontFamily: '"Press Start 2P"', fontSize: 7, color: '#606080' }}>
+            <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, fontWeight: 600, color: 'var(--text-muted, #64748b)' }}>
               {xp} XP
             </span>
           </div>
@@ -89,7 +90,7 @@ const XPBar = ({ collapsed }) => {
           />
         </div>
         {!collapsed && next && (
-          <div style={{ fontFamily: '"Press Start 2P"', fontSize: 6, color: '#404560', marginTop: 3, textAlign: 'right' }}>
+          <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 10, color: 'var(--text-muted, #64748b)', marginTop: 4, textAlign: 'right' }}>
             {xpToNext - xpInLevel} XP → LV{next.level}
           </div>
         )}

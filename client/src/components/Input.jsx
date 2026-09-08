@@ -1,5 +1,4 @@
 import { forwardRef } from 'react'
-import Icon from './Icon'
 
 const Input = forwardRef(({
   label,
@@ -20,16 +19,26 @@ const Input = forwardRef(({
       {label && (
         <label
           htmlFor={name}
-          className="block text-xs label-strong on-surface-tertiary"
-          style={{ paddingLeft: IconComp ? '0.5rem' : '0' }}
+          className="block text-xs"
+          style={{
+            fontFamily: "'Manrope', sans-serif",
+            fontWeight: 600,
+            fontSize: 12,
+            letterSpacing: '0.01em',
+            color: 'var(--text-secondary, #a7c4b5)',
+            paddingLeft: IconComp ? '0.5rem' : '0',
+          }}
         >
           {label}
         </label>
       )}
       <div className="relative">
         {IconComp && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#606080' }}>
-            <IconComp className="w-5 h-5" style={{ display: 'block' }} />
+          <div
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--text-muted, #769989)' }}
+          >
+            <IconComp size={16} strokeWidth={1.75} style={{ display: 'block' }} />
           </div>
         )}
         <input
@@ -44,21 +53,17 @@ const Input = forwardRef(({
           autoComplete={autoComplete}
           className={`
             input-sa w-full box-border
-            ${IconComp ? 'pl-10' : 'pl-3'}
-            ${error ? 'border-b-2 border-b-danger' : ''}
+            focus-visible:ring-2 focus-visible:ring-primary/30
+            ${IconComp ? 'pl-10' : ''}
+            ${error ? 'border-red-400' : ''}
           `}
-          style={{
-            borderRadius: '4px',
-            minHeight: 44,
-            background: '#14181e',
-          }}
           {...props}
         />
       </div>
       {error && (
         <p
           className="text-xs"
-          style={{ color: '#ffb4ab', fontWeight: 500, fontFamily: "'Manrope', sans-serif", paddingLeft: IconComp ? '0.5rem' : '0' }}
+          style={{ color: '#f87171', fontWeight: 500, fontFamily: "'Manrope', sans-serif", paddingLeft: IconComp ? '0.5rem' : '0' }}
         >
           {error}
         </p>

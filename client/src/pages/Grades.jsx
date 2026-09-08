@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BarChart3, Calculator, Plus } from 'lucide-react'
+import { ChartBar, Calculator, Plus } from '@phosphor-icons/react'
 import { useGradesStore, useAssignmentsStore, pctToGPA } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme'
 import { PageHeader, Card, SectionTitle, Empty } from '../components/ui'
@@ -13,10 +13,10 @@ function Modal({ open, onClose, children }) {
       zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
-        background: C.card,
-        border: `1px solid ${C.border}`, borderRadius: 18, padding: 28, width: 'min(440px,92vw)',
+        background: 'var(--bg-card, #101c17)',
+        border: `1px solid ${C.border}`, borderRadius: 14, padding: 26, width: 'min(460px,92vw)',
         maxHeight: '90vh', overflowY: 'auto',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.7)',
       }}>
         {children}
       </div>
@@ -38,9 +38,9 @@ function letterGrade(pct) {
 }
 
 function gradeColor(pct) {
-  if (pct >= 80) return C.green
-  if (pct >= 70) return C.orange
-  return C.pink
+  if (pct >= 80) return '#4ade80'
+  if (pct >= 70) return '#fb923c'
+  return '#f87171'
 }
 
 const EMPTY_COURSE = { name: '', credits: 3 }
@@ -108,89 +108,112 @@ export default function Grades() {
   }, [finalWeight, desiredGrade, currentPct])
 
   const gpaColor = overallGPA
-    ? (parseFloat(overallGPA) >= 3.5 ? C.green : parseFloat(overallGPA) >= 3.0 ? C.orange : C.pink)
+    ? (parseFloat(overallGPA) >= 3.5 ? '#4ade80' : parseFloat(overallGPA) >= 3.0 ? '#fb923c' : '#f87171')
     : C.textMuted
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 920, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 'min(1140px, 100%)', margin: '0 auto' }}>
       <PageHeader
-        icon={BarChart3}
+        icon={ChartBar}
         accent={C.green}
-        title="Grades"
-        subtitle="Track your GPA and predict your finals"
+        title="Grades & GPA"
+        subtitle="Track course averages and predict final exam targets"
         actions={
           <>
             <button onClick={() => openAddGrade()} disabled={!(courses || []).length} style={{ ...btnGhost, opacity: (courses || []).length ? 1 : 0.5 }}>
-              <Plus size={14} /> Add Grade
+              <Plus size={14} weight="bold" /> Add Grade
             </button>
             <button onClick={() => setShowAddCourse(true)} style={btnPrimary}>
-              <Plus size={15} /> Add Course
+              <Plus size={14} weight="bold" /> Add Course
             </button>
           </>
         }
       />
 
-      {/* GPA Overview */}
+      {/* GPA Overview — clean data card */}
       <Card style={{
-        padding: '24px 28px', marginBottom: 24,
+        padding: '24px 28px', marginBottom: 20,
         display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
-        background: C.card,
-        borderLeft: `3px solid ${gpaColor === C.textMuted ? C.blue : gpaColor}`,
+        background: 'var(--bg-card, #101c17)',
+        border: `1px solid ${C.border}`,
+        boxShadow: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
       }}>
         <div>
           <div style={{
-            fontSize: 11, color: C.textMuted, marginBottom: 6, fontFamily: fonts.heading,
-            fontWeight: 700, letterSpacing: '0.1em',
+            fontSize: 11, color: C.textMuted, marginBottom: 6, fontFamily: fonts.body,
+            fontWeight: 600, letterSpacing: '0.01em',
           }}>
-            CUMULATIVE GPA
+            Cumulative GPA
           </div>
           <div style={{
-            fontFamily: fonts.heading, fontSize: 54, fontWeight: 700,
+            fontFamily: fonts.heading, fontSize: 50, fontWeight: 700,
             color: gpaColor, lineHeight: 1,
-            textShadow: overallGPA ? `0 0 32px ${tint(gpaColor, 0.4)}` : 'none',
           }}>
             {overallGPA || '—'}
           </div>
         </div>
-        <div style={{ height: 60, width: 1, background: C.border }} />
+        <div style={{ height: 50, width: 1, background: C.borderSoft }} />
         <div>
           <div style={{ fontSize: 13, color: C.textMuted }}>
-            Tracking <strong style={{ color: C.text }}>{gradedCount}</strong> courses with grades
+            Tracking <strong style={{ color: C.text }}>{gradedCount}</strong> subjects with graded work
           </div>
           <div style={{ fontSize: 13, color: C.textMuted, marginTop: 4 }}>
-            Out of <strong style={{ color: C.text }}>{(courses || []).length}</strong> total courses
+            Out of <strong style={{ color: C.text }}>{(courses || []).length}</strong> enrolled subjects
           </div>
         </div>
       </Card>
 
+      {/* Grade trajectory */}
+      {courseGradeData.some((c) => c.result) && (
+        <Card style={{ padding: '20px 22px', marginBottom: 20 }}>
+          <SectionTitle icon={ChartBar} color={C.primary}>Grade trajectory</SectionTitle>
+          <svg viewBox="0 0 300 64" style={{ width: '100%', height: 64, display: 'block' }}>
+            <defs>
+              <linearGradient id="gradeTraj" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#34d399" />
+                <stop offset="100%" stopColor="#10b981" />
+              </linearGradient>
+            </defs>
+            <polyline
+              fill="none" stroke="url(#gradeTraj)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              points={courseGradeData.filter((c) => c.result).map((c, i, arr) => {
+                const x = arr.length === 1 ? 150 : (i / (arr.length - 1)) * 280 + 10
+                const y = 58 - (Math.min(100, Math.max(0, parseFloat(c.result.percentage))) / 100) * 52
+                return `${x},${y}`
+              }).join(' ')}
+            />
+          </svg>
+        </Card>
+      )}
+
       {/* Course cards */}
       {(courses || []).length === 0 ? (
-        <Card style={{ marginBottom: 24, padding: 0 }}>
+        <Card style={{ marginBottom: 20, padding: 0, background: 'var(--bg-card, #101c17)' }}>
           <Empty
-            icon={BarChart3}
+            icon={ChartBar}
             accent={C.green}
-            title="No courses yet"
-            description="Sync Google Classroom, or add a course and grades manually to see your GPA here."
+            title="No courses enrolled yet"
+            description="Sync Google Classroom or add your CBSE subjects to start tracking GPA."
             action={() => setShowAddCourse(true)}
-            actionLabel="Add Course"
+            actionLabel="Add Subject"
           />
         </Card>
       ) : (
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
           gap: 14, marginBottom: 24,
         }}>
           {courseGradeData.map(({ course, result }) => {
             if (!result) {
               return (
                 <div key={course.id} className="hover-lift" style={{
-                  background: C.card,
-                  border: `1px dashed ${C.border}`, borderRadius: 14, padding: 18,
+                  background: 'var(--bg-card, #101c17)',
+                  border: `1px dashed ${C.border}`, borderRadius: 10, padding: 18,
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 10,
                 }}>
-                  <div style={{ fontFamily: fonts.heading, fontSize: 14, fontWeight: 700, color: C.text }}>{course.name}</div>
-                  <div style={{ fontSize: 12, color: C.textFaint }}>No grades yet{course.credits ? ` · ${course.credits} credits` : ''}</div>
-                  <button onClick={() => openAddGrade(course.id)} style={{ ...btnGhost, alignSelf: 'flex-start', padding: '6px 12px', fontSize: 12 }}>
+                  <div style={{ fontFamily: fonts.heading, fontSize: 14.5, fontWeight: 700, color: C.text }}>{course.name}</div>
+                  <div style={{ fontSize: 12, color: C.textMuted }}>No grades yet{course.credits ? ` · ${course.credits} credits` : ''}</div>
+                  <button onClick={() => openAddGrade(course.id)} style={{ ...btnGhost, alignSelf: 'flex-start', padding: '5px 12px', fontSize: 11.5 }}>
                     <Plus size={12} /> Add Grade
                   </button>
                 </div>
@@ -201,26 +224,26 @@ export default function Grades() {
             const color = gradeColor(pct)
             return (
               <div key={course.id} className="hover-lift" style={{
-                background: C.card,
-                border: `1px solid ${C.border}`, borderRadius: 14, padding: 18,
+                background: 'var(--bg-card, #101c17)',
+                border: `1px solid ${C.border}`, borderRadius: 10, padding: 18,
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, gap: 10 }}>
-                  <div style={{ fontFamily: fonts.heading, fontSize: 14, fontWeight: 700, color: C.text }}>
+                  <div style={{ fontFamily: fonts.heading, fontSize: 14.5, fontWeight: 700, color: C.text }}>
                     {course.name}
                   </div>
                   <span style={{
-                    fontFamily: fonts.heading, fontSize: 21, fontWeight: 700,
-                    color, textShadow: `0 0 16px ${tint(color, 0.4)}`,
+                    fontFamily: fonts.heading, fontSize: 20, fontWeight: 700,
+                    color,
                   }}>{letter}</span>
                 </div>
-                <div style={{ height: 5, background: tint(color, 0.12), borderRadius: 3, overflow: 'hidden', marginBottom: 9 }}>
+                <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 9 }}>
                   <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: color, borderRadius: 3, transition: 'width 0.4s ease' }} />
                 </div>
-                <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 10 }}>
+                <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 12 }}>
                   {result.percentage}%{course.credits ? ` · ${course.credits} credits` : ''}
                   {result.isWeighted ? ' · weighted' : ''}
                 </div>
-                <button onClick={() => openAddGrade(course.id)} style={{ ...btnGhost, padding: '7px 12px', fontSize: 11, color: C.textMuted }}>
+                <button onClick={() => openAddGrade(course.id)} style={{ ...btnGhost, padding: '5px 10px', fontSize: 11.5, color: C.textMuted }}>
                   <Plus size={11} /> Add Grade
                 </button>
               </div>
@@ -229,12 +252,22 @@ export default function Grades() {
         </div>
       )}
 
-      {/* Grade predictor */}
-      <Card style={{ padding: 24 }}>
-        <SectionTitle icon={Calculator} color={C.blue}>Grade Predictor</SectionTitle>
+      {/* Grade predictor — What-If slider */}
+      <Card style={{ padding: 24, borderTop: `2px solid ${C.amber}` }}>
+        <SectionTitle icon={Calculator} color={C.amber}>What-if predictor</SectionTitle>
         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 18 }}>
-          What grade do I need on the final exam?
+          Slide to simulate target scores — what do you need on the final?
         </p>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: C.textMuted, marginBottom: 8, fontWeight: 700 }}>
+            <span>Desired final grade</span><span style={{ color: C.amber }}>{desiredGrade}%</span>
+          </label>
+          <input
+            type="range" min={50} max={100} value={desiredGrade}
+            onChange={(e) => setDesiredGrade(Number(e.target.value))}
+            style={{ width: '100%', accentColor: 'var(--accent-amber, #f59e0b)', cursor: 'pointer' }}
+          />
+        </div>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
           {[
             { label: 'Current Grade (%)', val: currentPct, set: setCurrentPct },
@@ -278,7 +311,7 @@ export default function Grades() {
         {/* CBSE quick-pick groups */}
         {CBSE_CLASS_GROUPS.map(group => (
           <div key={group.label} style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: C.textFaint, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 7 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.textFaint, letterSpacing: '0.01em', textTransform: 'none', marginBottom: 7 }}>
               {group.label}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

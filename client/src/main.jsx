@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './styles/index.css'
+import 'katex/dist/katex.min.css'
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // updateViaCache:'none' makes the browser re-check sw.js on every

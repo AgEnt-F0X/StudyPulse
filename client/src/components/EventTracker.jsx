@@ -22,7 +22,7 @@ const EventTracker = () => {
 
   const onSurfaceSecondary = '#8c90a0'
   const onSurfaceTertiary = '#606080'
-  const surfaceContainer = '#181c22'
+  const surfaceContainer = 'var(--bg-card, #101c17)'
 
   return (
     <div
@@ -36,9 +36,9 @@ const EventTracker = () => {
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b" style={{ borderColor: 'rgba(66,71,84,0.20)' }}>
         <h3
-          style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.7rem', color: '#d7ffc5', textTransform: 'uppercase', letterSpacing: '0.06em' }}
+          style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.7rem', color: '#d7ffc5', textTransform: 'none', letterSpacing: '0.01em' }}
         >
-          EVENTS
+          Events
         </h3>
         <Button
           variant="ghost"
@@ -112,8 +112,8 @@ const EventTracker = () => {
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(66,71,84,0.20)' }}
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full" style={{
-                  background: event.daysUntil === 0 ? '#ffb4ab' : event.daysUntil <= 7 ? '#ffb44d' : '#528dff',
-                  boxShadow: event.daysUntil === 0 ? '0 0 8px #ffb4ab' : event.daysUntil <= 7 ? '0 0 8px #ffb44d' : '0 0 8px #528dff'
+                  background: event.daysUntil === 0 ? '#ffb4ab' : event.daysUntil <= 7 ? '#ffb44d' : 'var(--primary, #10b981)',
+                  boxShadow: event.daysUntil === 0 ? '0 0 8px #ffb4ab' : event.daysUntil <= 7 ? '0 0 8px #ffb44d' : '0 0 8px rgba(16,185,129,0.5)'
                 }} />
                 <div className="flex-1 pl-3">
                   <p style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: '0.875rem', color: '#dfe2eb' }}>

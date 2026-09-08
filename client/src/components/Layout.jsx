@@ -1,40 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, Keyboard } from 'lucide-react'
+import { List, Sparkle, MagnifyingGlass, Fire, Lightning, SunDim, MoonStars, SidebarSimple } from '@phosphor-icons/react'
 import Sidebar from './Sidebar'
 import AIChat from './AIChat'
-import PomodoroTimer from './PomodoroTimer'
+import CommandPalette from './CommandPalette'
 import ToastContainer from './ToastContainer'
 import QuickCapture from './QuickCapture'
-import ShortcutModal from './ShortcutModal'
 import InstallBanner from './InstallBanner'
 import DemoTour from './DemoTour'
-import { useUIStore, useAuthStore } from '../stores'
+import { useUIStore, useAuthStore, useXPStore, usePomodoroStore } from '../stores'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { C, fonts, tint } from '../utils/theme'
 
-
-
 const Layout = () => {
-  const { aiChatOpen, toggleAIChat, toggleSidebarMobile, theme } = useUIStore()
+  const { aiChatOpen, toggleAIChat, toggleSidebar, toggleSidebarMobile, sidebarCollapsed, theme } = useUIStore()
   const { isDemo, exitDemoMode } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
-  const [showShortcuts, setShowShortcuts] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme || 'dark')
   }, [theme])
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return
-      if (e.key === '?') setShowShortcuts(s => !s)
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
 
   useKeyboardShortcuts()
 
@@ -44,6 +31,20 @@ const Layout = () => {
   }
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  const xp = useXPStore((s) => s.xp || 0)
+  const dailyFocusLog = usePomodoroStore((s) => s.dailyFocusLog || {})
+  const streak = useMemo(() => {
+    let count = 0
+    const d = new Date()
+    // count back consecutive days with focus minutes (today may be 0, start from yesterday if so)
+    if (!dailyFocusLog[d.toISOString().split('T')[0]]) d.setDate(d.getDate() - 1)
+    while (dailyFocusLog[d.toISOString().split('T')[0]] > 0) {
+      count++
+      d.setDate(d.getDate() - 1)
+    }
+    return count
+  }, [dailyFocusLog])
+  const openPalette = () => window.dispatchEvent(new Event('open-command-palette'))
 
   return (
     <div style={{
@@ -53,7 +54,14 @@ const Layout = () => {
       position: 'relative',
     }}>
       {/* Sidebar spacer (desktop) */}
-      <div className="sidebar-spacer" style={{ flexShrink: 0, transition: 'width 0.22s ease' }} />
+      <div
+        className="sidebar-spacer"
+        style={{
+          width: sidebarCollapsed ? 84 : 272,
+          flexShrink: 0,
+          transition: 'width 0.22s cubic-bezier(0.2, 0, 0, 1)',
+        }}
+      />
 
       <Sidebar />
 
@@ -62,10 +70,12 @@ const Layout = () => {
         flex: 1,
         minHeight: '100vh',
         overflowY: 'auto',
+        scrollbarWidth: 'none',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         zIndex: 1,
+        minWidth: 0,
       }}>
         {/* Demo banner */}
         {isDemo && (
@@ -96,42 +106,170 @@ const Layout = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '12px 24px',
           borderBottom: `1px solid ${C.borderSoft}`,
-          background: C.bg,
+          background: 'var(--bg-card-glass, rgba(16,28,22,0.75))',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           position: 'sticky', top: 0, zIndex: 30,
           flexShrink: 0, gap: 12,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button
               onClick={toggleSidebarMobile}
               className="mobile-hamburger"
               aria-label="Open menu"
               style={{
-                display: 'none', padding: 7, borderRadius: 9,
+                display: 'none', padding: '6px 8px', borderRadius: 6,
                 background: 'rgba(255,255,255,0.04)',
                 border: `1px solid ${C.border}`,
                 cursor: 'pointer', color: C.text,
               }}
             >
-              <Menu size={18} />
+              <List size={18} weight="bold" />
             </button>
-            <span style={{ fontFamily: fonts.body, fontSize: 13, color: C.textMuted }}>{today}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {sidebarCollapsed && (
+              <button
+                onClick={toggleSidebar}
+                className="desktop-sidebar-toggle"
+                title="Expand sidebar (⌘B)"
+                aria-label="Expand sidebar (⌘B)"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 30, height: 30, borderRadius: 7,
+                  background: 'transparent',
+                  border: `1px solid ${C.borderSoft}`,
+                  color: C.textMuted,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                  e.currentTarget.style.color = C.text
+                  e.currentTarget.style.borderColor = C.border
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = C.textMuted
+                  e.currentTarget.style.borderColor = C.borderSoft
+                }}
+              >
+                <SidebarSimple size={16} weight="duotone" />
+              </button>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                fontFamily: fonts.heading, fontSize: 13, fontWeight: 700,
+                color: C.text, letterSpacing: '-0.01em',
+              }}>
+                {today}
+              </span>
+            </div>
+            {/* Cmd+K trigger */}
             <button
-              onClick={() => setShowShortcuts(true)}
-              title="Keyboard shortcuts (?)"
+              onClick={openPalette}
+              title="Search & commands (Cmd+K)"
+              aria-label="Search and command palette"
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '5px 10px', borderRadius: 8,
-                background: 'transparent', border: `1px solid ${C.border}`,
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px', borderRadius: 8, minWidth: 180,
+                background: 'var(--surface-low, #0d1712)',
+                border: `1px solid ${C.borderSoft}`,
                 color: C.textFaint, cursor: 'pointer',
-                fontFamily: fonts.body, fontSize: 11.5,
+                fontFamily: fonts.body, fontSize: 12.5,
               }}
             >
-              <Keyboard size={13} /> <span className="hide-mobile">Shortcuts</span> <kbd style={{
-                fontFamily: fonts.heading, fontSize: 10, padding: '1px 5px',
-                borderRadius: 4, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`,
-              }}>?</kbd>
+              <MagnifyingGlass size={14} weight="duotone" />
+              <span style={{ flex: 1, textAlign: 'left' }}>Search…</span>
+              <kbd style={{
+                fontFamily: fonts.body, fontSize: 10, fontWeight: 700,
+                padding: '1px 6px', borderRadius: 4,
+                background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`,
+                color: C.textMuted,
+              }}>⌘K</kbd>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Streak + XP mini-badge (interactive link to Profile) */}
+            <button
+              onClick={() => navigate('/profile')}
+              title="View XP & Study Streak in Profile"
+              aria-label="View XP and Study Streak"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '5px 12px', borderRadius: 999,
+                background: tint(C.amberDeep || '#d97706', 0.10),
+                border: `1px solid ${tint('#f59e0b', 0.30)}`,
+                cursor: 'pointer',
+                transition: 'border-color 0.15s ease, background 0.15s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.amber; e.currentTarget.style.background = tint(C.amberDeep || '#d97706', 0.18) }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = tint('#f59e0b', 0.30); e.currentTarget.style.background = tint(C.amberDeep || '#d97706', 0.10) }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: fonts.body, fontSize: 12, fontWeight: 700, color: C.amber }}>
+                <Fire size={15} weight="duotone" />{streak}
+              </span>
+              <span style={{ width: 1, height: 14, background: tint('#f59e0b', 0.30) }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: fonts.body, fontSize: 12, fontWeight: 700, color: C.amber }}>
+                <Lightning size={15} weight="duotone" />{xp}
+              </span>
+            </button>
+
+            {/* AI Assistant Quick Toggle */}
+            <button
+              onClick={toggleAIChat}
+              title="Open AI Study Assistant"
+              aria-label="Open AI Study Assistant"
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '6px 12px', borderRadius: 8,
+                background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))',
+                border: '1px solid rgba(52,211,153,0.30)',
+                color: C.primary, cursor: 'pointer',
+                fontFamily: fonts.heading, fontSize: 12.5, fontWeight: 700,
+                transition: 'transform 0.1s ease, background 0.12s ease',
+              }}
+            >
+              <Sparkle size={15} weight="duotone" />
+              <span className="hide-mobile">AI Assistant</span>
+            </button>
+
+            {/* Theme toggle pill with spring */}
+            <button
+              onClick={useUIStore.getState().toggleTheme}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              style={{
+                display: 'flex', alignItems: 'center',
+                padding: 3, borderRadius: 999,
+                background: 'var(--surface-low, #0d1712)',
+                border: `1px solid ${C.border}`,
+                cursor: 'pointer', position: 'relative',
+              }}
+            >
+              {['dark', 'light'].map((m) => {
+                const selected = theme === m || (!theme && m === 'dark')
+                return (
+                  <span key={m} style={{ position: 'relative', padding: '4px 8px', display: 'flex' }}>
+                    {selected && (
+                      <motion.span
+                        layoutId="theme-pill"
+                        transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                        style={{
+                          position: 'absolute', inset: 0, borderRadius: 999,
+                          background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))',
+                          border: '1px solid rgba(52,211,153,0.30)',
+                        }}
+                      />
+                    )}
+                    <span style={{ position: 'relative', display: 'flex', color: selected ? C.primary : C.textFaint }}>
+                      {m === 'dark' ? <MoonStars size={14} weight="duotone" /> : <SunDim size={14} weight="duotone" />}
+                    </span>
+                  </span>
+                )
+              })}
             </button>
           </div>
         </header>
@@ -168,9 +306,8 @@ const Layout = () => {
           </>
         )}
       </AnimatePresence>
-      <PomodoroTimer />
       <QuickCapture />
-      <ShortcutModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
+      <CommandPalette />
       <InstallBanner />
       {isDemo && <DemoTour />}
       <ToastContainer />
@@ -179,12 +316,12 @@ const Layout = () => {
 
 
       <style>{`
-        .sidebar-spacer { width: 240px; }
-        .page-content { padding: 24px 24px 48px; }
-        @media (max-width: 1279px) { .sidebar-spacer { width: 72px; } }
+        .sidebar-spacer { transition: width 0.22s cubic-bezier(0.2, 0, 0, 1); }
+        .page-content { padding: 24px 28px 48px; background: var(--grad-hero); background-repeat: no-repeat; }
         @media (max-width: 1023px) {
-          .sidebar-spacer { display: none; }
+          .sidebar-spacer { display: none !important; width: 0 !important; }
           .mobile-hamburger { display: flex !important; }
+          .desktop-sidebar-toggle { display: none !important; }
           .hide-mobile { display: none; }
         }
         @media (max-width: 640px) {

@@ -92,18 +92,18 @@ const StudyHeatmap = ({ activityMap = {}, totalMinutes = 0 }) => {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <p style={{ fontFamily: '"Press Start 2P"', fontSize: 9, color: '#606080' }}>
+        <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--text-muted, #64748b)', letterSpacing: '0.06em' }}>
           STUDY ACTIVITY — PAST YEAR
         </p>
         <div style={{ display: 'flex', gap: 16 }}>
           {[
-            { label: 'Active Days', value: activeDays, color: '#c44dff' },
-            { label: 'Longest Streak', value: `${maxStreak}d`, color: '#e5b5ff' },
-            { label: 'Total Focus', value: `${totalH}h ${totalM}m`, color: '#afc6ff' },
+            { label: 'Active Days', value: activeDays, color: 'var(--accent-purple, #c084fc)' },
+            { label: 'Longest Streak', value: `${maxStreak}d`, color: 'var(--accent-blue, #10b981)' },
+            { label: 'Total Focus', value: `${totalH}h ${totalM}m`, color: '#4ade80' },
           ].map(s => (
             <div key={s.label} style={{ textAlign: 'right' }}>
-              <p style={{ fontFamily: '"Press Start 2P"', fontSize: 10, color: s.color }}>{s.value}</p>
-              <p style={{ fontFamily: 'VT323', fontSize: 12, color: '#424754' }}>{s.label}</p>
+              <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: s.color, margin: 0 }}>{s.value}</p>
+              <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: 'var(--text-muted, #64748b)', margin: 0 }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -117,7 +117,7 @@ const StudyHeatmap = ({ activityMap = {}, totalMinutes = 0 }) => {
               const nextIdx = monthLabels[i + 1]?.idx ?? weeks.length
               const width = (nextIdx - ml.idx) * (CELL + GAP)
               return (
-                <div key={i} style={{ width, fontFamily: 'VT323', fontSize: 12, color: '#606080', flexShrink: 0 }}>
+                <div key={i} style={{ width, fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 600, color: 'var(--text-muted, #64748b)', flexShrink: 0 }}>
                   {ml.label}
                 </div>
               )
@@ -128,7 +128,7 @@ const StudyHeatmap = ({ activityMap = {}, totalMinutes = 0 }) => {
             {/* Day labels */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: GAP, marginRight: 4 }}>
               {DAY_LABELS.map((label, i) => (
-                <div key={i} style={{ height: CELL, fontFamily: 'VT323', fontSize: 10, color: '#424754', lineHeight: `${CELL}px`, width: 20, textAlign: 'right' }}>
+                <div key={i} style={{ height: CELL, fontFamily: "'Manrope', sans-serif", fontSize: 9, color: 'var(--text-muted, #64748b)', lineHeight: `${CELL}px`, width: 20, textAlign: 'right' }}>
                   {label}
                 </div>
               ))}
@@ -149,7 +149,7 @@ const StudyHeatmap = ({ activityMap = {}, totalMinutes = 0 }) => {
                       height: CELL,
                       borderRadius: 2,
                       background: day.isFuture ? 'transparent' : getColor(day.minutes),
-                      border: day.isToday ? '1px solid #c44dff' : '1px solid transparent',
+                      border: day.isToday ? '1px solid var(--accent-blue, #10b981)' : '1px solid transparent',
                       cursor: day.minutes > 0 ? 'pointer' : 'default',
                     }}
                   />
@@ -160,11 +160,11 @@ const StudyHeatmap = ({ activityMap = {}, totalMinutes = 0 }) => {
 
           {/* Legend */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, justifyContent: 'flex-end' }}>
-            <span style={{ fontFamily: 'VT323', fontSize: 12, color: '#424754' }}>Less</span>
+            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: 'var(--text-muted, #64748b)' }}>Less</span>
             {LEVELS.map((l, i) => (
               <div key={i} style={{ width: CELL, height: CELL, borderRadius: 2, background: l.color }} title={l.label} />
             ))}
-            <span style={{ fontFamily: 'VT323', fontSize: 12, color: '#424754' }}>More</span>
+            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: 'var(--text-muted, #64748b)' }}>More</span>
           </div>
         </div>
       </div>

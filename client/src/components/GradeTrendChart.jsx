@@ -148,13 +148,13 @@ const GradeTrendChart = ({ courses = [], height = 160 }) => {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <p style={{ fontFamily: '"Press Start 2P"', fontSize: 9, color: '#606080' }}>GRADE TRENDS — LAST 5 MONTHS</p>
+        <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--text-muted, #64748b)', letterSpacing: '0.06em' }}>GRADE TRENDS — LAST 5 MONTHS</p>
         {/* Legend */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {courses.slice(0, 5).map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 10, height: 3, borderRadius: 2, background: c.color || '#c44dff' }} />
-              <span style={{ fontFamily: 'VT323', fontSize: 12, color: '#606080' }}>
+              <div style={{ width: 10, height: 3, borderRadius: 2, background: c.color || 'var(--accent-blue, #10b981)' }} />
+              <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-secondary, #94a3b8)' }}>
                 {c.code || c.name?.split(' ')[0] || `Course ${i + 1}`}
               </span>
             </div>

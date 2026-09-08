@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import { animate, stagger } from 'animejs'
 import {
   GraduationCap, ClipboardList, BarChart3, Layers, Target, Flame,
-  ShieldCheck, Github, Sparkles, ArrowRight,
+  ShieldCheck, Github, Sparkles, ArrowRight, Zap,
 } from 'lucide-react'
 import { C, fonts, tint, btnGhost, iconBox } from '../utils/theme'
 import { GoogleLogo } from '../components/GoogleButton'
@@ -126,11 +126,13 @@ export default function Landing() {
             whileHover={{ rotate: 12, scale: 1.08 }}
             transition={{ type: 'spring', stiffness: 300 }}
             style={{
-              width: 34, height: 34, borderRadius: 4,
-              background: C.blueDark,
+              width: 34, height: 34, borderRadius: 8,
+              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, color: '#0b0e14',
-            }}>栞</motion.div>
+              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.35)',
+            }}>
+            <Zap size={18} color="#ffffff" strokeWidth={2.5} />
+          </motion.div>
           <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, letterSpacing: '0.05em' }}>STUDYPULSE</span>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -330,7 +332,9 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, position: 'relative',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 13 }}>栞 StudyPulse</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: fonts.heading, fontWeight: 700, fontSize: 13 }}>
+            <Zap size={14} style={{ color: C.blue }} /> StudyPulse
+          </span>
           <span style={{ fontSize: 12, color: C.textFaint }}>· MIT License · Open source · Made by a student</span>
         </div>
         <div style={{ display: 'flex', gap: 18 }}>

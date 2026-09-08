@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Settings as SettingsIcon, RefreshCw, Eye, EyeOff, Check, LogOut, RotateCcw, Sparkles, Key, Zap, ExternalLink } from 'lucide-react'
+import { Gear, ArrowsClockwise, Eye, EyeSlash, Check, SignOut, ArrowCounterClockwise, Sparkle, Key, Lightning, ArrowSquareOut } from '@phosphor-icons/react'
 import { useAuthStore, useUIStore, useAssignmentsStore, useEventStore, useGradesStore, useNotesStore, useFlashcardsStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme'
 import { PageHeader, Card } from '../components/ui'
@@ -10,10 +10,10 @@ import { DEMO_COURSES, DEMO_ASSIGNMENTS, DEMO_EVENTS, DEMO_GRADES, DEMO_NOTES, D
 
 function Section({ title, children }) {
   return (
-    <Card style={{ padding: '20px 24px', marginBottom: 16 }}>
+    <Card style={{ padding: '22px 24px', marginBottom: 18, background: 'var(--bg-card, #101c17)' }}>
       <h2 style={{
-        fontFamily: fonts.heading, fontSize: 12, fontWeight: 700, color: C.textFaint,
-        letterSpacing: '0.1em', marginBottom: 16, textTransform: 'uppercase',
+        fontFamily: fonts.heading, fontSize: 11.5, fontWeight: 700, color: C.textFaint,
+        letterSpacing: '0.01em', marginBottom: 16, textTransform: 'none',
       }}>{title}</h2>
       {children}
     </Card>
@@ -71,47 +71,48 @@ export default function Settings() {
   const activeProvider = getKeyProvider()
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 680, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 720, margin: '0 auto' }}>
       <PageHeader
-        icon={SettingsIcon}
+        icon={Gear}
         accent={C.blue}
         title="Settings"
-        subtitle="Account, AI key, sample content & preferences"
+        subtitle="AI API keys, Classroom integrations, and sample curriculum"
       />
 
-      {/* AI Key Section (Prominent) */}
-      <Section title="AI Intelligence & API Key (100% Free)">
+      {/* AI Key Section */}
+      <Section title="AI Intelligence & Provider Key">
         <div style={{ marginBottom: 10 }}>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: hasClientKey() ? 'rgba(77,255,145,0.08)' : 'rgba(82,141,255,0.08)',
-            border: `1px solid ${hasClientKey() ? 'rgba(77,255,145,0.3)' : 'rgba(82,141,255,0.25)'}`,
-            borderRadius: 12, padding: '12px 16px', marginBottom: 16
+            background: hasClientKey() ? 'rgba(34, 197, 94, 0.08)' : 'rgba(59, 130, 246, 0.08)',
+            border: `1px solid ${hasClientKey() ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.25)'}`,
+            borderRadius: 10, padding: '12px 16px', marginBottom: 16
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width: 34, height: 34, borderRadius: 10,
-                background: hasClientKey() ? 'rgba(77,255,145,0.2)' : 'rgba(82,141,255,0.2)',
+                width: 32, height: 32, borderRadius: 8,
+                background: hasClientKey() ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: hasClientKey() ? '#4dff91' : '#528dff'
+                color: hasClientKey() ? '#4ade80' : C.blue
               }}>
-                <Zap size={18} />
+                <Lightning size={16} weight="duotone" />
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: C.text, fontFamily: fonts.heading }}>
                   {hasClientKey() ? `Active Engine: ${activeProvider}` : 'Instant Local AI Engine'}
                 </div>
-                <div style={{ fontSize: 11, color: C.textMuted }}>
-                  {hasClientKey() ? 'Ultra-low latency intelligent generation active' : 'Runs instant CBSE study assistant offline'}
+                <div style={{ fontSize: 11.5, color: C.textMuted }}>
+                  {hasClientKey() ? 'Ultra-low latency intelligent study assistant active' : 'Runs instant CBSE study assistant offline'}
                 </div>
               </div>
             </div>
             <span style={{
-              padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
-              color: hasClientKey() ? '#4dff91' : '#528dff',
-              background: hasClientKey() ? 'rgba(77,255,145,0.15)' : 'rgba(82,141,255,0.12)'
+              padding: '3px 9px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: fonts.heading,
+              color: hasClientKey() ? '#4ade80' : C.blue,
+              background: hasClientKey() ? 'rgba(34, 197, 94, 0.15)' : 'rgba(59, 130, 246, 0.12)',
+              border: `1px solid ${hasClientKey() ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.25)'}`,
             }}>
-              {hasClientKey() ? '● AI Connected' : '● Local Ready'}
+              {hasClientKey() ? 'Connected' : 'Local Ready'}
             </span>
           </div>
 
@@ -119,20 +120,20 @@ export default function Settings() {
             Paste Free API Key (Groq / Gemini / OpenRouter)
           </label>
           <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 12, lineHeight: 1.6 }}>
-            Paste any free key below. StudyPulse automatically detects and activates it:
+            Paste any free key below. StudyPulse automatically detects the provider prefix:
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, marginBottom: 16 }}>
-            <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, fontSize: 12 }}>
-              <span style={{ color: '#528dff', fontWeight: 700 }}>⚡ Groq (Recommended — Ultra-Fast ~300 t/s)</span>: Free Llama 3.3 70B & DeepSeek R1.{' '}
-              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: '#afc6ff', textDecoration: 'underline', fontWeight: 600 }}>
-                Get free Groq key <ExternalLink size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
+            <div style={{ padding: '9px 12px', borderRadius: 8, background: 'var(--surface-low, #0d1712)', border: `1px solid ${C.border}`, fontSize: 12 }}>
+              <span style={{ color: C.blue, fontWeight: 700 }}>⚡ Groq (Recommended — Ultra-Fast ~300 t/s)</span>: Free Llama 3.3 70B & DeepSeek R1.{' '}
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, textDecoration: 'underline', fontWeight: 600 }}>
+                Get free Groq key <ArrowSquareOut size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
               </a>
             </div>
-            <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, fontSize: 12 }}>
-              <span style={{ color: '#528dff', fontWeight: 700 }}>✨ Google Gemini</span>: Free Gemini 2.0 Flash.{' '}
-              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ color: '#afc6ff', textDecoration: 'underline', fontWeight: 600 }}>
-                Get free Gemini key <ExternalLink size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
+            <div style={{ padding: '9px 12px', borderRadius: 8, background: 'var(--surface-low, #0d1712)', border: `1px solid ${C.border}`, fontSize: 12 }}>
+              <span style={{ color: C.blue, fontWeight: 700 }}>✨ Google Gemini</span>: Free Gemini 2.0 Flash.{' '}
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, textDecoration: 'underline', fontWeight: 600 }}>
+                Get free Gemini key <ArrowSquareOut size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
               </a>
             </div>
           </div>
@@ -144,18 +145,18 @@ export default function Settings() {
               onChange={e => setKeyInput(e.target.value)}
               placeholder="Paste your key: gsk_... or AIza... or sk-or-..."
               style={{ ...inputStyle, flex: 1, width: 'auto' }}
-              onFocus={e => { e.target.style.borderColor = C.blueDark }}
+              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
               onBlur={e => { e.target.style.borderColor = C.border }}
             />
             <button onClick={() => setShowKey(s => !s)} aria-label={showKey ? 'Hide key' : 'Show key'} style={{
-              padding: '9px 12px', borderRadius: 10, border: `1px solid ${C.border}`,
+              padding: '9px 12px', borderRadius: 8, border: `1px solid ${C.border}`,
               background: 'transparent', color: C.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center',
             }}>
-              {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+              {showKey ? <EyeSlash size={15} /> : <Eye size={15} />}
             </button>
             <button onClick={saveKey} style={{
               ...btnPrimary,
-              background: keySaved ? C.greenDark : btnPrimary.background,
+              background: keySaved ? '#22c55e' : 'var(--accent-blue, #10b981)',
               minWidth: 90,
             }}>
               {keySaved ? <><Check size={14} /> Saved</> : 'Save Key'}
@@ -166,19 +167,19 @@ export default function Settings() {
 
       {/* Profile */}
       <Section title="Profile">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 56, height: 56, borderRadius: 14,
-            background: C.blueDark,
+            width: 48, height: 48, borderRadius: 10,
+            background: 'var(--accent-blue, #10b981)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: fonts.heading, fontWeight: 700, fontSize: 22, color: '#0b0e14',
-            boxShadow: `0 6px 20px ${tint(C.blueDark, 0.3)}`,
+            fontFamily: fonts.heading, fontWeight: 700, fontSize: 18, color: '#ffffff',
+            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
           }}>
             {userInitial}
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{userName}</div>
-            <div style={{ fontSize: 13, color: C.textMuted }}>{user?.email || 'Local Student Session'}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{userName}</div>
+            <div style={{ fontSize: 12.5, color: C.textMuted }}>{user?.email || 'Local Student Session'}</div>
           </div>
         </div>
       </Section>
@@ -186,8 +187,8 @@ export default function Settings() {
       {/* Integrations */}
       <Section title="Integrations">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <GoogleLogo size={22} />
+          <div style={{ width: 40, height: 40, borderRadius: 8, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <GoogleLogo size={20} />
           </div>
           <div style={{ flex: 1, minWidth: 180 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Google Classroom</div>
@@ -198,12 +199,12 @@ export default function Settings() {
             </div>
           </div>
           <span style={{
-            padding: '4px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+            padding: '3px 9px', borderRadius: 6, fontSize: 11, fontWeight: 700,
             fontFamily: fonts.heading, flexShrink: 0,
-            color: connected ? C.green : C.textMuted,
-            background: connected ? tint(C.greenDark, 0.1) : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${connected ? tint(C.greenDark, 0.4) : C.border}`,
-          }}>{connected ? '● Connected' : '○ Not connected'}</span>
+            color: connected ? '#4ade80' : C.textMuted,
+            background: connected ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${connected ? 'rgba(34, 197, 94, 0.3)' : C.border}`,
+          }}>{connected ? 'Connected' : 'Not connected'}</span>
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
@@ -214,7 +215,7 @@ export default function Settings() {
                 cursor: syncing ? 'not-allowed' : 'pointer',
                 opacity: syncing ? 0.7 : 1,
               }}>
-                <RefreshCw size={14} className={syncing ? 'spin' : ''} /> {syncing ? 'Syncing…' : 'Sync now'}
+                <ArrowsClockwise size={14} className={syncing ? 'spin' : ''} /> {syncing ? 'Syncing…' : 'Sync now'}
               </button>
               <button onClick={() => { clearGoogleAuth(); addToast({ type: 'info', message: 'Disconnected from Google Classroom' }) }} style={{ ...btnGhost, color: C.textMuted }}>
                 Disconnect
@@ -222,11 +223,11 @@ export default function Settings() {
             </>
           ) : (
             <button onClick={() => loginWithGoogle().catch(() => {})} style={{
-              padding: '9px 16px', borderRadius: 10, border: 'none',
-              background: '#fff', color: '#1f1f1f', cursor: 'pointer',
+              padding: '8px 16px', borderRadius: 8, border: 'none',
+              background: '#ffffff', color: '#090d16', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: 8,
-              fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
-            }}><GoogleLogo size={16} /> Connect Google Classroom</button>
+              fontFamily: fonts.heading, fontSize: 12.5, fontWeight: 700,
+            }}><GoogleLogo size={15} /> Connect Google Classroom</button>
           )}
         </div>
       </Section>
@@ -257,25 +258,11 @@ export default function Settings() {
             style={{
               ...btnPrimary,
               display: 'flex', alignItems: 'center', gap: 7,
-              fontSize: 13, padding: '9px 16px',
+              fontSize: 12.5, padding: '8px 14px',
             }}
           >
-            <RotateCcw size={14} /> Load CBSE Samples
+            <ArrowCounterClockwise size={13} /> Load CBSE Samples
           </button>
-        </div>
-      </Section>
-
-      {/* About */}
-      <Section title="About">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span style={{ color: C.textMuted }}>Version</span>
-            <span style={{ color: C.text }}>2.0</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span style={{ color: C.textMuted }}>License</span>
-            <span style={{ color: C.text }}>MIT — free & open source</span>
-          </div>
         </div>
       </Section>
 
@@ -284,12 +271,12 @@ export default function Settings() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button onClick={() => { Promise.resolve(logout?.()).finally(() => navigate('/home')) }} style={{
             display: 'flex', alignItems: 'center', gap: 9,
-            padding: '11px 16px', borderRadius: 10,
+            padding: '10px 14px', borderRadius: 8,
             border: `1px solid ${C.border}`, background: 'transparent',
             color: C.text, cursor: 'pointer', textAlign: 'left',
             fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
             transition: 'border-color 0.15s ease',
-          }}><LogOut size={14} /> Reset Session</button>
+          }}><SignOut size={14} /> Reset Session</button>
         </div>
       </Section>
     </div>

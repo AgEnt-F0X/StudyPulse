@@ -1,10 +1,11 @@
-﻿# StudyPulse 🎓
+# StudyPulse 🎓
 
 > **An AI-powered academic companion & productivity dashboard built for students.**  
-> Features real-time AI study assistance, CBSE-aligned exam prep, step-by-step doubt solving, subjective answer grading, magic note enhancement, and spaced repetition — powered by free, ultra-fast AI models.
+> Features real-time AI study assistance, CBSE-aligned exam prep, step-by-step doubt solving, subjective answer grading, magic note enhancement, formula extraction, and spaced repetition — powered by free, ultra-fast AI models with a sleek, distraction-free modern UI.
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Phosphor Icons](https://img.shields.io/badge/Icons-Phosphor%20%2B%20Lucide-059669)](https://phosphoricons.com/)
 [![Groq](https://img.shields.io/badge/Groq-Llama%203.3%2070B%20(~300%20t/s)-F05A28?logo=groq&logoColor=white)](https://groq.com)
 [![Gemini](https://img.shields.io/badge/Google%20Gemini-2.0%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -13,6 +14,13 @@
 ---
 
 ## ✨ Features Overview
+
+### 🎨 Modern Academic UI & UX
+* **🖥️ Distraction-Free Workspace:** Sleek dark and light theme palette (`#0a120e` deep pine, `#10b981` emerald action, warm brass rewards) with zero visible scrollbar clutter.
+* **⚡ Collapsible Sidebar Rail:** Collapses into a clean 60px icon rail with exact vertical plumb-line alignment. Toggle quickly with `⌘B` / `Ctrl+B` or the header toggle.
+* **🔍 Command Palette (`⌘K` / `Ctrl+K`):** Global quick navigation and action search across all courses, tools, and views.
+* **📝 Rich Notes Formatting Toolbar:** Full Markdown and KaTeX math toolbar (Bold, Italic, H1/H2 headings, bullet & numbered lists, checklists, formulas, code, blockquotes).
+* **💬 Formatted AI Outputs:** AI study notes, flashcards, and explanations render directly into rich formatted text and KaTeX equations without raw Markdown hashtags or symbols.
 
 ### 🤖 Intelligent AI Capabilities (100% Free & Fast)
 * **⚡ Multi-Provider AI Engine:** Direct client-side integration supporting:
@@ -46,7 +54,7 @@
 ### 1. Clone & Install
 ```bash
 # Clone the repository
-git clone https://github.com/kaorii-ako/StudyPulse.git
+git clone https://github.com/AgEnt-F0X/StudyPulse.git
 cd StudyPulse
 
 # Install client dependencies

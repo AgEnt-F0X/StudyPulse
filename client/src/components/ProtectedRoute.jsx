@@ -60,7 +60,7 @@ const ProtectedRoute = ({ children }) => {
   // Show a minimal dark screen while zustand rehydrates from localStorage.
   if (!_hasHydrated || isLoading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b0e14' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary, #0a120e)' }}>
         <div style={{
           width: 48, height: 48, borderRadius: 12,
           background: 'linear-gradient(135deg, #6c63ff, #c44dff)',

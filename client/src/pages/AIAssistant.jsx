@@ -15,6 +15,7 @@ import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme
 import { PageHeader, Card } from '../components/ui'
 import { hasClientKey, getKeyProvider } from '../utils/gemini'
 import { executeAIAssistantCommand } from '../utils/aiActions'
+import MarkdownContent from '../components/MarkdownContent'
 
 const QUICK_ACTIONS = [
   { label: '✅ Evaluate My Answer', prompt: 'Evaluate my answer: ' },
@@ -112,39 +113,39 @@ export default function AIAssistant() {
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 860, margin: '0 auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 880, margin: '0 auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
       <PageHeader
         icon={Sparkles}
         accent={C.blue}
         title="AI Study Assistant"
-        subtitle="Talk, summarize text, generate quizzes, flashcards & study plans"
+        subtitle="Chat, summarize curriculum, generate quizzes, flashcards & study plans"
         actions={
           <button
             onClick={() => setShowKeyInput(s => !s)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              padding: '8px 14px', borderRadius: 10,
-              background: hasKey ? tint(C.green, 0.12) : tint(C.blue, 0.12),
-              border: `1px solid ${hasKey ? tint(C.green, 0.4) : tint(C.blue, 0.4)}`,
-              color: hasKey ? C.green : C.blue,
-              fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: fonts.heading,
+              padding: '6px 12px', borderRadius: 8,
+              background: hasKey ? 'rgba(34, 197, 94, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+              border: `1px solid ${hasKey ? 'rgba(34, 197, 94, 0.35)' : 'rgba(59, 130, 246, 0.35)'}`,
+              color: hasKey ? '#4ade80' : C.blue,
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: fonts.heading,
             }}
           >
-            <Key size={13} /> {hasKey ? `${activeProvider} Active` : 'Add AI Key'}
+            <Key size={12} /> {hasKey ? `${activeProvider} Active` : 'Add Key'}
           </button>
         }
       />
 
-      {/* API Key Modal / Quick Bar */}
+      {/* API Key Quick Bar */}
       {showKeyInput && (
-        <Card style={{ padding: '16px 20px', marginBottom: 14, background: C.card, border: `1px solid ${tint(C.blue, 0.3)}` }}>
+        <Card style={{ padding: '16px 20px', marginBottom: 14, background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>AI API Key (Groq / Gemini / OpenRouter)</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.text, fontFamily: fonts.heading }}>Paste API Key (Groq / Gemini / OpenRouter)</span>
             <div style={{ display: 'flex', gap: 12 }}>
-              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.blue, textDecoration: 'underline' }}>
-                Get Groq Key (Fastest) ↗
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.blue, textDecoration: 'underline', fontWeight: 600 }}>
+                Get Groq Key ↗
               </a>
-              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.blue, textDecoration: 'underline' }}>
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.blue, textDecoration: 'underline', fontWeight: 600 }}>
                 Get Gemini Key ↗
               </a>
             </div>
@@ -163,7 +164,7 @@ export default function AIAssistant() {
       )}
 
       {/* Chat Messages Container */}
-      <Card style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, background: C.card }}>
+      <Card style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, background: 'var(--bg-card, #101c17)', borderRadius: 12 }}>
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {messages.map((m) => {
             const isUser = m.role === 'user'
@@ -171,56 +172,60 @@ export default function AIAssistant() {
               <div key={m.id} style={{ display: 'flex', gap: 12, justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
                 {!isUser && (
                   <div style={{
-                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                    background: 'linear-gradient(135deg, #5a8bff, #b55cff)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0b0e14',
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                    background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.blue,
                   }}>
-                    <Bot size={18} />
+                    <Sparkles size={16} />
                   </div>
                 )}
-                <div style={{ maxWidth: '80%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ maxWidth: '82%', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{
-                    padding: '14px 18px', borderRadius: 16,
-                    background: isUser ? C.blueDark : C.bg,
-                    border: `1px solid ${isUser ? tint(C.blue, 0.4) : C.border}`,
-                    color: C.text, fontSize: 14, lineHeight: 1.6,
-                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    padding: '12px 16px', borderRadius: isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                    background: isUser ? 'var(--accent-blue, #10b981)' : 'var(--surface-low, #0d1712)',
+                    border: `1px solid ${isUser ? 'transparent' : C.border}`,
+                    color: isUser ? '#ffffff' : C.text, fontSize: 13.5, lineHeight: 1.6,
+                    wordBreak: 'break-word',
                   }}>
-                    {m.content}
+                    {isUser ? (
+                      <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                    ) : (
+                      <MarkdownContent content={m.content} />
+                    )}
                   </div>
 
                   {/* Action Cards */}
                   {m.actionCard?.type === 'save_note' && (
                     <div style={{
-                      padding: '12px 16px', borderRadius: 12,
-                      background: tint(C.blue, 0.08), border: `1px solid ${tint(C.blue, 0.3)}`,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <FileText size={16} color={C.blue} />
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>Save this summary to your Notes?</span>
+                        <FileText size={15} color={C.blue} />
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: C.text }}>Save this summary to your Notes?</span>
                       </div>
                       <button
                         onClick={() => {
                           addNote({ title: m.actionCard.title, content: m.actionCard.content, color: '#4daaff' })
                           addToast({ type: 'success', message: `Saved "${m.actionCard.title}" to Notes!` })
                         }}
-                        style={{ ...btnPrimary, padding: '6px 12px', fontSize: 12 }}
+                        style={{ ...btnPrimary, padding: '5px 12px', fontSize: 11.5 }}
                       >
-                        <Plus size={13} /> Save to Notes
+                        <Plus size={12} /> Save to Notes
                       </button>
                     </div>
                   )}
 
                   {m.actionCard?.type === 'save_flashcards' && (
                     <div style={{
-                      padding: '12px 16px', borderRadius: 12,
-                      background: tint(C.purple, 0.08), border: `1px solid ${tint(C.purple, 0.3)}`,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(168, 85, 247, 0.08)', border: '1px solid rgba(168, 85, 247, 0.25)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Layers size={16} color={C.purple} />
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>Save as Flashcard Deck?</span>
+                        <Layers size={15} color={C.purple} />
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: C.text }}>Save as Flashcard Deck?</span>
                       </div>
                       <button
                         onClick={() => {
@@ -230,22 +235,22 @@ export default function AIAssistant() {
                           }
                           addToast({ type: 'success', message: `Created flashcard deck "${m.actionCard.topic}"!` })
                         }}
-                        style={{ ...btnPrimary, padding: '6px 12px', fontSize: 12 }}
+                        style={{ ...btnPrimary, padding: '5px 12px', fontSize: 11.5 }}
                       >
-                        <Plus size={13} /> Save Deck
+                        <Plus size={12} /> Save Deck
                       </button>
                     </div>
                   )}
 
                   {m.actionCard?.type === 'assignment' && (
                     <div style={{
-                      padding: '10px 14px', borderRadius: 10,
-                      background: tint(C.green, 0.08), border: `1px solid ${tint(C.green, 0.3)}`,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.25)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <CheckCircle2 size={15} color={C.green} />
-                        <span style={{ fontSize: 12, color: C.green, fontWeight: 600 }}>
+                        <CheckCircle2 size={15} color="#4ade80" />
+                        <span style={{ fontSize: 12, color: '#4ade80', fontWeight: 600 }}>
                           Added to Assignments (Due: {m.actionCard.dueDate})
                         </span>
                       </div>
@@ -257,8 +262,8 @@ export default function AIAssistant() {
 
                   {m.actionCard?.type === 'study_plan' && (
                     <div style={{
-                      padding: '10px 14px', borderRadius: 10,
-                      background: tint(C.blue, 0.08), border: `1px solid ${tint(C.blue, 0.3)}`,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}>
                       <span style={{ fontSize: 12, color: C.blue, fontWeight: 600 }}>
@@ -272,12 +277,12 @@ export default function AIAssistant() {
 
                   {m.actionCard?.type === 'evaluation' && (
                     <div style={{
-                      padding: '10px 14px', borderRadius: 10,
-                      background: tint(C.orange, 0.08), border: `1px solid ${tint(C.orange, 0.3)}`,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(251, 146, 60, 0.08)', border: '1px solid rgba(251, 146, 60, 0.25)',
                       display: 'flex', alignItems: 'center', gap: 8,
                     }}>
-                      <CheckCircle2 size={15} color={C.orange} />
-                      <span style={{ fontSize: 12, color: C.orange, fontWeight: 600 }}>
+                      <CheckCircle2 size={15} color="#fb923c" />
+                      <span style={{ fontSize: 12, color: '#fb923c', fontWeight: 600 }}>
                         Answer Evaluated — {m.actionCard.subject}
                       </span>
                     </div>
@@ -285,13 +290,13 @@ export default function AIAssistant() {
 
                   {m.actionCard?.type === 'solution' && (
                     <div style={{
-                      padding: '10px 14px', borderRadius: 10,
-                      background: tint(C.green, 0.08), border: `1px solid ${tint(C.green, 0.3)}`,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.25)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <BookOpen size={15} color={C.green} />
-                        <span style={{ fontSize: 12, color: C.green, fontWeight: 600 }}>
+                        <BookOpen size={15} color="#4ade80" />
+                        <span style={{ fontSize: 12, color: '#4ade80', fontWeight: 600 }}>
                           Step-by-Step Solution — {m.actionCard.subject}
                         </span>
                       </div>
@@ -312,17 +317,17 @@ export default function AIAssistant() {
                     </div>
                   )}
 
-                  <span style={{ fontSize: 11, color: C.textFaint, alignSelf: isUser ? 'flex-end' : 'flex-start', padding: '0 4px' }}>
+                  <span style={{ fontSize: 10.5, color: C.textFaint, alignSelf: isUser ? 'flex-end' : 'flex-start', padding: '0 4px' }}>
                     {m.timestamp}
                   </span>
                 </div>
                 {isUser && (
                   <div style={{
-                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
                     background: 'rgba(255,255,255,0.08)', border: `1px solid ${C.border}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.textMuted,
                   }}>
-                    <User size={18} />
+                    <User size={16} />
                   </div>
                 )}
               </div>
@@ -331,15 +336,15 @@ export default function AIAssistant() {
           {loading && (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <div style={{
-                width: 34, height: 34, borderRadius: 10,
-                background: 'linear-gradient(135deg, #5a8bff, #b55cff)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0b0e14',
+                width: 32, height: 32, borderRadius: 8,
+                background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.blue,
               }}>
-                <Sparkles size={16} className="spin" />
+                <Sparkles size={15} className="spin" />
               </div>
               <div style={{
-                padding: '12px 18px', borderRadius: 16, background: C.bg,
-                border: `1px solid ${C.border}`, fontSize: 13, color: C.textMuted,
+                padding: '10px 16px', borderRadius: 8, background: 'var(--surface-low, #0d1712)',
+                border: `1px solid ${C.border}`, fontSize: 12.5, color: C.textMuted,
               }}>
                 Thinking & generating response…
               </div>
@@ -350,8 +355,8 @@ export default function AIAssistant() {
 
         {/* Quick Action Buttons */}
         <div style={{
-          padding: '10px 16px', background: C.bg, borderTop: `1px solid ${C.border}`,
-          display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none',
+          padding: '8px 16px', background: 'var(--bg-primary, #0a120e)', borderTop: `1px solid ${C.borderSoft}`,
+          display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none',
         }}>
           {QUICK_ACTIONS.map(action => (
             <button
@@ -360,12 +365,13 @@ export default function AIAssistant() {
                 setInput(action.prompt)
               }}
               style={{
-                padding: '6px 12px', borderRadius: 999,
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`,
-                color: C.textMuted, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
+                padding: '5px 12px', borderRadius: 6,
+                background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`,
+                color: C.textMuted, fontSize: 11.5, cursor: 'pointer', whiteSpace: 'nowrap',
+                transition: 'border-color 0.12s ease, color 0.12s ease',
+                fontFamily: fonts.body,
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = C.blue; e.currentTarget.style.color = C.text }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-blue, #10b981)'; e.currentTarget.style.color = C.text }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted }}
             >
               {action.label}
@@ -374,7 +380,7 @@ export default function AIAssistant() {
         </div>
 
         {/* Input Bar */}
-        <div style={{ padding: '14px 16px', background: C.card, borderTop: `1px solid ${C.border}`, display: 'flex', gap: 10 }}>
+        <div style={{ padding: '12px 16px', background: 'var(--bg-card, #101c17)', borderTop: `1px solid ${C.borderSoft}`, display: 'flex', gap: 10 }}>
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -387,20 +393,20 @@ export default function AIAssistant() {
             placeholder="Ask AI to summarize text, create a quiz, build flashcards, or add assignments…"
             rows={1}
             style={{
-              ...inputStyle, flex: 1, resize: 'none', minHeight: 44, maxHeight: 120,
-              padding: '12px 16px',
+              ...inputStyle, flex: 1, resize: 'none', minHeight: 40, maxHeight: 120,
+              padding: '10px 14px', borderRadius: 8,
             }}
           />
           <button
             onClick={() => handleSend()}
             disabled={loading || !input.trim()}
             style={{
-              ...btnPrimary, padding: '0 20px', height: 44,
+              ...btnPrimary, padding: '0 18px', height: 40,
               opacity: loading || !input.trim() ? 0.6 : 1,
               cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
             }}
           >
-            <Send size={16} />
+            <Send size={15} />
           </button>
         </div>
       </Card>

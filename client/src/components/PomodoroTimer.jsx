@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, Pause, RotateCcw, X, Coffee, Brain, ChevronUp, ChevronDown, Volume2, VolumeX, Maximize2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { usePomodoroStore, useAssignmentsStore, useUIStore } from '../stores'
 import { playDing } from '../utils/sounds'
 
@@ -15,6 +15,7 @@ const RADIUS = 36
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 const PomodoroTimer = () => {
+  const location = useLocation()
   const {
     isRunning, isBreak, secondsLeft, workSeconds, breakSeconds,
     sessionCount, totalFocusMinutes, activeAssignment,
@@ -51,7 +52,7 @@ const PomodoroTimer = () => {
 
   const pending = assignments.filter(a => a.status !== 'graded')
   const accentColor = isBreak ? '#4dff91' : '#c44dff'
-  const accentBg = isBreak ? 'rgba(74,215,120,0.12)' : 'rgba(196,77,255,0.12)'
+  if (location.pathname === '/focus') return null
 
   if (!visible) {
     return (
@@ -62,18 +63,19 @@ const PomodoroTimer = () => {
         whileTap={{ scale: 0.95 }}
         onClick={() => setVisible(true)}
         style={{
-          position: 'fixed', bottom: 88, right: 20, zIndex: 90,
-          width: 44, height: 44, borderRadius: '50%',
-          background: 'rgba(196,77,255,0.15)',
-          border: '1px solid rgba(196,77,255,0.30)',
+          position: 'fixed', bottom: 24, right: 84, zIndex: 90,
+          width: 46, height: 46, borderRadius: '50%',
+          background: 'var(--bg-card, #101c17)',
+          border: '1px solid var(--border-color, #232d42)',
+          boxShadow: '0 8px 24px -4px rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: 'pointer',
         }}
         title="Open Pomodoro Timer"
       >
         {isRunning
-          ? <span style={{ fontFamily: '"Press Start 2P"', fontSize: 9, color: '#e5b5ff' }}>{fmt(secondsLeft)}</span>
-          : <Brain size={18} style={{ color: '#c44dff' }} />
+          ? <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 10, fontWeight: 700, color: 'var(--accent-blue, #10b981)' }}>{fmt(secondsLeft)}</span>
+          : <Brain size={18} style={{ color: 'var(--accent-blue, #10b981)' }} />
         }
       </motion.button>
     )
@@ -85,12 +87,12 @@ const PomodoroTimer = () => {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.85, y: 20 }}
       style={{
-        position: 'fixed', bottom: 88, right: 20, zIndex: 90,
-        width: expanded ? 280 : 200,
-        borderRadius: 8,
-        background: '#12161f',
-        border: `1px solid ${isRunning ? 'rgba(196,77,255,0.40)' : 'rgba(66,71,84,0.35)'}`,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+        position: 'fixed', bottom: 24, right: 84, zIndex: 90,
+        width: expanded ? 290 : 210,
+        borderRadius: 14,
+        background: 'var(--bg-card, #101c17)',
+        border: `1px solid ${isRunning ? 'rgba(59,130,246,0.45)' : 'var(--border-color, #232d42)'}`,
+        boxShadow: '0 12px 36px -8px rgba(0,0,0,0.5)',
         overflow: 'hidden',
         transition: 'width 0.25s ease, border-color 0.3s',
       }}
@@ -99,21 +101,21 @@ const PomodoroTimer = () => {
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 14px 8px',
-        borderBottom: '1px solid rgba(66,71,84,0.20)',
+        borderBottom: '1px solid var(--border-color, #232d42)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {isBreak
-            ? <Coffee size={13} style={{ color: '#4dff91' }} />
-            : <Brain size={13} style={{ color: '#c44dff' }} />
+            ? <Coffee size={14} style={{ color: '#4ade80' }} />
+            : <Brain size={14} style={{ color: 'var(--accent-blue, #10b981)' }} />
           }
-          <span style={{ fontFamily: '"Press Start 2P"', fontSize: 8, color: isBreak ? '#4dff91' : '#e5b5ff', letterSpacing: '0.04em' }}>
+          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: isBreak ? '#4ade80' : 'var(--accent-blue, #10b981)', letterSpacing: '0.04em' }}>
             {isBreak ? 'BREAK' : 'FOCUS'}
           </span>
           {sessionCount > 0 && (
             <span style={{
               marginLeft: 4, padding: '1px 6px', borderRadius: 100,
-              background: 'rgba(196,77,255,0.15)',
-              fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, color: '#c44dff',
+              background: 'rgba(59,130,246,0.15)',
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 700, color: 'var(--accent-blue, #10b981)',
             }}>
               ×{sessionCount}
             </span>
@@ -123,19 +125,19 @@ const PomodoroTimer = () => {
           <button
             onClick={() => setPomodoroSound(pomodoroSound === false ? true : false)}
             title={pomodoroSound === false ? 'Enable sounds' : 'Mute sounds'}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#424754', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}
           >
             {pomodoroSound === false ? <VolumeX size={13} /> : <Volume2 size={13} />}
           </button>
           <button
             onClick={() => setExpanded(e => !e)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#424754', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}
           >
             {expanded ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
           </button>
           <button
             onClick={() => { close(); setVisible(false) }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#424754', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}
           >
             <X size={13} />
           </button>
@@ -146,7 +148,7 @@ const PomodoroTimer = () => {
       <div style={{ padding: '16px 14px 12px', display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{ flexShrink: 0, position: 'relative', width: 88, height: 88 }}>
           <svg width="88" height="88" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="44" cy="44" r={RADIUS} fill="none" stroke="rgba(66,71,84,0.30)" strokeWidth="5" />
+            <circle cx="44" cy="44" r={RADIUS} fill="none" stroke="var(--border-color, #232d42)" strokeWidth="5" />
             <motion.circle
               cx="44" cy="44" r={RADIUS}
               fill="none"
@@ -162,10 +164,10 @@ const PomodoroTimer = () => {
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontFamily: '"Press Start 2P"', fontSize: 14, color: '#dfe2eb', lineHeight: 1 }}>
+            <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 16, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', lineHeight: 1 }}>
               {fmt(secondsLeft)}
             </span>
-            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 9, color: '#606080', marginTop: 3 }}>
+            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 10, color: 'var(--text-muted, #64748b)', marginTop: 4 }}>
               {Math.round((1 - secondsLeft / total) * 100)}%
             </span>
           </div>
@@ -174,7 +176,7 @@ const PomodoroTimer = () => {
         <div style={{ flex: 1, minWidth: 0 }}>
           {activeAssignment && (
             <p style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 11, color: '#8c90a0',
+              fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-secondary, #94a3b8)',
               marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             }}>
               {activeAssignment.title}
@@ -185,24 +187,24 @@ const PomodoroTimer = () => {
               onClick={isRunning ? pause : start}
               style={{
                 flex: 1, padding: '7px 10px', borderRadius: 8,
-                background: isRunning ? 'rgba(255,107,157,0.15)' : `rgba(196,77,255,0.20)`,
-                border: `1px solid ${isRunning ? 'rgba(255,107,157,0.3)' : 'rgba(196,77,255,0.35)'}`,
-                color: isRunning ? '#ff6b9d' : '#e5b5ff',
+                background: isRunning ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)',
+                border: `1px solid ${isRunning ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.3)'}`,
+                color: isRunning ? '#f87171' : 'var(--accent-blue, #10b981)',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               }}
             >
               {isRunning ? <Pause size={13} /> : <Play size={13} />}
-              <span style={{ fontFamily: '"Press Start 2P"', fontSize: 7 }}>
-                {isRunning ? 'PAUSE' : 'START'}
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700 }}>
+                {isRunning ? 'Pause' : 'Start'}
               </span>
             </button>
             <button
               onClick={reset}
               style={{
                 padding: '7px 9px', borderRadius: 8,
-                background: 'rgba(66,71,84,0.20)',
-                border: '1px solid rgba(66,71,84,0.30)',
-                color: '#606080', cursor: 'pointer',
+                background: 'var(--bg-secondary, #0e131f)',
+                border: '1px solid var(--border-color, #232d42)',
+                color: 'var(--text-muted, #64748b)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
@@ -210,7 +212,7 @@ const PomodoroTimer = () => {
             </button>
           </div>
           {totalFocusMinutes > 0 && (
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 10, color: '#424754', marginTop: 6 }}>
+            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: 'var(--text-muted, #64748b)', marginTop: 6 }}>
               {totalFocusMinutes} min focused today
             </p>
           )}
@@ -227,10 +229,10 @@ const PomodoroTimer = () => {
             style={{ overflow: 'hidden' }}
           >
             <div style={{
-              borderTop: '1px solid rgba(66,71,84,0.20)',
+              borderTop: '1px solid var(--border-color, #232d42)',
               padding: '10px 14px 14px',
             }}>
-              <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, color: '#606080', marginBottom: 8, letterSpacing: '0.06em' }}>
+              <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 700, color: 'var(--text-muted, #64748b)', marginBottom: 8, letterSpacing: '0.06em' }}>
                 STUDYING:
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 140, overflowY: 'auto' }}>
@@ -240,17 +242,17 @@ const PomodoroTimer = () => {
                     onClick={() => setActiveAssignment(a)}
                     style={{
                       padding: '7px 10px', borderRadius: 6, textAlign: 'left',
-                      background: activeAssignment?.id === a.id ? 'rgba(196,77,255,0.15)' : 'rgba(24,28,34,0.6)',
-                      border: `1px solid ${activeAssignment?.id === a.id ? 'rgba(196,77,255,0.30)' : 'rgba(66,71,84,0.20)'}`,
+                      background: activeAssignment?.id === a.id ? 'rgba(59,130,246,0.15)' : 'var(--bg-secondary, #0e131f)',
+                      border: `1px solid ${activeAssignment?.id === a.id ? 'rgba(59,130,246,0.35)' : 'var(--border-color, #232d42)'}`,
                       cursor: 'pointer',
                     }}
                   >
-                    <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: activeAssignment?.id === a.id ? '#e5b5ff' : '#8c90a0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: activeAssignment?.id === a.id ? 'var(--accent-blue, #10b981)' : 'var(--text-secondary, #94a3b8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {a.title}
                     </p>
                   </button>
                 )) : (
-                  <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: '#424754' }}>
+                  <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)' }}>
                     No pending assignments
                   </p>
                 )}

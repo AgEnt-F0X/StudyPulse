@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Puzzle, X, Trophy, ThumbsUp, BookOpen, Sparkles, Key, CheckCircle } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Brain, X, Trophy, ThumbsUp, BookOpenText, Sparkle, Key, CheckCircle } from '@phosphor-icons/react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useNotesStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme'
 import { PageHeader, Card } from '../components/ui'
@@ -37,6 +37,20 @@ const CBSE_SUBJECT_QUIZZES = {
   ]
 }
 
+function shuffleQuestion(q) {
+  // Randomize option positions (fixes ans:0 bank bias) + remap answer
+  const order = (q.opts || []).map((_, i) => i)
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[order[i], order[j]] = [order[j], order[i]]
+  }
+  return {
+    q: q.q,
+    opts: order.map((oi) => q.opts[oi]),
+    ans: order.indexOf(q.ans),
+  }
+}
+
 function getFallbackQuiz(noteId, notes) {
   const note = (notes || []).find(n => n.id === noteId)
   const title = (note?.title || '').toLowerCase()
@@ -63,8 +77,11 @@ function getFallbackQuiz(noteId, notes) {
   ]
 }
 
+const normalizeQuestions = (list) => (list || []).map(shuffleQuestion)
+
 export default function Quiz() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { notes } = useNotesStore()
   const [phase, setPhase] = useState('setup') // setup | quiz | results
   const [questions, setQuestions] = useState([])
@@ -72,12 +89,12 @@ export default function Quiz() {
   const [selected, setSelected] = useState(null)
   const [answers, setAnswers] = useState([])
   const [loading, setLoading] = useState(false)
-  const [selectedNote, setSelectedNote] = useState('')
+  const [selectedNote, setSelectedNote] = useState(() => searchParams.get('noteId') || '')
   const hasKey = hasClientKey()
 
   const startQuiz = async () => {
     setLoading(true)
-    const fallback = getFallbackQuiz(selectedNote, notes)
+    const fallback = normalizeQuestions(getFallbackQuiz(selectedNote, notes))
 
     if (hasKey) {
       try {
@@ -92,7 +109,7 @@ export default function Quiz() {
           if (match) {
             const parsed = JSON.parse(match[0])
             if (Array.isArray(parsed) && parsed.length > 0) {
-              setQuestions(parsed)
+              setQuestions(normalizeQuestions(parsed.filter((p) => p && p.q && Array.isArray(p.opts) && p.opts.length === 4)))
               setLoading(false)
               setPhase('quiz')
               setCurrent(0); setAnswers([]); setSelected(null)
@@ -131,7 +148,7 @@ export default function Quiz() {
   if (phase === 'results') {
     const perfect = score === questions.length
     const good = score >= questions.length / 2
-    const ResultIcon = perfect ? Trophy : good ? ThumbsUp : BookOpen
+    const ResultIcon = perfect ? Trophy : good ? ThumbsUp : BookOpenText
     const resultColor = perfect ? C.yellow : good ? C.green : C.blue
     return (
       <div className="page-enter" style={{ fontFamily: fonts.body, color: C.text, maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
@@ -142,7 +159,7 @@ export default function Quiz() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', color: resultColor,
             boxShadow: `0 0 40px ${tint(resultColor, 0.2)}`,
           }}>
-            <ResultIcon size={34} strokeWidth={1.8} />
+            <ResultIcon size={38} weight="duotone" />
           </div>
           <h2 style={{ fontFamily: fonts.heading, fontSize: 32, fontWeight: 700, color: C.text, marginBottom: 8 }}>
             {score} / {questions.length}
@@ -163,39 +180,81 @@ export default function Quiz() {
   if (phase === 'quiz') {
     const q = questions[current]
     return (
-      <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 560, margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ fontSize: 13, color: C.textMuted, fontFamily: fonts.heading, fontWeight: 600 }}>
+      <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 580, margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ fontSize: 13, color: C.textMuted, fontFamily: fonts.body, fontWeight: 700 }}>
             Question {current + 1} of {questions.length}
           </span>
-          <button onClick={() => setPhase('setup')} style={{ ...btnGhost, padding: '5px 12px', fontSize: 12, color: C.textMuted }}>
-            <X size={12} /> Quit
+          <button onClick={() => setPhase('setup')} style={{ ...btnGhost, padding: '4px 10px', fontSize: 11.5, color: C.textMuted }}>
+            <X size={13} weight="bold" /> Quit
           </button>
         </div>
-        <div style={{ height: 5, background: tint(C.blue, 0.1), borderRadius: 3, overflow: 'hidden', marginBottom: 24 }}>
+        {/* Progress stepper: answered / active / remaining */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+          {questions.map((_, i) => {
+            const answered = i < answers.length || (i === current && selected !== null)
+            const activeStep = i === current
+            return (
+              <div key={i} style={{
+                flex: 1, height: 6, borderRadius: 3,
+                background: answered
+                  ? 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))'
+                  : activeStep
+                    ? 'var(--accent-blue-soft, rgba(16,185,129,0.35))'
+                    : 'rgba(255,255,255,0.08)',
+                border: activeStep && !answered ? '1px solid rgba(52,211,153,0.45)' : 'none',
+                transition: 'background 0.2s ease',
+              }} />
+            )
+          })}
+        </div>
+        <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 22 }}>
           <div style={{
             height: '100%', width: `${((current + 1) / questions.length) * 100}%`,
-            background: C.blueDark,
-            borderRadius: 3, transition: 'width 0.3s',
+            background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+            borderRadius: 3, transition: 'width 0.3s ease',
           }} />
         </div>
-        <Card style={{ padding: '24px 28px', marginBottom: 16 }}>
-          <p style={{ fontSize: 16, fontWeight: 600, color: C.text, lineHeight: 1.6 }}>{q?.q}</p>
+        <Card style={{ padding: '22px 24px', marginBottom: 18, background: 'var(--bg-card, #101c17)', borderTop: `2px solid ${C.primary}` }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: C.text, lineHeight: 1.5, fontFamily: fonts.heading, letterSpacing: '-0.01em' }}>{q?.q}</p>
         </Card>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {(q?.opts || []).map((opt, i) => {
-            let bg = C.card, border = C.border, color = C.text
+            let bg = 'var(--bg-card, #101c17)', border = C.border, color = C.text, extra = {}
             if (selected !== null) {
-              if (i === q.ans) { bg = tint(C.greenDark, 0.12); border = tint(C.greenDark, 0.5); color = C.green }
-              else if (i === selected && selected !== q.ans) { bg = tint(C.pink, 0.12); border = tint(C.pink, 0.5); color = C.pink }
+              if (i === q.ans) { bg = 'rgba(16, 185, 129, 0.14)'; border = 'rgba(52,211,153,0.55)'; color = '#34d399' }
+              else if (i === selected && selected !== q.ans) {
+                bg = 'rgba(248, 113, 113, 0.14)'; border = 'rgba(248, 113, 113, 0.5)'; color = '#f87171'
+                extra = { animation: 'quiz-shake 0.3s ease' }
+              }
             }
             return (
-              <button key={i} onClick={() => handleAnswer(i)} className={selected === null ? 'hover-lift' : ''} style={{
-                padding: '14px 18px', borderRadius: 12, border: `1px solid ${border}`,
-                background: bg, color, cursor: selected !== null ? 'default' : 'pointer',
-                textAlign: 'left', fontSize: 14, fontFamily: fonts.body, fontWeight: 500,
-                transition: 'all 0.2s',
-              }}>{opt}</button>
+              <button
+                key={i}
+                onClick={() => handleAnswer(i)}
+                className={selected === null ? 'hover-lift' : ''}
+                style={{
+                  padding: '14px 18px', borderRadius: 12, border: `1px solid ${border}`,
+                  background: bg, color, cursor: selected !== null ? 'default' : 'pointer',
+                  textAlign: 'left', fontSize: 14, fontFamily: fonts.body, fontWeight: 600,
+                  transition: 'border-color 0.15s ease, background 0.15s ease',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  ...extra,
+                }}
+              >
+                <span style={{
+                  width: 24, height: 24, borderRadius: 7,
+                  background: selected !== null && i === q.ans ? 'rgba(16,185,129,0.16)' : 'rgba(255,255,255,0.06)',
+                  border: `1px solid ${selected !== null && i === q.ans ? 'rgba(52,211,153,0.5)' : C.border}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11.5, fontFamily: fonts.body, fontWeight: 700,
+                  color: selected !== null && i === q.ans ? '#34d399' : C.textMuted,
+                  flexShrink: 0,
+                }}>
+                  {String.fromCharCode(65 + i)}
+                </span>
+                <span style={{ flex: 1 }}>{opt}</span>
+              </button>
             )
           })}
         </div>
@@ -204,43 +263,44 @@ export default function Quiz() {
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 560, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 580, margin: '0 auto' }}>
       <PageHeader
-        icon={Puzzle}
+        icon={Brain}
         accent={C.purple}
         title="Quiz Generator"
-        subtitle="Test yourself with CBSE subject & AI-generated questions"
+        subtitle="Practice with CBSE curriculum & AI-generated questions"
       />
-      <Card style={{ padding: 28 }}>
+      <Card style={{ padding: 26, background: 'var(--bg-card, #101c17)' }}>
         {hasKey ? (
           <div style={{
             display: 'flex', gap: 10, alignItems: 'center',
-            background: tint(C.green, 0.08), border: `1px solid ${tint(C.green, 0.3)}`,
-            borderRadius: 12, padding: '10px 14px', marginBottom: 20, fontSize: 12, color: C.green,
+            background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(52,211,153,0.25)',
+            borderRadius: 8, padding: '10px 14px', marginBottom: 20, fontSize: 12.5, color: '#34d399',
           }}>
-            <CheckCircle size={15} color={C.green} style={{ flexShrink: 0 }} />
-            <span><strong>Gemini AI Active</strong> — Custom questions generated in seconds</span>
+            <CheckCircle size={16} weight="duotone" color="#34d399" style={{ flexShrink: 0 }} />
+            <span><strong>AI engine active</strong> — questions generated instantly</span>
           </div>
         ) : (
           <div style={{
             display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'space-between',
-            background: tint(C.blue, 0.06), border: `1px solid ${tint(C.blue, 0.25)}`,
-            borderRadius: 12, padding: '10px 14px', marginBottom: 20, fontSize: 12, color: C.blue,
+            background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))', border: '1px solid rgba(52,211,153,0.25)',
+            borderRadius: 8, padding: '10px 14px', marginBottom: 20, fontSize: 12.5, color: C.primary,
           }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Sparkles size={14} style={{ flexShrink: 0 }} />
-              <span>Instant CBSE Class 11 Question Bank ready</span>
+              <Sparkle size={15} weight="duotone" style={{ flexShrink: 0 }} />
+              <span>Instant CBSE Class 11 question bank ready</span>
             </div>
             <button
               onClick={() => navigate('/settings')}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '4px 8px', borderRadius: 6,
-                background: tint(C.blue, 0.15), border: `1px solid ${tint(C.blue, 0.3)}`,
-                color: C.blue, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(52,211,153,0.35)',
+                color: C.primary, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                fontFamily: fonts.body,
               }}
             >
-              <Key size={11} /> Add Key
+              <Key size={12} weight="duotone" /> Add key
             </button>
           </div>
         )}
@@ -258,10 +318,10 @@ export default function Quiz() {
         )}
 
         <button onClick={startQuiz} disabled={loading} style={{
-          ...btnPrimary, width: '100%', padding: '13px', fontSize: 15,
+          ...btnPrimary, width: '100%', padding: '12px', fontSize: 14,
           opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer',
         }}>
-          <Sparkles size={16} /> {loading ? 'Generating…' : 'Start Quiz'}
+          <Sparkle size={16} weight="duotone" /> {loading ? 'Generating…' : 'Start Practice Quiz'}
         </button>
       </Card>
     </div>

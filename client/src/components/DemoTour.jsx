@@ -115,9 +115,9 @@ const DemoTour = () => {
               maxHeight: 'calc(100dvh - 32px)',
               overflowY: 'auto',
               pointerEvents: 'auto',
-              background: 'rgba(16,20,26,0.97)',
+              background: 'var(--bg-card, #101c17)',
               border: `1px solid ${current.color}40`,
-              borderRadius: 18,
+              borderRadius: 14,
               padding: '32px 28px 24px',
               boxShadow: `0 0 60px ${current.color}20, 0 24px 64px rgba(0,0,0,0.6)`,
             }}
@@ -128,23 +128,22 @@ const DemoTour = () => {
               style={{
                 position: 'absolute', top: 16, right: 16,
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#424754', padding: 4,
+                color: 'var(--text-muted, #64748b)', padding: 4,
               }}
             >
               <X size={16} />
             </button>
 
-            {/* Step dots */}
+            {/* Step indicator */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
-              {STEPS.map((_, i) => (
-                <button
+              {STEPS.map((s, i) => (
+                <div
                   key={i}
                   onClick={() => setStep(i)}
                   style={{
-                    height: 4, flex: i === step ? 2 : 1,
-                    borderRadius: 2, border: 'none', cursor: 'pointer',
-                    background: i === step ? current.color : 'rgba(255,255,255,0.12)',
-                    transition: 'all 0.25s',
+                    flex: 1, height: 3, borderRadius: 2,
+                    background: i === step ? current.color : i < step ? `${current.color}60` : 'rgba(255,255,255,0.1)',
+                    cursor: 'pointer', transition: 'background 0.2s',
                   }}
                 />
               ))}
@@ -161,13 +160,13 @@ const DemoTour = () => {
             </div>
 
             {/* Content */}
-            <p style={{ fontFamily: 'VT323', fontSize: 13, color: current.color, letterSpacing: '0.08em', marginBottom: 4 }}>
-              {current.subtitle.toUpperCase()}
+            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: current.color, letterSpacing: '0.01em', marginBottom: 6, textTransform: 'none' }}>
+              {current.subtitle}
             </p>
-            <h2 style={{ fontFamily: '"Press Start 2P"', fontSize: 13, color: '#dfe2eb', marginBottom: 16, lineHeight: 1.5 }}>
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', marginBottom: 12, lineHeight: 1.3, letterSpacing: '-0.01em' }}>
               {current.title}
             </h2>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: '#8c90a0', lineHeight: 1.7, marginBottom: 16 }}>
+            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.7, marginBottom: 16 }}>
               {current.body}
             </p>
             <div style={{
@@ -176,7 +175,7 @@ const DemoTour = () => {
               border: '1px solid rgba(255,255,255,0.08)',
               marginBottom: 24,
             }}>
-              <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: '#606080' }}>
+              <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)' }}>
                 {current.hint}
               </p>
             </div>
@@ -189,14 +188,14 @@ const DemoTour = () => {
                 rel="noopener noreferrer"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  padding: '10px 16px', borderRadius: 4,
+                  padding: '11px 18px', borderRadius: 8,
                   background: current.color,
                   color: '#0b0e14', textDecoration: 'none',
-                  fontFamily: '"Press Start 2P"', fontSize: 9,
-                  marginBottom: 12,
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+                  marginBottom: 14,
                 }}
               >
-                <Github size={14} />
+                <Github size={15} />
                 {current.cta.label}
               </a>
             )}
@@ -209,25 +208,26 @@ const DemoTour = () => {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   background: 'none', border: 'none', cursor: step === 0 ? 'not-allowed' : 'pointer',
-                  color: step === 0 ? '#2a2e38' : '#606080',
-                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 12,
+                  color: step === 0 ? 'rgba(255,255,255,0.15)' : 'var(--text-muted, #64748b)',
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600,
                   padding: '8px 0',
                 }}
               >
-                <ChevronLeft size={15} /> Back
+                <ChevronLeft size={16} /> Back
               </button>
               <button
                 onClick={next}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '9px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer',
                   background: current.color,
                   color: '#0b0e14',
-                  fontFamily: '"Press Start 2P"', fontSize: 9,
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+                  boxShadow: `0 4px 14px ${current.color}40`,
                 }}
               >
-                {step === STEPS.length - 1 ? 'START EXPLORING' : 'NEXT'}
-                {step < STEPS.length - 1 && <ChevronRight size={13} />}
+                {step === STEPS.length - 1 ? 'Start Exploring' : 'Next'}
+                {step < STEPS.length - 1 && <ChevronRight size={14} />}
               </button>
             </div>
           </motion.div>

@@ -1,15 +1,25 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ClipboardList, BarChart3, FileText, CheckCircle2,
-  Target, Puzzle, Layers, ArrowRight, Zap,
-  Sparkles, RefreshCw, Brain, Loader2
-} from 'lucide-react'
+  ClipboardText, ChartBar, Notebook, CheckCircle,
+  Target, Brain, Cards, ArrowRight, Lightning,
+  Sparkle, ArrowClockwise, SpinnerGap, Play
+} from '@phosphor-icons/react'
 import { useAuthStore, useAssignmentsStore, useGradesStore, useNotesStore, useXPStore, useUIStore, usePomodoroStore, pctToGPA, calcStreak } from '../stores'
 import { hasClientKey, callGeminiClient, getKeyProvider } from '../utils/gemini'
-import { C, fonts, tint } from '../utils/theme'
+import { C, fonts, tint, btnPrimary, iconBox } from '../utils/theme'
 import { StatCard, SectionTitle, Card } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
+const stripMarkdown = (str) => {
+  if (!str) return ''
+  return str
+    .replace(/^#+\s+/gm, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\$([^$]+)\$/g, '$1')
+    .trim()
+}
 
 export default function Home() {
   const navigate = useNavigate()
@@ -132,63 +142,100 @@ ${context}`
   }, []) // eslint-disable-line
 
   const quickActions = [
-    { icon: Target, label: 'Start Focus Mode', path: '/focus', color: C.blue },
-    { icon: Puzzle, label: 'Take a Quiz', path: '/quiz', color: C.purple },
-    { icon: Layers, label: 'Review Flashcards', path: '/flashcards', color: C.green },
-    { icon: BarChart3, label: 'Check Grades', path: '/grades', color: C.orange },
+    { icon: Target, label: 'Start Focus Mode', path: '/focus', color: C.primary },
+    { icon: Brain, label: 'Take a Quiz', path: '/quiz', color: C.amber },
+    { icon: Cards, label: 'Review Flashcards', path: '/flashcards', color: C.green },
+    { icon: ChartBar, label: 'Check Grades', path: '/grades', color: C.orange },
   ]
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 1020, margin: '0 auto' }}>
-      <div style={{ marginBottom: 26 }}>
-        <h1 style={{ fontFamily: fonts.heading, fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 4, letterSpacing: '-0.01em' }}>
-          {greeting}, {name}
-        </h1>
-        <p style={{ fontSize: 13, color: C.textMuted }}>{today}</p>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 'min(1280px, 100%)', margin: '0 auto' }}>
+      {/* Top Greeting & Status Bar */}
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 16, marginBottom: 24,
+      }}>
+        <div>
+          <h1 style={{
+            fontFamily: fonts.heading, fontSize: 26, fontWeight: 700,
+            color: C.text, marginBottom: 4, letterSpacing: '-0.02em',
+          }}>
+            {greeting}, {name}
+          </h1>
+          <p style={{ fontSize: 13.5, color: C.textMuted }}>
+            {today} · <span style={{ color: C.primary, fontWeight: 600 }}>{todayAssignments.length} due today</span>
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            onClick={() => navigate('/assistant')}
+            style={{
+              ...btnPrimary,
+              padding: '8px 14px',
+              fontSize: 12.5,
+            }}
+          >
+            <Sparkle size={15} weight="duotone" /> Ask AI Coach
+          </button>
+        </div>
       </div>
 
-      {/* XP Bar */}
-      <Card style={{ padding: '14px 20px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 9, gap: 12, flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: fonts.heading, fontSize: 13, fontWeight: 700, color: xpLevel?.color || C.blue }}>
-            <Zap size={14} /> {xpLevel?.title || 'Freshman'} · Level {xpLevel?.level || 1}
-          </span>
-          <span style={{ fontSize: 12, color: C.textMuted }}>
-            {xp} XP{xpNext ? ` · ${xpToNext - (xp - xpLevel.min)} to next level` : ' · Max level!'}
+      {/* XP Level Progress Tracker */}
+      <Card style={{ padding: '16px 20px', marginBottom: 22, background: 'var(--bg-card-glass, rgba(16,28,22,0.75))' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: 7,
+              background: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
+              boxShadow: '0 8px 32px rgba(245,158,11,0.22)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Lightning size={14} weight="duotone" color="#1a1005" />
+            </div>
+            <span style={{ fontFamily: fonts.heading, fontSize: 13, fontWeight: 700, color: C.text }}>
+              {xpLevel?.title || 'Freshman'} <span style={{ color: C.amber }}>· Level {xpLevel?.level || 1}</span>
+            </span>
+          </div>
+          <span style={{ fontSize: 12, color: C.textMuted, fontFamily: fonts.heading, fontWeight: 600 }}>
+            {xp} XP {xpNext ? `· ${xpToNext - (xp - xpLevel.min)} XP to Level ${(xpLevel?.level || 1) + 1}` : '· Max level reached'}
           </span>
         </div>
-        <div style={{ height: 7, background: tint(C.blue, 0.1), borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
           <div style={{
-            height: '100%', width: `${xpPct}%`,
-            background: xpLevel?.color || C.blue,
-            borderRadius: 4, transition: 'width 0.4s ease',
+            height: '100%', width: `${Math.min(100, Math.max(0, xpPct))}%`,
+            background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+            borderRadius: 3, transition: 'width 0.4s ease',
           }} />
         </div>
       </Card>
 
-      {/* Stats */}
+      {/* Stats Grid */}
       <div className="stat-grid" style={{ marginBottom: 24 }}>
-        <StatCard icon={ClipboardList} label="Due today" value={todayAssignments.length} color={todayAssignments.length > 0 ? C.pink : C.green} />
-        <StatCard icon={BarChart3} label="Current GPA" value={currentGPA} color={C.blue} />
-        <StatCard icon={FileText} label="Notes" value={notes?.length || 0} color={C.purple} />
-        <StatCard icon={CheckCircle2} label="Completed" value={(assignments || []).filter(a => a.completed).length} color={C.green} />
+        <StatCard icon={ClipboardText} label="Due today" value={todayAssignments.length} color={todayAssignments.length > 0 ? C.pink : C.primary} />
+        <StatCard icon={ChartBar} label="Current GPA" value={currentGPA} color={C.primary} />
+        <StatCard icon={Notebook} label="Study Notes" value={notes?.length || 0} color={C.amber} />
+        <StatCard icon={CheckCircle} label="Completed Tasks" value={(assignments || []).filter(a => a.completed).length} color={C.green} />
       </div>
 
-      {/* AI Daily Study Brief */}
+      {/* AI Daily Study Brief — Botanical hero */}
       {hasClientKey() && (
-        <Card style={{ marginBottom: 24, padding: '18px 22px', background: `linear-gradient(135deg, ${tint(C.blue, 0.06)}, ${tint(C.purple, 0.06)})`, border: `1px solid ${tint(C.blue, 0.2)}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: dailyBrief ? 12 : 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: 'linear-gradient(135deg, #5a8bff, #b55cff)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Brain size={16} color="#0b0e14" />
-              </div>
+        <Card style={{
+          marginBottom: 24,
+          padding: '20px 22px',
+          background: 'var(--bg-card, #101c17)',
+          border: `1px solid ${C.border}`,
+          boxShadow: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <Brain size={18} weight="duotone" color={C.primary} />
               <div>
-                <span style={{ fontFamily: fonts.heading, fontSize: 13, fontWeight: 700, color: C.text }}>Today's AI Study Brief</span>
-                <span style={{ fontSize: 11, color: C.textFaint, marginLeft: 8 }}>{getKeyProvider()}</span>
+                <span style={{ fontFamily: fonts.heading, fontSize: 13.5, fontWeight: 700, color: C.text }}>
+                  Today's Study Brief
+                </span>
+                <span style={{ fontSize: 11, color: C.textMuted, marginLeft: 8, fontFamily: fonts.heading, fontWeight: 600 }}>
+                  ({getKeyProvider()})
+                </span>
               </div>
             </div>
             <button
@@ -196,54 +243,67 @@ ${context}`
               disabled={briefLoading}
               style={{
                 display: 'flex', alignItems: 'center', gap: 5,
-                padding: '5px 10px', borderRadius: 8,
-                background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`,
-                color: C.textMuted, fontSize: 11, cursor: briefLoading ? 'wait' : 'pointer',
+                padding: '4px 10px', borderRadius: 6,
+                background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`,
+                color: C.textMuted, fontSize: 11.5, cursor: briefLoading ? 'wait' : 'pointer',
                 fontFamily: fonts.heading, fontWeight: 600,
+                transition: 'color 0.12s ease, border-color 0.12s ease',
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = C.text }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = C.textMuted }}
             >
-              {briefLoading ? <Loader2 size={11} className="spin" /> : <RefreshCw size={11} />}
+              {briefLoading ? <SpinnerGap size={12} className="spin" weight="bold" /> : <ArrowClockwise size={12} weight="bold" />}
               {briefLoading ? 'Generating...' : 'Refresh'}
             </button>
           </div>
           {dailyBrief ? (
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: C.text, margin: 0, whiteSpace: 'pre-wrap' }}>
+            <div style={{
+              fontSize: 13.5, lineHeight: 1.65, color: C.text,
+              background: 'var(--surface-low, #0d1712)',
+              padding: '14px 16px', borderRadius: 8,
+              border: `1px solid ${C.borderSoft}`,
+            }}>
               {dailyBrief}
-            </p>
+            </div>
           ) : briefLoading ? (
-            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>Analyzing your study data and generating today's brief...</p>
+            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>
+              Analyzing curriculum, upcoming deadlines, and generating personalized study priorities...
+            </p>
           ) : (
-            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>AI brief will appear here once you add an API key in Settings.</p>
+            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>
+              Add an API key in Settings to activate real-time AI study briefs.
+            </p>
           )}
         </Card>
       )}
 
-      <div className="grid-2">
-        {/* Upcoming assignments */}
-        <Card>
+      {/* Main Dual Columns */}
+      <div className="grid-2" style={{ marginBottom: 28 }}>
+        {/* Upcoming Assignments */}
+        <Card style={{ padding: '18px 20px' }}>
           <SectionTitle
-            icon={ClipboardList}
-            color={C.pink}
+            icon={ClipboardText}
+            color={C.primary}
             action={
               <button onClick={() => navigate('/assignments')} style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 12, color: C.blue, background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: fonts.body, fontWeight: 600,
-              }}>View all <ArrowRight size={12} /></button>
+                fontSize: 12, color: C.primary, background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: fonts.heading, fontWeight: 700,
+              }}>View all <ArrowRight size={12} weight="bold" /></button>
             }
-          >Upcoming</SectionTitle>
+          >Upcoming deadlines</SectionTitle>
           {upcoming.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
+            <div style={{ textAlign: 'center', padding: '24px 0 12px' }}>
               <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14 }}>
-                {connected ? 'No upcoming assignments — you\'re clear.' : 'Connect Google Classroom to auto-import your assignments.'}
+                {connected ? 'No pending assignments — all caught up!' : 'Sync Google Classroom or create assignments.'}
               </p>
               <button onClick={handleSync} disabled={syncing} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
-                padding: '9px 16px', borderRadius: 10, border: 'none',
-                background: '#fff', color: '#1f1f1f', cursor: syncing ? 'not-allowed' : 'pointer',
-                fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
+                padding: '8px 16px', borderRadius: 8, border: 'none',
+                background: '#ffffff', color: '#090d16', cursor: syncing ? 'not-allowed' : 'pointer',
+                fontFamily: fonts.heading, fontSize: 12.5, fontWeight: 700,
               }}>
-                <GoogleLogo size={15} /> {syncing ? 'Syncing…' : connected ? 'Sync Classroom now' : 'Connect Classroom'}
+                <GoogleLogo size={14} /> {syncing ? 'Syncing…' : connected ? 'Sync Classroom' : 'Connect Classroom'}
               </button>
             </div>
           ) : (
@@ -252,22 +312,48 @@ ${context}`
               const daysLeft = Math.ceil((due - new Date()) / (1000 * 60 * 60 * 24))
               return (
                 <div key={a.id} className="hover-row" style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 8px', margin: '0 -8px',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 10px', margin: '0 -6px',
                   borderBottom: `1px solid ${C.borderSoft}`,
                 }}>
                   <div style={{
-                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
                     background: daysLeft <= 1 ? C.pink : daysLeft <= 3 ? C.orange : C.green,
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {a.title}
                     </div>
-                    <div style={{ fontSize: 11, color: C.textFaint }}>{a.course || a.courseName}</div>
+                    <div style={{ fontSize: 11.5, color: C.textMuted }}>{a.course || a.courseName}</div>
                   </div>
-                  <div style={{ fontSize: 11.5, fontWeight: 700, color: daysLeft <= 1 ? C.pink : C.textMuted, flexShrink: 0 }}>
-                    {daysLeft === 0 ? 'Today' : daysLeft === 1 ? 'Tomorrow' : `${daysLeft}d`}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                    <div style={{
+                      fontSize: 11.5, fontWeight: 700,
+                      color: daysLeft <= 1 ? C.pink : C.textMuted,
+                      fontFamily: fonts.heading,
+                    }}>
+                      {daysLeft === 0 ? 'Due Today' : daysLeft === 1 ? 'Tomorrow' : `${daysLeft}d left`}
+                    </div>
+                    <button
+                      onClick={() => {
+                        usePomodoroStore.getState().setActiveAssignment(a.id)
+                        navigate('/focus')
+                      }}
+                      title="Focus on this assignment with Pomodoro"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        padding: '3px 8px', borderRadius: 6,
+                        background: 'var(--surface-low, #0d1712)',
+                        border: `1px solid ${C.borderSoft}`,
+                        color: C.primary, fontSize: 11, cursor: 'pointer',
+                        fontFamily: fonts.heading, fontWeight: 700,
+                        transition: 'all 0.12s ease',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.background = 'var(--accent-blue-soft, rgba(16,185,129,0.12))' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = C.borderSoft; e.currentTarget.style.background = 'var(--surface-low, #0d1712)' }}
+                    >
+                      <Play size={10} weight="fill" /> Focus
+                    </button>
                   </div>
                 </div>
               )
@@ -275,55 +361,72 @@ ${context}`
           )}
         </Card>
 
-        {/* Recent notes */}
-        <Card>
+        {/* Recent Notes */}
+        <Card style={{ padding: '18px 20px' }}>
           <SectionTitle
-            icon={FileText}
-            color={C.purple}
+            icon={Notebook}
+            color={C.primary}
             action={
               <button onClick={() => navigate('/notes')} style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 12, color: C.blue, background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: fonts.body, fontWeight: 600,
-              }}>View all <ArrowRight size={12} /></button>
+                fontSize: 12, color: C.primary, background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: fonts.heading, fontWeight: 700,
+              }}>View all <ArrowRight size={12} weight="bold" /></button>
             }
-          >Recent Notes</SectionTitle>
+          >Recent notes</SectionTitle>
           {recentNotes.length === 0 ? (
-            <p style={{ fontSize: 13, color: C.textMuted, textAlign: 'center', padding: '20px 0' }}>
-              No notes yet — start writing.
+            <p style={{ fontSize: 13, color: C.textMuted, textAlign: 'center', padding: '24px 0' }}>
+              No notes saved yet. Capture your lecture points anytime.
             </p>
           ) : (
-            recentNotes.map(n => (
-              <div key={n.id} className="hover-row" style={{
-                padding: '10px 8px', margin: '0 -8px',
-                borderBottom: `1px solid ${C.borderSoft}`, cursor: 'pointer',
-              }} onClick={() => navigate('/notes')}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{n.title || 'Untitled'}</div>
-                <div style={{ fontSize: 11.5, color: C.textFaint, marginTop: 2 }}>
-                  {(n.content || '').slice(0, 60)}{n.content?.length > 60 ? '…' : ''}
+            recentNotes.map(n => {
+              const cleanText = stripMarkdown(n.content || '')
+              return (
+                <div key={n.id} className="hover-row" style={{
+                  padding: '10px 10px', margin: '0 -6px',
+                  borderBottom: `1px solid ${C.borderSoft}`, cursor: 'pointer',
+                }} onClick={() => navigate('/notes')}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{n.title || 'Untitled note'}</div>
+                  <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 3 }}>
+                    {cleanText.slice(0, 65)}{cleanText.length > 65 ? '…' : ''}
+                  </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           )}
         </Card>
       </div>
 
-      {/* Quick actions */}
-      <div style={{ marginTop: 24 }}>
-        <SectionTitle icon={Zap} color={C.yellow}>Quick Actions</SectionTitle>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      {/* Quick Action Tiles */}
+      <div>
+        <SectionTitle icon={Lightning} color={C.amber}>Quick study actions</SectionTitle>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           {quickActions.map(a => {
             const Icon = a.icon
             return (
-              <button key={a.path} onClick={() => navigate(a.path)} className="hover-lift" style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '12px 20px', borderRadius: 12,
-                border: `1px solid ${tint(a.color, 0.25)}`,
-                background: tint(a.color, 0.07), color: a.color,
-                cursor: 'pointer', fontFamily: fonts.heading,
-                fontSize: 13, fontWeight: 600,
-              }}>
-                <Icon size={16} strokeWidth={2.2} /> {a.label}
+              <button
+                key={a.path}
+                onClick={() => navigate(a.path)}
+                className="hover-lift"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 11,
+                  padding: '14px 16px', borderRadius: 16,
+                  border: `1px solid ${C.border}`,
+                  background: 'var(--bg-card, #101c17)',
+                  color: C.text,
+                  cursor: 'pointer',
+                  fontFamily: fonts.heading,
+                  fontSize: 13, fontWeight: 600,
+                  textAlign: 'left',
+                  transition: 'border-color 0.15s ease, background 0.15s ease',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = tint(typeof a.color === 'string' && a.color.startsWith('var(') ? '#10b981' : a.color, 0.45) }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border }}
+              >
+                <div style={iconBox(typeof a.color === 'string' && a.color.startsWith('var(') ? '#10b981' : a.color, 32)}>
+                  <Icon size={18} weight="duotone" />
+                </div>
+                <span>{a.label}</span>
               </button>
             )
           })}

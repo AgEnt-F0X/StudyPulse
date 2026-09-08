@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Layers, Plus, ArrowLeft, ArrowRight, RotateCcw, Trash2, Sparkles, PenLine, Check, X as XIcon, AlertTriangle, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Cards, Plus, ArrowLeft, ArrowRight, ArrowsClockwise, Trash, Sparkle, PencilSimple, Check, X as XIcon, Warning, SpinnerGap } from '@phosphor-icons/react'
 import { useFlashcardsStore, useNotesStore, useXPStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost, iconBox, chip } from '../utils/theme'
 import { PageHeader, Empty } from '../components/ui'
@@ -37,7 +37,7 @@ function Modal({ open, onClose, children }) {
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
         background: C.card,
-        border: `1px solid ${C.border}`, borderRadius: 18, padding: 28, width: 'min(480px,92vw)',
+        border: `1px solid ${C.border}`, borderRadius: 14, padding: 28, width: 'min(480px,92vw)',
         maxHeight: '90vh', overflowY: 'auto',
         boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
       }}>
@@ -73,6 +73,31 @@ export default function Flashcards() {
   const deck = studyDeck ? (decks || []).find(d => d.id === studyDeck) : null
   const cards = deck?.cards || []
   const card = cards[cardIndex]
+  const mastered = cards.filter((c) => (c.streak || 0) >= 3).length
+  const masteryPct = cards.length ? Math.round((mastered / cards.length) * 100) : 0
+
+  // Anki-style keyboard: Space flip, 1-4 grade
+  useEffect(() => {
+    if (!studyDeck || !cards.length) return
+    const onKey = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return
+      if (e.code === 'Space') { e.preventDefault(); setFlipped((f) => !f) }
+      if (['1', '2', '3', '4'].includes(e.key) && flipped) {
+        gradeCard(Number(e.key))
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [studyDeck, cards.length, cardIndex, flipped])
+
+  const gradeCard = (score) => {
+    // 1 Again · 2 Hard · 3 Good · 4 Easy
+    if (score === 1) setFlipped(false)
+    else if (cardIndex < cards.length - 1) { setCardIndex((i) => i + 1); setFlipped(false) }
+    if (score >= 3) addXP(score === 4 ? 5 : 3)
+    setWrittenAnswer('')
+    setGradeResult(null)
+  }
 
   const handleAddDeck = () => {
     if (!deckName.trim()) return
@@ -150,16 +175,32 @@ export default function Flashcards() {
           <button onClick={() => { setStudyDeck(null); setCardIndex(0); setFlipped(false); setWrittenMode(false) }} style={{ ...btnGhost, padding: '7px 14px', color: C.textMuted }}>
             <ArrowLeft size={14} /> Back
           </button>
-          <h2 style={{ fontFamily: fonts.heading, fontSize: 20, fontWeight: 700, color: C.text }}>{deck.name}</h2>
-          <span style={{ fontSize: 12, color: C.textMuted, fontFamily: fonts.heading, fontWeight: 600 }}>
+          <h2 style={{ fontFamily: fonts.heading, fontSize: 20, fontWeight: 700, color: C.text, letterSpacing: '-0.01em' }}>{deck.name}</h2>
+          <span style={{ fontSize: 12, color: C.textMuted, fontFamily: fonts.body, fontWeight: 600 }}>
             {cards.length ? `${cardIndex + 1} / ${cards.length}` : '0 cards'}
           </span>
+          {/* Mastery ring */}
+          <div title={`${masteryPct}% mastered`} style={{ position: 'relative', width: 34, height: 34 }}>
+            <svg width="34" height="34" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+              <circle
+                cx="17" cy="17" r="14" fill="none" stroke="var(--primary, #10b981)" strokeWidth="3"
+                strokeLinecap="round" strokeDasharray={2 * Math.PI * 14}
+                strokeDashoffset={2 * Math.PI * 14 * (1 - masteryPct / 100)}
+                style={{ transition: 'stroke-dashoffset 0.4s ease' }}
+              />
+            </svg>
+            <span style={{
+              position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700, fontFamily: fonts.body, color: C.primary,
+            }}>{masteryPct}</span>
+          </div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={() => setShowAddCard(true)} style={{ ...btnGhost, padding: '7px 12px', fontSize: 12, color: C.textMuted }}>
-              <Plus size={13} /> Add Card
+              <Plus size={13} weight="bold" /> Add Card
             </button>
             <button onClick={() => setShowGenerate(true)} style={{ ...btnGhost, padding: '7px 12px', fontSize: 12, color: C.purple, borderColor: tint(C.purple, 0.35) }}>
-              <Sparkles size={13} /> Generate with AI
+              <Sparkle size={13} weight="duotone" /> Generate with AI
             </button>
           </div>
         </div>
@@ -170,7 +211,7 @@ export default function Flashcards() {
             border: `1px solid ${C.border}`, borderRadius: 16,
           }}>
             <Empty
-              icon={Layers}
+              icon={Cards}
               accent={C.purple}
               title="No cards in this deck yet"
               description="Generate cards from your notes with AI, or add them yourself."
@@ -179,17 +220,17 @@ export default function Flashcards() {
             />
             <div style={{ textAlign: 'center', paddingBottom: 32 }}>
               <button onClick={() => setShowAddCard(true)} style={{ ...btnGhost, color: C.textMuted }}>
-                <Plus size={13} /> Add a card manually
+                <Plus size={13} weight="bold" /> Add a card manually
               </button>
             </div>
           </div>
         ) : (
           <>
             {/* Progress bar */}
-            <div style={{ height: 5, background: tint(C.blue, 0.1), borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
+            <div style={{ height: 5, background: 'rgba(16,185,129,0.12)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
               <div style={{
                 height: '100%', width: `${((cardIndex + 1) / cards.length) * 100}%`,
-                background: C.blueDark,
+                background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
                 borderRadius: 3, transition: 'width 0.3s ease',
               }} />
             </div>
@@ -200,49 +241,73 @@ export default function Flashcards() {
                 <span style={{ ...chip(dMeta.color), textTransform: 'capitalize' }}>{dMeta.label}</span>
               ) : <span />}
               <div style={{ display: 'flex', gap: 6 }}>
-                {[{ key: false, label: 'Flip', icon: RotateCcw }, { key: true, label: 'Written', icon: PenLine }].map(m => (
+                {[{ key: false, label: 'Flip', icon: ArrowsClockwise }, { key: true, label: 'Written', icon: PencilSimple }].map(m => (
                   <button key={String(m.key)} onClick={() => { setWrittenMode(m.key); setFlipped(false); setWrittenAnswer(''); setGradeResult(null) }} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 999,
-                    border: `1px solid ${writtenMode === m.key ? tint(C.blue, 0.4) : C.border}`,
-                    background: writtenMode === m.key ? tint(C.blue, 0.12) : 'transparent',
-                    color: writtenMode === m.key ? C.blue : C.textMuted,
-                    cursor: 'pointer', fontFamily: fonts.heading, fontSize: 11, fontWeight: 700,
-                  }}><m.icon size={11} /> {m.label}</button>
+                    border: `1px solid ${writtenMode === m.key ? 'rgba(52,211,153,0.40)' : C.border}`,
+                    background: writtenMode === m.key ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+                    color: writtenMode === m.key ? C.primary : C.textMuted,
+                    cursor: 'pointer', fontFamily: fonts.body, fontSize: 11, fontWeight: 700,
+                  }}><m.icon size={12} weight="duotone" /> {m.label}</button>
                 ))}
               </div>
             </div>
 
             {!writtenMode ? (
               <>
-                {/* Card */}
+                {/* Card — 3D spring flip */}
+                <div style={{ perspective: 1200, marginBottom: 16 }}>
                 <div onClick={() => setFlipped(f => !f)} style={{
-                  background: C.card,
-                  border: `1px solid ${flipped ? tint(C.purple, 0.5) : C.border}`,
-                  borderRadius: 20, padding: '48px 32px', textAlign: 'center', cursor: 'pointer',
-                  minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexDirection: 'column', gap: 12, marginBottom: 24,
-                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                  boxShadow: flipped ? `0 0 40px ${tint(C.purple, 0.15)}` : '0 8px 24px rgba(0,0,0,0.3)',
+                  background: 'var(--bg-card, #101c17)',
+                  border: `1px solid ${flipped ? 'rgba(52,211,153,0.45)' : C.border}`,
+                  borderRadius: 16, padding: '48px 32px', textAlign: 'center', cursor: 'pointer',
+                  minHeight: 230, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexDirection: 'column', gap: 12,
+                  transform: `rotateY(${flipped ? 180 : 0}deg)`,
+                  transformStyle: 'preserve-3d',
+                  transition: 'transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease',
+                  boxShadow: flipped ? 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))' : 'var(--shadow-card)',
                   userSelect: 'none',
                 }}>
                   <div style={{
-                    fontSize: 11, color: flipped ? C.purple : C.textFaint, fontFamily: fonts.heading,
-                    fontWeight: 700, letterSpacing: '0.12em', marginBottom: 8,
+                    fontSize: 11, color: flipped ? C.primary : C.textMuted, fontFamily: fonts.body,
+                    fontWeight: 700, letterSpacing: '0.02em', marginBottom: 8,
+                    transform: `rotateY(${flipped ? 180 : 0}deg)`,
                   }}>
-                    {flipped ? 'BACK' : 'FRONT'} — click to flip
+                    {flipped ? 'Answer — Space to flip back' : 'Question — Space to flip'}
                   </div>
-                  <div style={{ fontSize: 19, fontWeight: 600, color: flipped ? C.purple : C.text, lineHeight: 1.5 }}>
+                  <div style={{
+                    fontSize: 20, fontWeight: 700, color: C.text, lineHeight: 1.5,
+                    fontFamily: fonts.heading, letterSpacing: '-0.01em',
+                    transform: `rotateY(${flipped ? 180 : 0}deg)`,
+                  }}>
                     {flipped ? card.back : card.front}
                   </div>
                 </div>
+                </div>
+                {/* Anki grading */}
+                {flipped && (
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+                    {[
+                      { n: 1, label: 'Again' }, { n: 2, label: 'Hard' },
+                      { n: 3, label: 'Good' }, { n: 4, label: 'Easy' },
+                    ].map(g => (
+                      <button key={g.n} onClick={() => gradeCard(g.n)} style={{
+                        padding: '6px 12px', borderRadius: 8, cursor: 'pointer',
+                        border: `1px solid ${C.borderSoft}`, background: 'transparent',
+                        color: C.textMuted, fontFamily: fonts.body, fontSize: 11.5, fontWeight: 700,
+                      }}>{g.n} · {g.label}</button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Controls */}
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                   <button onClick={prevCard} disabled={cardIndex === 0}
                     style={{ ...btnGhost, color: cardIndex === 0 ? C.textFaint : C.text, cursor: cardIndex === 0 ? 'not-allowed' : 'pointer' }}
                   ><ArrowLeft size={14} /> Prev</button>
-                  <button onClick={() => setFlipped(false)} style={{ ...btnGhost, color: C.textMuted }}>
-                    <RotateCcw size={13} /> Flip Back
+                  <button onClick={() => setFlipped(f => !f)} style={{ ...btnGhost, color: C.primary }}>
+                    <RotateCcw size={13} /> {flipped ? 'Show question' : 'Flip card'}
                   </button>
                   <button onClick={nextCard} disabled={cardIndex === cards.length - 1}
                     style={{ ...btnGhost, color: cardIndex === cards.length - 1 ? C.textFaint : C.text, cursor: cardIndex === cards.length - 1 ? 'not-allowed' : 'pointer' }}
@@ -258,7 +323,7 @@ export default function Flashcards() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexDirection: 'column', gap: 16, marginBottom: 20,
                 }}>
-                  <div style={{ fontSize: 11, color: C.textFaint, fontFamily: fonts.heading, fontWeight: 700, letterSpacing: '0.12em' }}>QUESTION</div>
+                  <div style={{ fontSize: 11, color: C.textFaint, fontFamily: fonts.heading, fontWeight: 700, letterSpacing: '0.01em', textTransform: 'none' }}>Question</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: C.text, lineHeight: 1.5 }}>{card.front}</div>
                 </div>
 
@@ -276,16 +341,16 @@ export default function Flashcards() {
                     />
                     {!aiAvailable() && (
                       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: C.orange, marginBottom: 14 }}>
-                        <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+                        <Warning size={14} weight="duotone" style={{ flexShrink: 0, marginTop: 1 }} />
                         No AI available in this browser — answers will only be checked for an exact match.
                       </div>
                     )}
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                       <button onClick={prevCard} disabled={cardIndex === 0} style={{ ...btnGhost, color: cardIndex === 0 ? C.textFaint : C.text }}>
-                        <ArrowLeft size={14} /> Prev
+                        <ArrowLeft size={14} weight="bold" /> Prev
                       </button>
                       <button onClick={submitWrittenAnswer} disabled={!writtenAnswer.trim() || grading} style={{ ...btnPrimary, opacity: !writtenAnswer.trim() || grading ? 0.6 : 1 }}>
-                        {grading ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {grading ? (aiAvailable() ? `Grading with ${aiModeLabel()}…` : 'Checking…') : 'Submit Answer'}
+                        {grading ? <SpinnerGap size={14} className="spin" weight="bold" /> : <Check size={14} weight="bold" />} {grading ? (aiAvailable() ? `Grading with ${aiModeLabel()}…` : 'Checking…') : 'Submit Answer'}
                       </button>
                     </div>
                   </>
@@ -297,7 +362,7 @@ export default function Flashcards() {
                       border: `1px solid ${tint(gradeResult.correct ? C.greenDark : C.pink, 0.35)}`,
                       borderRadius: 14, padding: '16px 18px', marginBottom: 18,
                     }}>
-                      {gradeResult.correct ? <Check size={18} color={C.green} style={{ flexShrink: 0 }} /> : <XIcon size={18} color={C.pink} style={{ flexShrink: 0 }} />}
+                      {gradeResult.correct ? <Check size={18} weight="bold" color={C.green} style={{ flexShrink: 0 }} /> : <XIcon size={18} weight="bold" color={C.pink} style={{ flexShrink: 0 }} />}
                       <div>
                         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 14, color: gradeResult.correct ? C.green : C.pink, marginBottom: 4 }}>
                           {gradeResult.correct ? 'Correct! +5 XP' : 'Not quite'}
@@ -307,10 +372,10 @@ export default function Flashcards() {
                     </div>
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                       <button onClick={prevCard} disabled={cardIndex === 0} style={{ ...btnGhost, color: cardIndex === 0 ? C.textFaint : C.text }}>
-                        <ArrowLeft size={14} /> Prev
+                        <ArrowLeft size={14} weight="bold" /> Prev
                       </button>
                       <button onClick={nextCard} disabled={cardIndex === cards.length - 1} style={btnPrimary}>
-                        Next <ArrowRight size={14} />
+                        Next <ArrowRight size={14} weight="bold" />
                       </button>
                     </div>
                   </>
@@ -372,7 +437,7 @@ export default function Flashcards() {
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button onClick={() => setShowGenerate(false)} disabled={generating} style={{ ...btnGhost, color: C.textMuted }}>Cancel</button>
             <button onClick={handleGenerate} disabled={generating} style={{ ...btnPrimary, opacity: generating ? 0.7 : 1 }}>
-              {generating ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />} {generating ? 'Generating…' : 'Generate 8 Cards'}
+              {generating ? <SpinnerGap size={14} className="spin" /> : <Sparkle size={14} />} {generating ? 'Generating…' : 'Generate 8 Cards'}
             </button>
           </div>
         </Modal>
@@ -383,7 +448,7 @@ export default function Flashcards() {
   return (
     <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 920, margin: '0 auto' }}>
       <PageHeader
-        icon={Layers}
+        icon={Cards}
         accent={C.purple}
         title="Flashcards"
         subtitle="Study decks for every subject"
@@ -400,7 +465,7 @@ export default function Flashcards() {
           border: `1px solid ${C.border}`, borderRadius: 16,
         }}>
           <Empty
-            icon={Layers}
+            icon={Cards}
             accent={C.purple}
             title="No flashcard decks yet"
             description="Create a deck, then generate cards from your notes with AI — or add them yourself."
@@ -416,7 +481,7 @@ export default function Flashcards() {
               border: `1px solid ${C.border}`, borderRadius: 14, padding: 20,
             }}>
               <div style={{ ...iconBox(C.purple, 42), marginBottom: 14 }}>
-                <Layers size={20} strokeWidth={2.2} />
+                <Cards size={22} weight="duotone" />
               </div>
               <div style={{ fontFamily: fonts.heading, fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 4 }}>{d.name}</div>
               <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 16 }}>{(d.cards || []).length} cards</div>
@@ -431,7 +496,7 @@ export default function Flashcards() {
                 }}
                   onMouseEnter={e => e.currentTarget.style.color = C.pink}
                   onMouseLeave={e => e.currentTarget.style.color = C.textFaint}
-                ><Trash2 size={13} /></button>
+                ><Trash size={15} weight="duotone" /></button>
               </div>
             </div>
           ))}

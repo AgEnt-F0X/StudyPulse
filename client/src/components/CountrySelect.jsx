@@ -68,16 +68,18 @@ const CountrySelect = forwardRef(({
           ${error ? 'border-accent-danger' : ''}
         `}
         style={{
-          fontFamily: 'VT323',
-          fontSize: '18px',
+          fontFamily: "'Manrope', sans-serif",
+          fontSize: '14px',
           paddingRight: '2rem',
-          background: 'rgba(24,28,36,0.9)',
-          color: '#dfe2eb',
+          background: 'var(--bg-secondary, #0e131f)',
+          color: 'var(--text-primary, #f0f4fc)',
+          borderRadius: 8,
+          border: '1px solid var(--border-color, #232d42)',
           colorScheme: 'dark',
         }}
         {...props}
       >
-        <option value="">SELECT COUNTRY</option>
+        <option value="">Select country...</option>
         {countries.map((country) => (
           <option key={country.code} value={country.name}>
             {country.name}

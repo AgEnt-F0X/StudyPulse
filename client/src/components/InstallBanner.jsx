@@ -43,25 +43,25 @@ const InstallBanner = () => {
           style={{
             position: 'fixed', bottom: 16, left: 16, right: 16, zIndex: 180,
             maxWidth: 420, margin: '0 auto',
-            background: '#12161f',
-            border: '1px solid rgba(175,198,255,0.25)',
-            borderRadius: 6, padding: '14px 16px',
+            background: 'var(--bg-card, #101c17)',
+            border: '1px solid var(--border-color, rgba(52,211,153,0.22))',
+            borderRadius: 10, padding: '14px 16px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             display: 'flex', alignItems: 'center', gap: 12,
           }}
         >
           <div style={{
-            width: 38, height: 38, borderRadius: 4, flexShrink: 0,
-            background: 'rgba(175,198,255,0.16)',
+            width: 38, height: 38, borderRadius: 8, flexShrink: 0,
+            background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Download size={17} style={{ color: '#afc6ff' }} />
+            <Download size={17} style={{ color: 'var(--accent-blue, #10b981)' }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 13, color: '#dfe2eb', marginBottom: 1 }}>
+            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 13, color: 'var(--text-primary, #e6f4ea)', marginBottom: 1 }}>
               Install StudyPulse
             </p>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: '#606080' }}>
+            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #7da08d)' }}>
               Add to home screen — works offline
             </p>
           </div>
@@ -69,8 +69,8 @@ const InstallBanner = () => {
             onClick={install}
             style={{
               padding: '7px 14px', borderRadius: 4, border: 'none', cursor: 'pointer',
-              background: '#528dff',
-              color: '#0b0e14', fontFamily: "'Space Grotesk', sans-serif",
+              background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+              color: '#04120c', fontFamily: "'Space Grotesk', sans-serif",
               fontSize: 11, fontWeight: 700, flexShrink: 0,
             }}
           >

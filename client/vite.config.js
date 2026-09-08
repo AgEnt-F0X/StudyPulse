@@ -19,14 +19,16 @@ export default defineConfig({
     }
   },
   build: {
-    chunkSizeWarningLimit: 700,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          motion: ['framer-motion'],
+          three3d: ['three', '@react-three/fiber', '@react-three/drei'],
+          motion: ['framer-motion', 'motion'],
           ui: ['lucide-react'],
-          pdf: ['jspdf'],
+          pdf: ['jspdf', 'pdfjs-dist'],
+          supabase: ['@supabase/supabase-js'],
           state: ['zustand'],
         }
       }

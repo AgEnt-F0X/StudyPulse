@@ -2,37 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Theme tokens ===== */
+/* ===== StudyPulse Botanical Scholar Design Tokens — LOCKED =====
+   Pine base + Emerald action + Brass reward. Flat reading surfaces,
+   gradients only on 4 brand moments (logo/CTA/hero/reward). */
 :root, [data-theme="dark"] {
-  --bg-primary: #0b0e14;
-  --bg-card: rgba(22,27,38,0.60);
-  --text-primary: #e8ebf4;
-  --text-secondary: #9aa1b5;
-  --text-muted: #5c6478;
-  --border-color: rgba(34,42,58,0.80);
-  --sidebar-bg: #0d111a;
-  --surface-low: #10141c;
+  --bg-primary: #0a120e;
+  --bg-card: #101c17;
+  --bg-card-glass: rgba(16, 28, 22, 0.75);
+  --surface-low: #0d1712;
+  --surface-card-soft: #14231c;
+  --surface-card-hover: #182b22;
+  --text-primary: #f0fdf4;
+  --text-secondary: #a7c4b5;
+  --text-muted: #769989;
+  --border-color: rgba(52, 211, 153, 0.14);
+  --border-soft: rgba(52, 211, 153, 0.10);
+  --border-subtle: rgba(52, 211, 153, 0.10);
+  --sidebar-bg: #080f0c;
+  --accent-blue: #10b981;
+  --accent-blue-soft: rgba(16, 185, 129, 0.12);
+  --primary: #10b981;
+  --primary-deep: #059669;
+  --primary-glow: #34d399;
+  --accent-amber: #f59e0b;
+  --accent-amber-deep: #d97706;
+  --grad-logo: linear-gradient(135deg, #10b981, #059669);
+  --grad-primary: linear-gradient(135deg, #34d399, #10b981);
+  --grad-reward: linear-gradient(135deg, #fbbf24, #d97706);
+  --grad-hero: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(16, 185, 129, 0.12), transparent);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-glow-emerald: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-glow-amber: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="light"] {
-  --bg-primary: #f0f2f7;
-  --bg-card: rgba(255,255,255,0.80);
-  --text-primary: #1a1d26;
-  --text-secondary: #4a4e60;
-  --text-muted: #7a7e90;
-  --border-color: rgba(0,0,0,0.10);
+  --bg-primary: #fbfbfa;
+  --bg-card: #ffffff;
+  --bg-card-glass: rgba(255, 255, 255, 0.8);
+  --surface-low: #f2f5f2;
+  --surface-card-soft: #eef2ee;
+  --surface-card-hover: #e6eae6;
+  --text-primary: #11221b;
+  --text-secondary: #3d5a4d;
+  --text-muted: #566c61;
+  --border-color: #e6eae6;
+  --border-soft: #eef2ee;
+  --border-subtle: #e6eae6;
   --sidebar-bg: #ffffff;
-  --surface-low: #f8f9fc;
+  --accent-blue: #059669;
+  --accent-blue-soft: rgba(5, 150, 105, 0.10);
+  --primary: #059669;
+  --primary-deep: #047857;
+  --primary-glow: #10b981;
+  --accent-amber: #d97706;
+  --accent-amber-deep: #b45309;
+  --grad-logo: linear-gradient(135deg, #10b981, #047857);
+  --grad-primary: linear-gradient(135deg, #10b981, #059669);
+  --grad-reward: linear-gradient(135deg, #f59e0b, #d97706);
+  --grad-hero: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(5, 150, 105, 0.08), transparent);
+  --shadow-card: 0 1px 3px rgba(17, 34, 27, 0.08);
+  --shadow-lift: 0 8px 24px rgba(17, 34, 27, 0.12);
+  --shadow-glow-emerald: 0 4px 20px rgba(17, 34, 27, 0.08);
+  --shadow-glow-amber: 0 4px 20px rgba(17, 34, 27, 0.08);
+  --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="light"] body {
-  background-color: #f0f2f7;
-  color: #1a1d26;
-  scrollbar-color: #c0c4d0 #f0f2f7;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
-
-[data-theme="light"] ::-webkit-scrollbar-track { background: #f0f2f7; }
-[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c0c4d0; }
 
 /* ===== Syntactic Architect — Design Tokens ===== */
 
@@ -51,41 +91,39 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #2a3242 #0b0e14;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   body {
-    background-color: #0b0e14;
-    color: #e8ebf4;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Manrope', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   ::selection {
-    background: rgba(90, 139, 255, 0.35);
+    background: rgba(16, 185, 129, 0.35);
   }
 
   :focus-visible {
-    outline: 2px solid #5a8bff;
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  /* Completely hide native scrollbar tracks while preserving smooth wheel/touch scrolling */
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
   }
-  ::-webkit-scrollbar-track {
-    background: #0b0e14;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #2a3242;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #3a4358;
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 }
 
@@ -116,8 +154,8 @@
 }
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(0,0,0,0.45);
-  border-color: #2e3850 !important;
+  box-shadow: var(--shadow-lift);
+  border-color: rgba(52, 211, 153, 0.28) !important;
 }
 
 .hover-row {
@@ -125,11 +163,21 @@
   border-radius: 10px;
 }
 .hover-row:hover {
-  background: rgba(90,139,255,0.06);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .spin { animation: studypulseSpin 0.9s linear infinite; }
 .pulse { animation: studypulsePulse 1.6s ease-in-out infinite; }
+
+@keyframes quiz-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quiz-shake, .pulse, .spin { animation: none !important; }
+}
 
 /* Responsive grids for inline-styled pages */
 .grid-2 {
@@ -160,61 +208,64 @@
 }
 
 @layer components {
-  /* ---- Ambient surface utilities ---- */
+  /* ---- Ambient surface utilities (pine scale) ---- */
   .surface-container-lowest {
-    background-color: #0a0e14;
+    background-color: #080f0c;
   }
   .surface-container-low {
-    background-color: #14181e;
+    background-color: #0d1712;
   }
   .surface-container {
-    background-color: #181c22;
+    background-color: #101c17;
   }
   .surface-container-high {
-    background-color: #21262d;
+    background-color: #14231c;
   }
   .surface-container-highest {
-    background-color: #31353c;
+    background-color: #182b22;
   }
 
   /* ---- Flat panel (no blur/glass) ---- */
   .glass {
-    background: #181c22;
-    border: 1px solid rgba(66, 71, 84, 0.40);
-    border-radius: 4px;
+    background: var(--bg-card-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    box-shadow: var(--sheen-top);
   }
 
   /* ---- Ghost border ---- */
   .ghost-border {
-    border: 1px solid rgba(66, 71, 84, 0.40);
+    border: 1px solid var(--border-color);
   }
 
   /* ---- On-surface ink layers ---- */
   .on-surface-primary {
-    color: #dfe2eb;
+    color: var(--text-primary);
   }
   .on-surface-secondary {
-    color: #8c90a0;
+    color: var(--text-secondary);
   }
   .on-surface-tertiary {
-    color: #606080;
+    color: var(--text-muted);
   }
 
-  /* ---- Stroke accents ---- */
+  /* ---- Stroke accents (botanical) ---- */
   .stroke-primary {
-    border-color: rgba(82, 141, 255, 0.40);
+    border-color: rgba(16, 185, 129, 0.40);
   }
   .stroke-success {
-    border-color: rgba(74, 215, 120, 0.40);
+    border-color: rgba(52, 211, 153, 0.40);
   }
   .stroke-warning {
-    border-color: rgba(255, 180, 77, 0.40);
+    border-color: rgba(245, 158, 11, 0.40);
   }
   .stroke-danger {
-    border-color: rgba(255, 180, 171, 0.40);
+    border-color: rgba(248, 113, 113, 0.40);
   }
   .stroke-tertiary {
-    border-color: rgba(229, 181, 255, 0.40);
+    border-color: rgba(192, 132, 252, 0.40);
   }
 
   /* ---- Typography helpers ---- */
@@ -229,30 +280,30 @@
     letter-spacing: -0.01em;
   }
   .label-strong {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
   /* ---- Input styles ---- */
   .input-sa {
-    background-color: #14181e;
-    border: none;
-    border-bottom: 2px solid rgba(66, 71, 84, 0.50);
-    color: #dfe2eb;
+    background-color: var(--surface-low);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
     font-family: 'Manrope', sans-serif;
     font-weight: 500;
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 0.875rem;
+    min-height: 36px;
     transition: border-color 0.2s, box-shadow 0.2s;
     outline: none;
   }
   .input-sa::placeholder {
-    color: #606080;
+    color: var(--text-muted);
   }
   .input-sa:focus {
-    border-bottom-color: #d7ffc5;
-    box-shadow: 0 4px 12px rgba(215, 255, 197, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
   }
   .input-sa:disabled {
     opacity: 0.40;
@@ -270,7 +321,7 @@
 @layer utilities {
   /* Focus-visible ring */
   .focus-ring {
-    outline: 2px solid #528dff;
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 }

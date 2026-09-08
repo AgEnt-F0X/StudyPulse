@@ -1,14 +1,14 @@
 import { useMemo } from 'react'
-import { User, Zap, Medal, Flame, CheckCircle2, FileText, Target } from 'lucide-react'
+import { User, Lightning, Medal, Fire, CheckCircle, Notebook, Target } from '@phosphor-icons/react'
 import { useAuthStore, useAssignmentsStore, useNotesStore, useXPStore, usePomodoroStore, calcStreak } from '../stores'
 import { C, fonts, tint } from '../utils/theme'
 import { PageHeader, Card, StatCard } from '../components/ui'
 
 const BADGES = [
-  { icon: Flame, color: '#ffc88a', label: 'On Fire', desc: '7-day streak', req: s => s.streak >= 7 },
-  { icon: FileText, color: '#d9a9ff', label: 'Note Taker', desc: '10+ notes', req: s => s.notes >= 10 },
-  { icon: CheckCircle2, color: '#a6f0a0', label: 'Finisher', desc: '20 assignments done', req: s => s.completed >= 20 },
-  { icon: Zap, color: '#9db8ff', label: 'XP Hunter', desc: '500+ XP', req: s => s.xp >= 500 },
+  { icon: Fire, color: '#ffc88a', label: 'On Fire', desc: '7-day streak', req: s => s.streak >= 7 },
+  { icon: Notebook, color: '#d9a9ff', label: 'Note Taker', desc: '10+ notes', req: s => s.notes >= 10 },
+  { icon: CheckCircle, color: '#a6f0a0', label: 'Finisher', desc: '20 assignments done', req: s => s.completed >= 20 },
+  { icon: Lightning, color: '#9db8ff', label: 'XP Hunter', desc: '500+ XP', req: s => s.xp >= 500 },
   { icon: Medal, color: '#ffe08a', label: 'Level Up', desc: 'Reached Level 5', req: s => s.level >= 5 },
   { icon: Target, color: '#ff7aa8', label: 'Focused', desc: 'Used Focus Mode', req: s => s.totalFocusMinutes >= 25 },
 ]
@@ -50,14 +50,14 @@ export default function Profile() {
           <img
             src={user.picture}
             alt={userName}
-            style={{ width: 80, height: 80, borderRadius: 20, flexShrink: 0, objectFit: 'cover', border: `2px solid ${tint(C.blue, 0.3)}` }}
+            style={{ width: 80, height: 80, borderRadius: 16, flexShrink: 0, objectFit: 'cover', border: `2px solid ${tint(C.blue, 0.3)}` }}
           />
         ) : (
           <div style={{
-            width: 80, height: 80, borderRadius: 20, flexShrink: 0,
+            width: 80, height: 80, borderRadius: 16, flexShrink: 0,
             background: C.blueDark,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: fonts.heading, fontWeight: 700, fontSize: 32, color: '#0b0e14',
+            fontFamily: fonts.heading, fontWeight: 700, fontSize: 32, color: '#ffffff',
             boxShadow: `0 8px 28px ${tint(C.blueDark, 0.3)}`,
           }}>{userInitial}</div>
         )}
@@ -83,18 +83,18 @@ export default function Profile() {
 
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginBottom: 20 }}>
-        <StatCard icon={Zap} label="Total XP" value={xp} color={C.blue} />
+        <StatCard icon={Lightning} label="Total XP" value={xp} color={C.blue} />
         <StatCard icon={Medal} label="Level" value={level} color={C.purple} />
-        <StatCard icon={Flame} label="Streak" value={`${streak}d`} color={C.orange} />
-        <StatCard icon={CheckCircle2} label="Done" value={completed} color={C.green} />
-        <StatCard icon={FileText} label="Notes" value={noteCount} color={C.pink} />
+        <StatCard icon={Fire} label="Streak" value={`${streak}d`} color={C.orange} />
+        <StatCard icon={CheckCircle} label="Done" value={completed} color={C.green} />
+        <StatCard icon={Notebook} label="Notes" value={noteCount} color={C.pink} />
       </div>
 
       {/* Badges */}
       <Card style={{ padding: '20px 24px' }}>
         <h2 style={{
           fontFamily: fonts.heading, fontSize: 12, fontWeight: 700, color: C.textFaint,
-          letterSpacing: '0.1em', marginBottom: 16, textTransform: 'uppercase',
+          letterSpacing: '0.01em', marginBottom: 16, textTransform: 'none',
         }}>Achievements</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10 }}>
           {BADGES.map(b => {

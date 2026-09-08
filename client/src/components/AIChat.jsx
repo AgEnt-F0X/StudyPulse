@@ -6,7 +6,8 @@ import { generateAI, aiAvailable } from '../utils/ai'
 import { hasClientKey } from '../utils/gemini'
 import { executeAIAssistantCommand } from '../utils/aiActions'
 import { useAuthStore, useAssignmentsStore, useNotesStore, useFlashcardsStore, useStudyPlansStore } from '../stores'
-import { tint, btnGhost } from '../utils/theme'
+import { C, fonts, tint, btnGhost } from '../utils/theme'
+import MarkdownContent from './MarkdownContent'
 
 const QUICK_PROMPTS = [
   "What's due this week?",
@@ -55,7 +56,7 @@ const getLocalResponse = (message, assignments) => {
   }
 
   if (msg.includes('help') || msg.includes('what can') || msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
-    return `Hey! I'm StudyPulse (栞), your AI study companion. I can see you have ${pending.length} pending assignments right now.\n\nHere's what I can do:\n• Prioritize your tasks by deadline + weight\n• Generate personalized study plans\n• Track your grades and predict final scores\n• Answer questions about your schedule\n\nWhat would you like to tackle first?`
+    return `Hey! I'm StudyPulse, your AI study companion. I can see you have ${pending.length} pending assignments right now.\n\nHere's what I can do:\n• Prioritize your tasks by deadline + weight\n• Generate personalized study plans\n• Track your grades and predict final scores\n• Answer questions about your schedule\n\nWhat would you like to tackle first?`
   }
 
   if (msg.includes('tip') || msg.includes('advice') || msg.includes('study')) {
@@ -148,19 +149,23 @@ const AIChat = ({ onClose }) => {
         className="flex items-center justify-between px-4 py-3 flex-shrink-0"
         style={{ background: '#14181e', borderBottom: '1px solid rgba(66,71,84,0.30)' }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <div
             className="w-8 h-8 flex items-center justify-center rounded-lg"
-            style={{ background: '#528dff', color: '#0b0e14' }}
+            style={{
+              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+              color: '#04120c',
+              boxShadow: '0 8px 32px rgba(16,185,129,0.22)',
+            }}
           >
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.875rem', color: '#dfe2eb' }}>
+            <p style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '0.9rem', color: C.text }}>
               StudyPulse AI
             </p>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: '0.7rem', color: '#606080' }}>
-              {hasClientKey() ? '⚡ Gemini 2.0 Flash Active' : '✨ Instant Study Assistant'}
+            <p style={{ fontFamily: fonts.body, fontSize: '0.75rem', color: C.textMuted }}>
+              {hasClientKey() ? '⚡ Connected to AI Engine' : '✨ Instant Study Assistant'}
             </p>
           </div>
         </div>
@@ -168,9 +173,9 @@ const AIChat = ({ onClose }) => {
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg transition-sa"
-            style={{ color: '#8c90a0', background: 'none', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#afc6ff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#8c90a0' }}
+            style={{ color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = C.text }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = C.textMuted }}
           >
             <X className="w-5 h-5" />
           </button>
@@ -178,36 +183,42 @@ const AIChat = ({ onClose }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4" style={{ background: 'rgba(24,28,34,0.30)' }}>
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4" style={{ background: 'var(--surface-low, #0d1712)' }}>
         {messages.length === 0 && (
           <div className="text-center py-6">
             <div
-              className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-lg"
-              style={{ background: 'rgba(82,141,255,0.14)' }}
+              className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-xl"
+              style={{
+                background: 'rgba(59, 130, 246, 0.12)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+              }}
             >
-              <Sparkles className="w-6 h-6" style={{ color: '#afc6ff' }} />
+              <Sparkles className="w-6 h-6" style={{ color: C.blue }} />
             </div>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: '0.875rem', color: '#8c90a0' }}>
-              Ask me anything about your schedule
+            <p style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '0.95rem', color: C.text }}>
+              How can I assist your study session today?
+            </p>
+            <p style={{ fontFamily: fonts.body, fontSize: '0.8rem', color: C.textMuted, marginTop: 4 }}>
+              Ask questions, parse syllabi, or generate customized study plans.
             </p>
             <div className="mt-4 space-y-2">
               {QUICK_PROMPTS.map(prompt => (
                 <button
                   key={prompt}
                   onClick={() => sendMessage(prompt)}
-                  className="w-full text-left px-3 py-2 rounded-lg transition-sa"
+                  className="w-full text-left px-3 py-2.5 rounded-lg transition-sa"
                   style={{
-                    background: 'rgba(82,141,255,0.06)',
-                    border: '1px solid rgba(82,141,255,0.15)',
-                    color: '#8c90a0',
-                    fontFamily: "'Manrope', sans-serif",
-                    fontSize: '0.8rem',
+                    background: 'var(--bg-card, #101c17)',
+                    border: `1px solid ${C.border}`,
+                    color: C.text,
+                    fontFamily: fonts.body,
+                    fontSize: '0.825rem',
                     cursor: 'pointer',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(82,141,255,0.12)'; e.currentTarget.style.color = '#afc6ff' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(82,141,255,0.06)'; e.currentTarget.style.color = '#8c90a0' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.45)'; e.currentTarget.style.background = 'var(--surface-card-hover, #1d273e)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = 'var(--bg-card, #101c17)' }}
                 >
-                  <Zap size={11} style={{ display: 'inline', marginRight: 6 }} />
+                  <Zap size={12} color={C.blue} style={{ display: 'inline', marginRight: 7 }} />
                   {prompt}
                 </button>
               ))}
@@ -223,34 +234,39 @@ const AIChat = ({ onClose }) => {
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] px-4 py-3 flex flex-col gap-2`}
+              className="max-w-[85%] px-4 py-3 flex flex-col gap-2"
               style={{
-                fontFamily: "'Manrope', sans-serif",
+                fontFamily: fonts.body,
                 fontSize: '0.875rem',
                 lineHeight: 1.6,
                 whiteSpace: 'pre-wrap',
-                background: msg.role === 'user' ? '#9db8ff' : '#181c22',
-                color: msg.role === 'user' ? '#0b0e14' : '#dfe2eb',
-                borderRadius: msg.role === 'user' ? '10px 10px 2px 10px' : '10px 10px 10px 2px',
-                border: msg.role === 'user' ? 'none' : '1px solid rgba(66,71,84,0.25)',
+                background: msg.role === 'user' ? 'var(--accent-blue, #10b981)' : 'var(--bg-card, #101c17)',
+                color: msg.role === 'user' ? '#ffffff' : C.text,
+                borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                border: msg.role === 'user' ? 'none' : `1px solid ${C.border}`,
+                boxShadow: msg.role === 'user' ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 3px rgba(0,0,0,0.2)',
               }}
             >
-              <p>{msg.content}</p>
+              {msg.role === 'user' ? (
+                <p style={{ margin: 0 }}>{msg.content}</p>
+              ) : (
+                <MarkdownContent content={msg.content} />
+              )}
               
               {/* Action Cards */}
               {msg.actionCard?.type === 'assignment' && (
                 <div style={{
                   padding: '8px 12px', borderRadius: 8,
-                  background: 'rgba(77,255,145,0.1)', border: '1px solid rgba(77,255,145,0.3)',
+                  background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <CheckCircle2 size={14} color="#4dff91" />
-                    <span style={{ fontSize: 11, color: '#4dff91', fontWeight: 600 }}>
+                    <CheckCircle2 size={14} color="#4ade80" />
+                    <span style={{ fontSize: 11, color: '#4ade80', fontWeight: 600 }}>
                       Added (Due: {msg.actionCard.dueDate})
                     </span>
                   </div>
-                  <button onClick={() => navigate('/assignments')} style={{ ...btnGhost, fontSize: 10, padding: '2px 6px', color: '#afc6ff' }}>
+                  <button onClick={() => navigate('/assignments')} style={{ ...btnGhost, fontSize: 10, padding: '2px 8px', color: C.blue }}>
                     View <ArrowRight size={10} />
                   </button>
                 </div>
@@ -259,22 +275,24 @@ const AIChat = ({ onClose }) => {
               {msg.actionCard?.type === 'save_note' && (
                 <div style={{
                   padding: '8px 12px', borderRadius: 8,
-                  background: 'rgba(82,141,255,0.1)', border: '1px solid rgba(82,141,255,0.3)',
+                  background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                  <span style={{ fontSize: 11, color: '#afc6ff', fontWeight: 600 }}>Summary Note</span>
+                  <span style={{ fontSize: 11, color: C.blue, fontWeight: 600 }}>Summary Note</span>
                   <button
                     onClick={() => {
-                      addNote({ title: msg.actionCard.title, content: msg.actionCard.content, color: '#4daaff' })
+                      addNote({ title: msg.actionCard.title, content: msg.actionCard.content, color: '#3b82f6' })
                     }}
-                    style={{ ...btnGhost, fontSize: 10, padding: '2px 6px', color: '#4daaff' }}
+                    style={{ ...btnGhost, fontSize: 10, padding: '2px 8px', color: C.blue }}
                   >
                     + Save to Notes
                   </button>
                 </div>
               )}
 
-              <p style={{ fontSize: '0.65rem', marginTop: 2, opacity: 0.6 }}>{msg.timestamp}</p>
+              <p style={{ fontSize: '0.68rem', marginTop: 2, color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : C.textMuted }}>
+                {msg.timestamp}
+              </p>
             </div>
           </motion.div>
         ))}
@@ -282,15 +300,15 @@ const AIChat = ({ onClose }) => {
         {generating && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
             <div style={{
-              padding: '12px 16px', borderRadius: '10px 10px 10px 2px',
-              background: '#181c22', border: '1px solid rgba(66,71,84,0.25)',
+              padding: '12px 16px', borderRadius: '12px 12px 12px 2px',
+              background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}`,
             }}>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1.5 items-center">
                 {[0, 1, 2].map((i) => (
                   <motion.span
                     key={i}
                     className="w-2 h-2 rounded-full"
-                    style={{ background: '#8c90a0', display: 'block' }}
+                    style={{ background: C.blue, display: 'block' }}
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
                   />
@@ -303,11 +321,11 @@ const AIChat = ({ onClose }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(66,71,84,0.30)' }}>
+      {/* Input Bar */}
+      <div className="p-3 flex-shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: 'var(--bg-primary, #0a120e)' }}>
         <div
           className="flex items-center gap-2 px-3 py-2 rounded-xl"
-          style={{ background: '#14181e', border: '1px solid rgba(66,71,84,0.40)' }}
+          style={{ background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}` }}
         >
           <textarea
             value={input}
@@ -316,15 +334,15 @@ const AIChat = ({ onClose }) => {
             placeholder="Ask StudyPulse..."
             rows={1}
             className="flex-1 bg-transparent resize-none outline-none min-h-[24px] text-sm"
-            style={{ fontFamily: "'Manrope', sans-serif", color: '#dfe2eb' }}
+            style={{ fontFamily: fonts.body, color: C.text }}
           />
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || generating}
             className="p-2 rounded-lg transition-sa"
             style={{
-              background: input.trim() && !generating ? '#528dff' : 'rgba(66,71,84,0.25)',
-              color: input.trim() && !generating ? '#0b0e14' : '#606080',
+              background: input.trim() && !generating ? 'var(--accent-blue, #10b981)' : 'rgba(255,255,255,0.06)',
+              color: input.trim() && !generating ? '#ffffff' : C.textFaint,
               border: 'none', cursor: input.trim() ? 'pointer' : 'default',
             }}
           >

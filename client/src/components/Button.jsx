@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
 
+// Botanical Scholar tactile buttons — gradients only on brand moments.
+// primary: emerald action · amber: streak/XP/AI · secondary: frosted · ghost: minimal
 const Button = ({
   children,
   variant = 'primary',
@@ -13,68 +15,73 @@ const Button = ({
   ...props
 }) => {
   const sizes = {
-    sm: 'text-xs py-1.5 px-3 rounded',
-    md: 'text-sm py-2 px-4 rounded',
-    lg: 'text-base py-2.5 px-6 rounded',
+    sm: 'text-xs py-1.5 px-3 rounded-lg',
+    md: 'text-sm py-2 px-4 rounded-lg',
+    lg: 'text-base py-2.5 px-6 rounded-lg',
   }
 
-  // Flat, solid fills — no gradient CTAs.
   const variantStyles = {
     primary: {
-      bg: '#528dff',
-      color: '#0b0e14',
+      background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+      color: '#04120c',
+      border: 'none',
+      boxShadow:
+        'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(16,185,129,0.22)',
+    },
+    amber: {
+      background: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
+      color: '#1a1005',
+      border: 'none',
+      boxShadow:
+        'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(245,158,11,0.22)',
     },
     secondary: {
-      bg: '#4dff91',
-      color: '#0b0e14',
-    },
-    tertiary: {
-      bg: '#c44dff',
-      color: '#10141a',
+      background: 'var(--bg-card-glass, rgba(16,28,22,0.75))',
+      color: 'var(--text-primary, #f0fdf4)',
+      border: '1px solid var(--border-color, rgba(52,211,153,0.14))',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
     },
     ghost: {
-      bg: 'transparent',
-      color: '#afc6ff',
-      border: '1px solid rgba(175, 198, 255, 0.25)',
+      background: 'transparent',
+      color: 'var(--text-primary, #f0fdf4)',
+      border: '1px solid transparent',
+      boxShadow: 'none',
     },
     danger: {
-      bg: '#ff6b7a',
-      color: '#10141a',
+      background: '#f87171',
+      color: '#140a0a',
+      border: 'none',
+      boxShadow: 'none',
     },
   }
 
-  const style = variant === 'ghost'
-    ? {
-        background: variantStyles.ghost.bg,
-        color: variantStyles.ghost.color,
-        border: variantStyles.ghost.border,
-        padding: '0.625rem 1.25rem',
-      }
-    : {
-        background: variantStyles[variant].bg,
-        color: variantStyles[variant].color,
-        padding: '0.625rem 1.25rem',
-      }
+  const resolved = variantStyles[variant] || variantStyles.primary
 
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={disabled || loading ? {} : { scale: 1.02 }}
+      whileTap={disabled || loading ? {} : { scale: 0.97 }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
       className={`
         flex items-center justify-center gap-2 font-medium
         focus-ring transition-sa whitespace-nowrap
+        focus-visible:ring-2 focus-visible:ring-primary/30
         ${sizes[size]}
         ${className}
       `}
       style={{
-        ...style,
-        borderRadius: '6px',
+        ...resolved,
+        borderRadius: 8,
         fontFamily: "'Space Grotesk', sans-serif",
-        fontWeight: 600,
-        letterSpacing: '0.04em',
+        fontWeight: 700,
+        letterSpacing: '0.01em',
+        padding: '0.625rem 1.25rem',
+        minHeight: 36,
         opacity: disabled || loading ? 0.5 : 1,
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
         fontSize: size === 'sm' ? '0.75rem' : size === 'lg' ? '1rem' : '0.875rem',
@@ -92,6 +99,7 @@ const Button = ({
         <Icon
           className="flex-shrink-0"
           size={size === 'sm' ? 14 : size === 'lg' ? 20 : 16}
+          strokeWidth={1.75}
           style={{ display: 'block' }}
         />
       )}

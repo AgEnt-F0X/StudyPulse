@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, AlertTriangle } from 'lucide-react'
 
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -25,19 +25,19 @@ export default class ErrorBoundary extends Component {
     if (inline) {
       return (
         <div style={{
-          padding: '12px 16px', borderRadius: 8,
-          background: 'rgba(255,77,106,0.08)',
-          border: '1px solid rgba(255,77,106,0.3)',
-          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '12px 16px', borderRadius: 10,
+          background: 'rgba(239,68,68,0.08)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
         }}>
-          <span style={{ fontFamily: 'VT323', fontSize: 15, color: '#ff4d6a' }}>
+          <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: '#f87171' }}>
             Component error — refresh to try again
           </span>
           <button
             onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff4d6a' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171', display: 'flex', alignItems: 'center', padding: 4 }}
           >
-            <RefreshCw size={13} />
+            <RefreshCw size={14} />
           </button>
         </div>
       )
@@ -45,33 +45,42 @@ export default class ErrorBoundary extends Component {
 
     return (
       <div style={{
-        minHeight: '100vh', background: '#0b0e14',
+        minHeight: '100vh', background: 'var(--bg-primary, #0a120e)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16,
         padding: 32,
       }}>
         <div style={{
-          width: 56, height: 56, borderRadius: 6,
-          background: '#ff4d6a',
+          width: 56, height: 56, borderRadius: 14,
+          background: 'rgba(239,68,68,0.12)',
+          border: '1px solid rgba(239,68,68,0.3)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <span style={{ color: '#fff', fontSize: 24 }}>栞</span>
+          <AlertTriangle size={28} color="#ef4444" />
         </div>
-        <p style={{ fontFamily: '"Press Start 2P"', fontSize: 11, color: '#ff4d6a' }}>
-          SOMETHING WENT WRONG
+        <p style={{
+          fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 700,
+          color: 'var(--text-primary, #f0f4fc)', letterSpacing: '-0.01em', margin: 0,
+        }}>
+          Something went wrong
         </p>
-        <p style={{ fontFamily: 'VT323', fontSize: 16, color: '#606080', maxWidth: 400, textAlign: 'center' }}>
+        <p style={{
+          fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-secondary, #94a3b8)',
+          maxWidth: 420, textAlign: 'center', lineHeight: 1.5, margin: 0,
+        }}>
           {this.state.error?.message || 'An unexpected error occurred.'}
         </p>
         <button
           onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }}
           style={{
-            padding: '10px 20px', borderRadius: 8, cursor: 'pointer',
-            background: 'rgba(196,77,255,0.15)', border: '1px solid rgba(196,77,255,0.4)',
-            color: '#c44dff', fontFamily: '"Press Start 2P"', fontSize: 9,
-            display: 'flex', alignItems: 'center', gap: 6,
+            marginTop: 8,
+            padding: '11px 22px', borderRadius: 10, cursor: 'pointer',
+            background: 'var(--accent-blue, #10b981)', border: 'none',
+            color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+            display: 'flex', alignItems: 'center', gap: 8,
+            boxShadow: '0 4px 14px rgba(59,130,246,0.35)',
           }}
         >
-          <RefreshCw size={12} /> RELOAD APP
+          <RefreshCw size={14} /> Reload App
         </button>
       </div>
     )

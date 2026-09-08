@@ -70,15 +70,15 @@ const QuickCapture = () => {
     <>
       {/* FAB */}
       <motion.button
-        whileHover={{ scale: 1.08 }}
+        whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.94 }}
         onClick={() => setOpen(o => !o)}
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 120,
-          width: 52, height: 52, borderRadius: '50%',
-          background: open ? '#ff4d6a' : '#c44dff',
-          border: 'none', cursor: 'pointer',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          width: 50, height: 50, borderRadius: '50%',
+          background: open ? '#ef4444' : 'var(--accent-blue, #10b981)',
+          border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer',
+          boxShadow: '0 8px 24px -4px rgba(59,130,246,0.45)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
         title="Quick capture (Ctrl+Shift+A)"
@@ -97,20 +97,20 @@ const QuickCapture = () => {
             exit={{ opacity: 0, scale: 0.9, y: 16 }}
             transition={{ type: 'spring', stiffness: 360, damping: 28 }}
             style={{
-              position: 'fixed', bottom: 86, right: 24, zIndex: 120,
+              position: 'fixed', bottom: 84, right: 24, zIndex: 120,
               width: 'min(360px, calc(100vw - 32px))',
-              background: '#12161f',
-              border: '1px solid rgba(196,77,255,0.35)',
-              borderRadius: 8, padding: '20px 20px 16px',
-              boxShadow: '0 8px 48px rgba(0,0,0,0.6)',
+              background: 'var(--bg-card, #101c17)',
+              border: '1px solid var(--border-color, #232d42)',
+              borderRadius: 14, padding: '20px 20px 18px',
+              boxShadow: '0 16px 40px -8px rgba(0,0,0,0.6)',
             }}
           >
             {/* Title */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontFamily: '"Press Start 2P"', fontSize: 9, color: '#c44dff' }}>
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', letterSpacing: '0.04em' }}>
                 QUICK CAPTURE
               </span>
-              <span style={{ fontFamily: 'VT323', fontSize: 12, color: '#424754' }}>Ctrl+Shift+A</span>
+              <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, fontWeight: 600, color: 'var(--text-muted, #64748b)' }}>Ctrl+Shift+A</span>
             </div>
 
             {/* Assignment title */}
@@ -122,9 +122,9 @@ const QuickCapture = () => {
               placeholder="Assignment name..."
               style={{
                 width: '100%', padding: '10px 12px', marginBottom: 10,
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8,
-                color: '#dfe2eb', fontFamily: 'Manrope, sans-serif', fontSize: 15,
+                background: 'var(--bg-secondary, #0e131f)',
+                border: '1px solid var(--border-color, #232d42)', borderRadius: 8,
+                color: 'var(--text-primary, #f0f4fc)', fontFamily: "'Manrope', sans-serif", fontSize: 14,
                 outline: 'none', boxSizing: 'border-box',
               }}
             />
@@ -134,9 +134,12 @@ const QuickCapture = () => {
               <select
                 value={courseId}
                 onChange={e => setCourseId(e.target.value)}
-                style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-                  color: courseId ? '#dfe2eb' : '#606080', fontFamily: 'VT323', fontSize: 15, cursor: 'pointer' }}
+                style={{
+                  padding: '8px 10px', background: 'var(--bg-secondary, #0e131f)',
+                  border: '1px solid var(--border-color, #232d42)', borderRadius: 8,
+                  color: courseId ? 'var(--text-primary, #f0f4fc)' : 'var(--text-muted, #64748b)',
+                  fontFamily: "'Manrope', sans-serif", fontSize: 13, cursor: 'pointer'
+                }}
               >
                 <option value="">Course…</option>
                 {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -147,9 +150,12 @@ const QuickCapture = () => {
                 type="date"
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
-                style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-                  color: dueDate ? '#dfe2eb' : '#606080', fontFamily: 'VT323', fontSize: 15, cursor: 'pointer' }}
+                style={{
+                  padding: '8px 10px', background: 'var(--bg-secondary, #0e131f)',
+                  border: '1px solid var(--border-color, #232d42)', borderRadius: 8,
+                  color: dueDate ? 'var(--text-primary, #f0f4fc)' : 'var(--text-muted, #64748b)',
+                  fontFamily: "'Manrope', sans-serif", fontSize: 13, cursor: 'pointer'
+                }}
               />
             </div>
 
@@ -160,14 +166,15 @@ const QuickCapture = () => {
                   key={p}
                   onClick={() => setPriority(p)}
                   style={{
-                    flex: 1, padding: '6px', borderRadius: 6, cursor: 'pointer',
-                    background: priority === p ? `${PRIORITY_COLORS[p]}20` : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${priority === p ? PRIORITY_COLORS[p] : 'rgba(255,255,255,0.08)'}`,
-                    color: priority === p ? PRIORITY_COLORS[p] : '#606080',
-                    fontFamily: '"Press Start 2P"', fontSize: 7, transition: 'all 0.15s',
+                    flex: 1, padding: '7px 0', borderRadius: 6, cursor: 'pointer',
+                    background: priority === p ? `${PRIORITY_COLORS[p]}20` : 'var(--bg-secondary, #0e131f)',
+                    border: `1px solid ${priority === p ? PRIORITY_COLORS[p] : 'var(--border-color, #232d42)'}`,
+                    color: priority === p ? PRIORITY_COLORS[p] : 'var(--text-muted, #64748b)',
+                    fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 600,
+                    textTransform: 'capitalize', transition: 'all 0.15s',
                   }}
                 >
-                  {p.toUpperCase()}
+                  {p}
                 </button>
               ))}
             </div>
@@ -177,22 +184,24 @@ const QuickCapture = () => {
               onClick={handleSubmit}
               disabled={!title.trim()}
               style={{
-                width: '100%', padding: '10px', borderRadius: 8, cursor: 'pointer',
+                width: '100%', padding: '11px', borderRadius: 8, cursor: title.trim() ? 'pointer' : 'default',
                 background: saved
-                  ? '#4dff91'
+                  ? '#22c55e'
                   : title.trim()
-                  ? '#c44dff'
-                  : 'rgba(255,255,255,0.06)',
+                  ? 'var(--accent-blue, #10b981)'
+                  : 'var(--bg-secondary, #0e131f)',
                 border: 'none',
-                color: title.trim() ? '#fff' : '#424754',
-                fontFamily: '"Press Start 2P"', fontSize: 9,
+                color: title.trim() ? '#fff' : 'var(--text-muted, #64748b)',
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+                letterSpacing: '0.02em',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 transition: 'all 0.2s',
+                boxShadow: title.trim() ? '0 4px 14px rgba(59,130,246,0.35)' : 'none',
               }}
             >
               {saved
-                ? <><Check size={14} /> SAVED!</>
-                : <><Plus size={14} /> ADD ASSIGNMENT</>}
+                ? <><Check size={15} /> Saved!</>
+                : <><Plus size={15} /> Add Assignment</>}
             </button>
           </motion.div>
         )}

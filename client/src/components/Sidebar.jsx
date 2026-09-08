@@ -1,48 +1,50 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
-  Home, ClipboardList, CalendarDays, BarChart3, FileText, Layers,
-  Puzzle, CheckCircle2, TrendingUp, BookOpen, Trophy, Target,
-  Upload, User, Settings, X, Sparkles,
-} from 'lucide-react'
+  House, ClipboardText, CalendarDots, ChartBar, Notebook, Cards,
+  Brain, CheckCircle, TrendUp, BookOpenText, Trophy, Target,
+  UploadSimple, User, Gear, X, Sparkle, Plant,
+  SidebarSimple
+} from '@phosphor-icons/react'
 import { useAuthStore, useUIStore } from '../stores'
-import { C, fonts, tint } from '../utils/theme'
+import { C, fonts } from '../utils/theme'
 
 const navSections = [
   {
     label: 'Overview',
     items: [
-      { icon: Home, label: 'Home', path: '/home' },
-      { icon: ClipboardList, label: 'Assignments', path: '/assignments' },
-      { icon: CalendarDays, label: 'Calendar', path: '/calendar' },
-      { icon: BarChart3, label: 'Grades', path: '/grades' },
+      { icon: House, label: 'Home', path: '/home', shortcut: 'gh' },
+      { icon: ClipboardText, label: 'Assignments', path: '/assignments', shortcut: 'ga' },
+      { icon: CalendarDots, label: 'Calendar', path: '/calendar', shortcut: 'gc' },
+      { icon: ChartBar, label: 'Grades', path: '/grades', shortcut: 'gg' },
     ],
   },
   {
     label: 'Study',
     items: [
-      { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
-      { icon: FileText, label: 'Notes', path: '/notes' },
-      { icon: Layers, label: 'Flashcards', path: '/flashcards' },
-      { icon: Puzzle, label: 'Quiz', path: '/quiz' },
-      { icon: BookOpen, label: 'Study Plans', path: '/study-plans' },
+      { icon: Sparkle, label: 'AI Assistant', path: '/assistant' },
+      { icon: Notebook, label: 'Notes', path: '/notes', shortcut: 'gn' },
+      { icon: Cards, label: 'Flashcards', path: '/flashcards', shortcut: 'gf' },
+      { icon: Brain, label: 'Quiz', path: '/quiz', shortcut: 'gq' },
+      { icon: BookOpenText, label: 'Study Plans', path: '/study-plans', shortcut: 'gs' },
       { icon: Target, label: 'Focus Mode', path: '/focus' },
     ],
   },
   {
     label: 'Progress',
     items: [
-      { icon: CheckCircle2, label: 'Habits', path: '/habits' },
-      { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
-      { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
+      { icon: CheckCircle, label: 'Habits', path: '/habits', shortcut: 'gb' },
+      { icon: TrendUp, label: 'Analytics', path: '/analytics', shortcut: 'gr' },
+      { icon: Trophy, label: 'Leaderboard', path: '/leaderboard', shortcut: 'gl' },
     ],
   },
   {
     label: 'Account',
     items: [
-      { icon: Upload, label: 'Import', path: '/import' },
+      { icon: UploadSimple, label: 'Import', path: '/import', shortcut: 'gi' },
       { icon: User, label: 'Profile', path: '/profile' },
-      { icon: Settings, label: 'Settings', path: '/settings' },
+      { icon: Gear, label: 'Settings', path: '/settings' },
     ],
   },
 ]
@@ -51,15 +53,13 @@ const Sidebar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuthStore()
-  const { sidebarMobileOpen, closeSidebarMobile } = useUIStore()
-  const [collapsed, setCollapsed] = useState(false)
+  const { sidebarCollapsed, toggleSidebar, sidebarMobileOpen, closeSidebarMobile } = useUIStore()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1024
       setIsMobile(mobile)
-      setCollapsed(mobile ? false : window.innerWidth < 1280)
     }
     handleResize()
     window.addEventListener('resize', handleResize)
@@ -82,8 +82,8 @@ const Sidebar = () => {
     : user?.name || user?.username || 'Student'
   const userInitial = userName[0]?.toUpperCase() || 'S'
 
-  const showLabels = !collapsed || isMobile
-  const sidebarWidth = showLabels ? 240 : 72
+  const showLabels = !sidebarCollapsed || isMobile
+  const sidebarWidth = showLabels ? 248 : 60
 
   return (
     <>
@@ -92,76 +92,129 @@ const Sidebar = () => {
         <div
           onClick={closeSidebarMobile}
           style={{
-            position: 'fixed', inset: 0, background: 'rgba(4,6,10,0.75)',
+            position: 'fixed', inset: 0, background: 'rgba(4,10,8,0.7)',
+            backdropFilter: 'blur(4px)',
             zIndex: 40,
           }}
         />
       )}
 
+      {/* Floating glass dock */}
       <aside
         style={{
           position: 'fixed',
-          top: 0, left: 0,
-          height: '100%',
+          top: 12, left: 12, bottom: 12,
           width: sidebarWidth,
           zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
-          background: '#0d111a',
-          borderRight: `1px solid ${C.borderSoft}`,
-          transition: 'width 0.22s ease, transform 0.25s ease',
-          transform: isMobile && !sidebarMobileOpen ? 'translateX(-100%)' : 'translateX(0)',
+          background: 'var(--bg-card-glass, rgba(16,28,22,0.75))',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid var(--border-color, rgba(52,211,153,0.14))',
+          borderRadius: 16,
+          boxShadow: 'var(--shadow-lift, 0 12px 32px rgba(0,0,0,0.45)), inset 0 1px 0 rgba(255,255,255,0.08)',
+          transition: 'width 0.22s cubic-bezier(0.2, 0, 0, 1), transform 0.25s ease',
+          transform: isMobile && !sidebarMobileOpen ? 'translateX(calc(-100% - 12px))' : 'translateX(0)',
+          overflow: 'hidden',
         }}
       >
-        {/* Logo */}
+        {/* Brand */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '18px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: showLabels ? 'flex-start' : 'center',
+          gap: showLabels ? 10 : 0,
+          padding: showLabels ? '0 12px' : 0,
           borderBottom: `1px solid ${C.borderSoft}`,
           flexShrink: 0,
+          height: 54,
+          boxSizing: 'border-box',
+          width: '100%',
         }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 4, flexShrink: 0,
-            background: C.blueDark,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{
-              color: '#0b0e14', fontWeight: 700, fontSize: 17,
-              fontFamily: fonts.heading,
-            }}>栞</span>
-          </div>
+          <button
+            onClick={!showLabels ? toggleSidebar : undefined}
+            title={!showLabels ? "Expand sidebar (⌘B)" : undefined}
+            aria-label={!showLabels ? "Expand sidebar (⌘B)" : "StudyPulse"}
+            style={{
+              width: 34, height: 34, borderRadius: 8, flexShrink: 0,
+              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 8px rgba(0,0,0,0.3)',
+              border: 'none', padding: 0,
+              cursor: !showLabels ? 'pointer' : 'default',
+              transition: 'transform 0.15s ease',
+            }}
+            onMouseEnter={e => { if (!showLabels) e.currentTarget.style.transform = 'scale(1.06)' }}
+            onMouseLeave={e => { if (!showLabels) e.currentTarget.style.transform = 'scale(1)' }}
+          >
+            <Plant size={19} color="#04120c" weight="duotone" />
+          </button>
           {showLabels && (
-            <div>
-              <div style={{
-                fontFamily: fonts.heading, fontWeight: 700, fontSize: 15,
-                color: C.text, letterSpacing: '0.06em',
-              }}>STUDYPULSE</div>
-              <div style={{ fontFamily: fonts.body, fontSize: 11, color: C.textFaint }}>
-                Your study space
+            <>
+              <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                <div style={{
+                  fontFamily: fonts.heading, fontWeight: 700, fontSize: 14,
+                  color: C.text, letterSpacing: '-0.02em', lineHeight: 1.2,
+                  whiteSpace: 'nowrap',
+                }}>StudyPulse</div>
+                <div style={{
+                  fontFamily: fonts.body, fontSize: 10.5, color: C.textMuted, fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                }}>
+                  Academic Workspace
+                </div>
               </div>
-            </div>
-          )}
-          {sidebarMobileOpen && (
-            <button
-              onClick={closeSidebarMobile}
-              aria-label="Close menu"
-              style={{
-                marginLeft: 'auto', background: 'none', border: 'none',
-                color: C.textMuted, cursor: 'pointer', padding: 4, display: 'flex',
-              }}
-            ><X size={18} /></button>
+              {!isMobile && (
+                <button
+                  onClick={toggleSidebar}
+                  title="Collapse sidebar (⌘B)"
+                  aria-label="Collapse sidebar (⌘B)"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 26, height: 26, borderRadius: 6,
+                    background: 'transparent', border: 'none',
+                    color: C.textMuted, cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'background 0.12s ease, color 0.12s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = C.text }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textMuted }}
+                >
+                  <SidebarSimple size={16} weight="duotone" />
+                </button>
+              )}
+              {sidebarMobileOpen && (
+                <button
+                  onClick={closeSidebarMobile}
+                  aria-label="Close menu"
+                  style={{
+                    marginLeft: 'auto', background: 'none', border: 'none',
+                    color: C.textMuted, cursor: 'pointer', padding: 4, display: 'flex',
+                  }}
+                ><X size={18} /></button>
+              )}
+            </>
           )}
         </div>
 
         {/* Nav */}
-        <nav className="scrollbar-dense" style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 12px' }}>
+        <nav className="scrollbar-dense" style={{
+          flex: 1,
+          overflowY: 'auto',
+          scrollbarWidth: 'none',
+          padding: showLabels ? '10px 8px' : '10px 0',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}>
           {navSections.map((section) => (
-            <div key={section.label} style={{ marginBottom: 10 }}>
+            <div key={section.label} style={{ marginBottom: showLabels ? 12 : 8, width: '100%' }}>
               {showLabels && (
                 <div style={{
-                  fontFamily: fonts.heading, fontSize: 10, fontWeight: 700,
-                  letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: C.textFaint, padding: '8px 12px 4px',
+                  fontFamily: fonts.body, fontSize: 10.5, fontWeight: 600,
+                  letterSpacing: '0.02em',
+                  color: C.textFaint, padding: '4px 10px 3px',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>{section.label}</div>
               )}
               {section.items.map((item) => {
@@ -171,25 +224,27 @@ const Sidebar = () => {
                   <button
                     key={item.path}
                     onClick={() => handleNav(item.path)}
-                    title={!showLabels ? item.label : undefined}
+                    title={!showLabels ? `${item.label}${item.shortcut ? ` (${item.shortcut})` : ''}` : item.shortcut}
                     style={{
-                      width: '100%',
+                      width: showLabels ? '100%' : 36,
+                      height: 36,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 11,
-                      padding: showLabels ? '9px 12px' : '10px 0',
                       justifyContent: showLabels ? 'flex-start' : 'center',
-                      borderRadius: 10,
-                      border: 'none',
+                      gap: showLabels ? 10 : 0,
+                      padding: showLabels ? '0 10px' : 0,
+                      margin: showLabels ? '0 0 2px 0' : '0 auto 4px auto',
+                      borderRadius: 8,
+                      border: `1px solid ${active ? 'rgba(52,211,153,0.30)' : 'transparent'}`,
                       cursor: 'pointer',
-                      marginBottom: 2,
-                      background: active ? tint(C.blueDark, 0.14) : 'transparent',
-                      color: active ? C.blue : C.textMuted,
-                      boxShadow: active ? `inset 2px 0 0 ${C.blueDark}` : 'none',
-                      transition: 'background 0.13s ease, color 0.13s ease',
+                      position: 'relative',
+                      background: active ? 'var(--accent-blue-soft, rgba(16,185,129,0.14))' : 'transparent',
+                      color: active ? C.primary : C.textMuted,
+                      transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                       fontFamily: fonts.body,
                       fontSize: 13,
                       fontWeight: active ? 700 : 500,
+                      boxSizing: 'border-box',
                     }}
                     onMouseEnter={(e) => {
                       if (!active) {
@@ -204,8 +259,20 @@ const Sidebar = () => {
                       }
                     }}
                   >
-                    <Icon size={17} strokeWidth={active ? 2.4 : 2} style={{ flexShrink: 0 }} />
-                    {showLabels && <span>{item.label}</span>}
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 18, height: 18 }}>
+                      <Icon size={18} weight={active ? "fill" : "duotone"} />
+                    </span>
+                    {showLabels && (
+                      <span style={{
+                        flex: 1,
+                        textAlign: 'left',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {item.label}
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -213,47 +280,58 @@ const Sidebar = () => {
           ))}
         </nav>
 
-        {/* User section */}
+        {/* User profile */}
         <div style={{
-          padding: '12px 10px',
+          padding: showLabels ? '10px 8px' : '10px 0',
           borderTop: `1px solid ${C.borderSoft}`,
           flexShrink: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+          boxSizing: 'border-box',
         }}>
           <button
             onClick={() => handleNav('/profile')}
             style={{
-              width: '100%',
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: showLabels ? '8px 10px' : '8px 0',
+              width: showLabels ? '100%' : 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: showLabels ? 'flex-start' : 'center',
-              borderRadius: 10,
+              gap: showLabels ? 9 : 0,
+              padding: showLabels ? '0 8px' : 0,
+              margin: '0 auto',
+              borderRadius: 8,
               border: `1px solid ${C.borderSoft}`,
-              background: 'rgba(255,255,255,0.02)',
+              background: 'rgba(16,185,129,0.04)',
               cursor: 'pointer',
-              transition: 'background 0.13s ease',
+              transition: 'background 0.13s ease, border-color 0.13s ease',
+              boxSizing: 'border-box',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
+            title={!showLabels ? `${userName} (${user?.email || 'Profile'})` : undefined}
           >
             <div style={{
-              width: 32, height: 32, borderRadius: 4, flexShrink: 0,
-              background: C.purpleDark,
+              width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#0b0e14', fontWeight: 700, fontSize: 13,
+              color: '#04120c', fontWeight: 700, fontSize: 12,
               fontFamily: fonts.heading,
             }}>
               {userInitial}
             </div>
             {showLabels && (
-              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+              <div style={{
+                flex: 1, minWidth: 0, textAlign: 'left',
+                overflow: 'hidden',
+              }}>
                 <div style={{
                   fontFamily: fonts.body,
-                  fontSize: 12.5, fontWeight: 700, color: C.text,
+                  fontSize: 12, fontWeight: 700, color: C.text,
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>{userName}</div>
                 <div style={{
                   fontFamily: fonts.body,
-                  fontSize: 11, color: C.textFaint,
+                  fontSize: 10.5, color: C.textMuted,
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>{user?.email || 'View profile'}</div>
               </div>

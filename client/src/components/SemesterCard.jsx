@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, X, Download, Share2, Star } from 'lucide-react'
+import { Trophy, X, DownloadSimple, ShareNetwork, Star } from '@phosphor-icons/react'
 import { useAssignmentsStore, useGradesStore, useXPStore, useAuthStore, usePomodoroStore } from '../stores'
 import { getLevel } from '../stores'
 
@@ -10,15 +10,15 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   canvas.height = 1000
   const ctx = canvas.getContext('2d')
 
-  // Background gradient
+  // Background gradient - Deep Pine Obsidian
   const bg = ctx.createLinearGradient(0, 0, 800, 1000)
-  bg.addColorStop(0, '#0d111a')
-  bg.addColorStop(0.5, '#121620')
-  bg.addColorStop(1, '#0a0e14')
+  bg.addColorStop(0, '#0a120e')
+  bg.addColorStop(0.5, '#101c17')
+  bg.addColorStop(1, '#070c09')
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, 800, 1000)
 
-  // Decorative orbs
+  // Decorative botanical orbs
   const orb = (x, y, r, color) => {
     const g = ctx.createRadialGradient(x, y, 0, x, y, r)
     g.addColorStop(0, color)
@@ -26,39 +26,39 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
     ctx.fillStyle = g
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
   }
-  orb(150, 200, 250, 'rgba(196,77,255,0.10)')
-  orb(650, 700, 200, 'rgba(82,141,255,0.09)')
-  orb(400, 500, 180, 'rgba(77,255,145,0.05)')
+  orb(150, 200, 250, 'rgba(16,185,129,0.12)')
+  orb(650, 700, 200, 'rgba(245,158,11,0.09)')
+  orb(400, 500, 180, 'rgba(52,211,153,0.06)')
 
   // Top border accent
   const topGrad = ctx.createLinearGradient(0, 0, 800, 0)
-  topGrad.addColorStop(0, '#c44dff')
-  topGrad.addColorStop(0.5, '#528dff')
-  topGrad.addColorStop(1, '#4dff91')
+  topGrad.addColorStop(0, '#10b981')
+  topGrad.addColorStop(0.5, '#34d399')
+  topGrad.addColorStop(1, '#f59e0b')
   ctx.fillStyle = topGrad
   ctx.fillRect(0, 0, 800, 4)
 
   // Header
-  ctx.fillStyle = '#c44dff'
-  ctx.font = 'bold 14px monospace'
-  ctx.fillText('栞 STUDYPULSE', 48, 52)
+  ctx.fillStyle = '#10b981'
+  ctx.font = 'bold 15px "Space Grotesk", sans-serif'
+  ctx.fillText('🌿 STUDYPULSE', 48, 52)
 
-  ctx.fillStyle = '#424754'
-  ctx.font = '12px monospace'
+  ctx.fillStyle = '#769989'
+  ctx.font = '12px "Manrope", sans-serif'
   const sem = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   ctx.fillText(`SEMESTER REPORT · ${sem.toUpperCase()}`, 48, 72)
 
   // Student name
-  ctx.fillStyle = '#ffffff'
-  ctx.font = 'bold 38px Arial'
+  ctx.fillStyle = '#f0fdf4'
+  ctx.font = 'bold 36px "Space Grotesk", sans-serif'
   ctx.fillText(user?.name || 'Student', 48, 140)
 
-  ctx.fillStyle = '#606080'
-  ctx.font = '14px Arial'
+  ctx.fillStyle = '#769989'
+  ctx.font = '14px "Manrope", sans-serif'
   ctx.fillText(user?.email || '', 48, 165)
 
   // Level badge
-  const lvlColor = level?.color || '#afc6ff'
+  const lvlColor = level?.color || '#34d399'
   ctx.fillStyle = `${lvlColor}22`
   roundRect(ctx, 48, 185, 160, 36, 18)
   ctx.fill()
@@ -67,38 +67,42 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   roundRect(ctx, 48, 185, 160, 36, 18)
   ctx.stroke()
   ctx.fillStyle = lvlColor
-  ctx.font = 'bold 12px monospace'
+  ctx.font = 'bold 12px "Manrope", sans-serif'
   ctx.fillText(`Lv.${level?.level || 1}  ${(level?.title || 'Freshman').toUpperCase()}`, 62, 209)
 
-  // XP pill
-  ctx.fillStyle = 'rgba(175,198,255,0.1)'
+  // XP pill (warm amber)
+  ctx.fillStyle = 'rgba(245,158,11,0.14)'
   roundRect(ctx, 222, 185, 120, 36, 18)
   ctx.fill()
-  ctx.fillStyle = '#afc6ff'
-  ctx.font = 'bold 12px monospace'
+  ctx.strokeStyle = 'rgba(245,158,11,0.40)'
+  ctx.lineWidth = 1.5
+  roundRect(ctx, 222, 185, 120, 36, 18)
+  ctx.stroke()
+  ctx.fillStyle = '#f59e0b'
+  ctx.font = 'bold 12px "Manrope", sans-serif'
   ctx.fillText(`${xp || 0} XP`, 250, 209)
 
   // Divider
-  ctx.fillStyle = 'rgba(255,255,255,0.06)'
+  ctx.fillStyle = 'rgba(52,211,153,0.12)'
   ctx.fillRect(48, 240, 704, 1)
 
   // Big GPA
-  ctx.font = 'bold 80px Arial'
+  ctx.font = 'bold 80px "Space Grotesk", sans-serif'
   const gpaGrad = ctx.createLinearGradient(48, 280, 48, 380)
-  gpaGrad.addColorStop(0, '#4dff91')
-  gpaGrad.addColorStop(1, '#afc6ff')
+  gpaGrad.addColorStop(0, '#34d399')
+  gpaGrad.addColorStop(1, '#10b981')
   ctx.fillStyle = gpaGrad
   ctx.fillText(gpa ? `${gpa}%` : '—', 48, 360)
 
-  ctx.fillStyle = '#424754'
-  ctx.font = '13px monospace'
+  ctx.fillStyle = '#769989'
+  ctx.font = '13px "Manrope", sans-serif'
   ctx.fillText('CUMULATIVE GPA', 48, 385)
 
   // Stats row
   const stats = [
-    { label: 'COMPLETED', value: `${completed}/${total}`, color: '#ffd6a0' },
-    { label: 'STREAK', value: `${streak}d`, color: '#ff6b9d' },
-    { label: 'FOCUS', value: `${focusHours}h`, color: '#c44dff' },
+    { label: 'COMPLETED', value: `${completed}/${total}`, color: '#34d399' },
+    { label: 'STREAK', value: `${streak}d`, color: '#f59e0b' },
+    { label: 'FOCUS', value: `${focusHours}h`, color: '#10b981' },
   ]
 
   stats.forEach((s, i) => {
@@ -112,20 +116,20 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
     roundRect(ctx, x, y, 210, 90, 12)
     ctx.stroke()
     ctx.fillStyle = s.color
-    ctx.font = 'bold 30px Arial'
+    ctx.font = 'bold 30px "Space Grotesk", sans-serif'
     ctx.fillText(s.value, x + 16, y + 50)
-    ctx.fillStyle = '#424754'
-    ctx.font = '11px monospace'
+    ctx.fillStyle = '#769989'
+    ctx.font = '11px "Manrope", sans-serif'
     ctx.fillText(s.label, x + 16, y + 72)
   })
 
   // Course breakdown
-  ctx.fillStyle = '#606080'
-  ctx.font = '11px monospace'
+  ctx.fillStyle = '#769989'
+  ctx.font = '11px "Manrope", sans-serif'
   ctx.fillText('COURSE BREAKDOWN', 48, 530)
 
   if (courses?.length) {
-    const colors = ['#ff6b9d', '#c44dff', '#4daaff', '#4dff91', '#ffd6a0']
+    const colors = ['#10b981', '#34d399', '#f59e0b', '#059669', '#fbbf24']
     courses.slice(0, 5).forEach((c, i) => {
       const y = 546 + i * 56
       const color = colors[i % colors.length]
@@ -259,57 +263,58 @@ export default function SemesterCard({ onClose }) {
         initial={{ scale: 0.92, y: 24 }}
         animate={{ scale: 1, y: 0 }}
         style={{
-          background: 'rgba(16,20,26,0.98)',
-          border: '1px solid rgba(196,77,255,0.3)',
-          borderRadius: 16, padding: 28,
+          background: 'var(--bg-card, #101c17)',
+          border: '1px solid var(--border-color, #232d42)',
+          borderRadius: 14, padding: 28,
           width: 'min(500px, 100%)',
           maxHeight: '90vh', overflowY: 'auto',
-          boxShadow: '0 0 60px rgba(196,77,255,0.15)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Trophy size={18} style={{ color: '#ffd6a0' }} />
-            <span style={{ fontFamily: '"Press Start 2P"', fontSize: 10, color: '#dfe2eb' }}>
+            <Trophy size={18} weight="duotone" style={{ color: 'var(--accent-amber, #f59e0b)' }} />
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', letterSpacing: '0.04em' }}>
               SEMESTER REPORT CARD
             </span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#606080' }}>
-            <X size={18} />
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}>
+            <X size={18} weight="bold" />
           </button>
         </div>
 
         {!preview ? (
           <>
-            <p style={{ fontFamily: 'VT323', fontSize: 18, color: '#8c90a0', marginBottom: 20 }}>
+            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.6, marginBottom: 20 }}>
               Generate a beautiful shareable image of your semester stats — GPA, courses, streak, focus hours.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               {[
-                { label: 'GPA', value: gpa ? `${gpa}%` : '—', color: '#4dff91' },
-                { label: 'Assignments', value: `${completed}/${assignments.length}`, color: '#ffd6a0' },
-                { label: 'Streak', value: `${streak}d`, color: '#ff6b9d' },
-                { label: 'Focus', value: `${focusHours}h`, color: '#c44dff' },
+                { label: 'GPA', value: gpa ? `${gpa}%` : '—', color: '#34d399' },
+                { label: 'Assignments', value: `${completed}/${assignments.length}`, color: '#f59e0b' },
+                { label: 'Streak', value: `${streak}d`, color: '#10b981' },
+                { label: 'Focus', value: `${focusHours}h`, color: '#d97706' },
               ].map(s => (
                 <div key={s.label} style={{
                   padding: '14px 16px', borderRadius: 10,
                   background: `${s.color}0f`, border: `1px solid ${s.color}33`,
                 }}>
-                  <p style={{ fontFamily: '"Press Start 2P"', fontSize: 8, color: '#606080', marginBottom: 6 }}>{s.label}</p>
-                  <p style={{ fontFamily: '"Press Start 2P"', fontSize: 20, color: s.color }}>{s.value}</p>
+                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--text-muted, #64748b)', marginBottom: 6, letterSpacing: '0.04em' }}>{s.label}</p>
+                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 700, color: s.color, letterSpacing: '-0.02em', margin: 0 }}>{s.value}</p>
                 </div>
               ))}
             </div>
             <button
               onClick={generate}
               style={{
-                width: '100%', padding: '14px', borderRadius: 6, cursor: 'pointer',
-                background: '#c44dff',
-                border: 'none', color: '#fff',
-                fontFamily: '"Press Start 2P"', fontSize: 10, fontWeight: 700,
+                width: '100%', padding: '13px', borderRadius: 10, cursor: 'pointer',
+                background: 'var(--accent-blue, #10b981)',
+                border: 'none', color: '#04120c',
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+                boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
               }}
             >
-              GENERATE REPORT CARD
+              Generate Report Card
             </button>
           </>
         ) : (
@@ -320,26 +325,24 @@ export default function SemesterCard({ onClose }) {
                 onClick={download}
                 style={{
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  padding: '12px', borderRadius: 8, cursor: 'pointer',
-                  background: 'rgba(175,198,255,0.12)', border: '1px solid rgba(175,198,255,0.25)',
-                  color: '#afc6ff', fontFamily: '"Press Start 2P"', fontSize: 8,
+                  padding: '11px', borderRadius: 8, cursor: 'pointer',
+                  background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))', border: '1px solid rgba(52,211,153,0.30)',
+                  color: 'var(--accent-blue, #10b981)', fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
                 }}
               >
-                <Download size={13} /> DOWNLOAD
+                <DownloadSimple size={15} weight="bold" /> Download
               </button>
               <button
                 onClick={tweet}
                 style={{
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  padding: '12px', borderRadius: 8, cursor: 'pointer',
+                  padding: '11px', borderRadius: 8, cursor: 'pointer',
                   background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)',
-                  color: '#fff', fontFamily: '"Press Start 2P"', fontSize: 8,
+                  color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
                 }}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                TWEET
+                <ShareNetwork size={14} weight="duotone" />
+                Post
               </button>
               <a
                 href="https://github.com/kaorii-ako/StudyPulse"
@@ -347,13 +350,13 @@ export default function SemesterCard({ onClose }) {
                 rel="noopener noreferrer"
                 style={{
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  padding: '12px', borderRadius: 8, textDecoration: 'none',
-                  background: 'rgba(196,77,255,0.16)',
-                  border: '1px solid rgba(196,77,255,0.3)',
-                  color: '#e5b5ff', fontFamily: '"Press Start 2P"', fontSize: 8,
+                  padding: '11px', borderRadius: 8, textDecoration: 'none',
+                  background: 'rgba(245,158,11,0.14)',
+                  border: '1px solid rgba(245,158,11,0.35)',
+                  color: '#f59e0b', fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
                 }}
               >
-                <Star size={12} /> STAR
+                <Star size={14} weight="duotone" /> Star
               </a>
             </div>
           </>

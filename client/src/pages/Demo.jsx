@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Zap } from 'lucide-react'
 import { useAuthStore, useAssignmentsStore, useEventStore, useGradesStore, useNotesStore, useFlashcardsStore, useXPStore } from '../stores'
 import { DEMO_COURSES, DEMO_ASSIGNMENTS, DEMO_EVENTS, DEMO_GRADES, DEMO_NOTES, DEMO_COURSE_WEIGHTS, DEMO_DECKS, DEMO_QUIZ_HISTORY, DEMO_LEADERBOARD } from '../utils/demoData'
+import { C, fonts } from '../utils/theme'
 
 export default function Demo() {
   const navigate = useNavigate()
@@ -33,17 +35,18 @@ export default function Demo() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#0b0e14', color: '#e8ebf4', fontFamily: "'Space Grotesk', sans-serif", fontSize: 15,
+      background: C.bg, color: C.text, fontFamily: fonts.body, fontSize: 15,
     }}>
       <div style={{ textAlign: 'center' }}>
         <div className="pulse" style={{
-          width: 56, height: 56, borderRadius: 16, margin: '0 auto 18px',
-          background: '#5a8bff',
+          width: 56, height: 56, borderRadius: 14, margin: '0 auto 18px',
+          background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 26, fontWeight: 700, color: '#0b0e14',
-          boxShadow: '0 8px 32px rgba(90,139,255,0.4)',
-        }}>栞</div>
-        <div style={{ color: '#9aa1b5' }}>Setting up your demo…</div>
+          boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
+        }}>
+          <Zap size={28} color="#ffffff" strokeWidth={2.5} />
+        </div>
+        <div style={{ color: C.textMuted, fontFamily: fonts.heading, fontSize: 14 }}>Setting up your study demo…</div>
       </div>
     </div>
   )

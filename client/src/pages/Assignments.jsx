@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ClipboardList, Plus, Trash2, ExternalLink } from 'lucide-react'
-import { useAssignmentsStore, useAuthStore, useUIStore } from '../stores'
+import { ClipboardList, Plus, Trash2, ExternalLink, Play } from 'lucide-react'
+import { useAssignmentsStore, useAuthStore, useUIStore, usePomodoroStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost, chip } from '../utils/theme'
 import { PageHeader, Empty } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
@@ -20,7 +20,7 @@ function Modal({ open, onClose, children }) {
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
         background: C.card,
-        border: `1px solid ${C.border}`, borderRadius: 18,
+        border: `1px solid ${C.border}`, borderRadius: 14,
         padding: 28, width: 'min(480px, 92vw)', maxHeight: '90vh', overflowY: 'auto',
         boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
       }}>
@@ -33,6 +33,7 @@ function Modal({ open, onClose, children }) {
 export default function Assignments() {
   const navigate = useNavigate()
   const { assignments, addAssignment, updateAssignment, deleteAssignment, syncClassroom, syncing } = useAssignmentsStore()
+  const { setActiveAssignment } = usePomodoroStore()
   const { isGoogleConnected, loginWithGoogle } = useAuthStore()
   const { addToast } = useUIStore()
   const [filter, setFilter] = useState('all')
@@ -87,7 +88,7 @@ export default function Assignments() {
   ]
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 820, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 'min(1080px, 100%)', margin: '0 auto' }}>
       <PageHeader
         icon={ClipboardList}
         accent={C.pink}
@@ -111,42 +112,42 @@ export default function Assignments() {
         }
       />
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+      {/* Filter tabs — compact pills */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setFilter(t.key)} style={{
-            padding: '6px 16px', borderRadius: 999,
-            border: `1px solid ${filter === t.key ? tint(C.blue, 0.4) : C.border}`,
-            background: filter === t.key ? tint(C.blue, 0.12) : 'transparent',
-            color: filter === t.key ? C.blue : C.textMuted,
-            cursor: 'pointer', fontFamily: fonts.heading, fontSize: 12, fontWeight: 600,
-            transition: 'all 0.15s ease',
+            padding: '6px 14px', borderRadius: 999,
+            border: `1px solid ${filter === t.key ? 'rgba(52,211,153,0.45)' : C.border}`,
+            background: filter === t.key ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+            color: filter === t.key ? C.primary : C.textMuted,
+            cursor: 'pointer', fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700,
+            transition: 'all 0.12s ease',
           }}>{t.label}</button>
         ))}
       </div>
 
-      {/* List */}
+      {/* List — compact task rows */}
       {filtered.length === 0 ? (
         <div style={{
-          background: C.card,
+          background: 'var(--bg-card, #101c17)',
           border: `1px solid ${C.border}`, borderRadius: 16,
         }}>
           <Empty
             icon={ClipboardList}
-            accent={C.pink}
-            title={filter === 'all' ? 'No assignments yet' : 'Nothing here'}
+            accent={C.primary}
+            title={filter === 'all' ? 'No assignments yet' : 'Nothing due here'}
             description={filter === 'all'
-              ? 'Import everything from Google Classroom, or add one manually.'
-              : 'No assignments match this filter. Nice work staying on top of things!'}
+              ? 'Import assignments from Google Classroom, or create one manually.'
+              : 'No assignments match this filter. Excellent work staying ahead!'}
           />
           {filter === 'all' && (
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', padding: '0 20px 36px' }}>
               <button onClick={handleSync} disabled={syncing} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px 18px', borderRadius: 10, border: 'none',
-                background: '#fff', color: '#1f1f1f', cursor: syncing ? 'not-allowed' : 'pointer',
-                fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
-              }}><GoogleLogo size={16} /> {connected ? 'Sync Google Classroom' : 'Connect Google Classroom'}</button>
+                padding: '9px 18px', borderRadius: 8, border: 'none',
+                background: '#ffffff', color: '#090d16', cursor: syncing ? 'not-allowed' : 'pointer',
+                fontFamily: fonts.heading, fontSize: 13, fontWeight: 700,
+              }}><GoogleLogo size={15} /> {connected ? 'Sync Google Classroom' : 'Connect Google Classroom'}</button>
               <button onClick={() => setShowModal(true)} style={btnGhost}>Add manually</button>
             </div>
           )}
@@ -159,41 +160,74 @@ export default function Assignments() {
             const pColor = PRIORITY_COLOR[a.priority] || C.textMuted
             return (
               <div key={a.id} className="hover-lift" style={{
-                background: C.card,
-                border: `1px solid ${overdue ? tint(C.pink, 0.35) : C.border}`, borderRadius: 12,
-                padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12,
-                opacity: a.completed ? 0.5 : 1,
+                background: 'var(--bg-card, #101c17)',
+                border: `1px solid ${overdue ? 'rgba(248, 113, 113, 0.4)' : C.border}`,
+                borderRadius: 12,
+                padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14,
+                opacity: a.completed ? 0.55 : 1,
+                transition: 'border-color 0.15s ease, transform 0.15s ease',
               }}>
                 <input
                   type="checkbox"
                   checked={!!a.completed}
                   onChange={() => updateAssignment(a.id, { completed: !a.completed })}
-                  style={{ width: 17, height: 17, cursor: 'pointer', flexShrink: 0, accentColor: C.blueDark }}
+                  style={{ width: 18, height: 18, cursor: 'pointer', flexShrink: 0, accentColor: 'var(--primary, #10b981)' }}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontSize: 14, fontWeight: 600, color: C.text,
                     textDecoration: a.completed ? 'line-through' : 'none',
                   }}>{a.title}</div>
-                  <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    {a.course || a.courseName} · {due ? `Due ${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'No due date'}
-                    {overdue && <span style={{ color: C.pink, fontWeight: 700 }}>Overdue</span>}
+                  <div style={{ fontSize: 12, color: C.textMuted, marginTop: 3, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 600, color: C.text }}>{a.course || a.courseName}</span>
+                    <span>·</span>
+                    <span>{due ? `Due ${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'No due date'}</span>
+                    {overdue && (
+                      <span style={{
+                        padding: '1px 6px', borderRadius: 4,
+                        background: 'rgba(248, 113, 113, 0.15)', border: '1px solid rgba(248, 113, 113, 0.35)',
+                        color: '#f87171', fontSize: 10.5, fontWeight: 700, fontFamily: fonts.heading,
+                      }}>Overdue</span>
+                    )}
                     {a.link && (
                       <a href={a.link} target="_blank" rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}
-                        style={{ color: C.blue, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        style={{ color: C.blue, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
                         Classroom <ExternalLink size={11} />
                       </a>
                     )}
                   </div>
                 </div>
+                {!a.completed && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setActiveAssignment(a.id)
+                      navigate('/focus')
+                    }}
+                    title="Focus on this assignment with Pomodoro"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5,
+                      padding: '4px 10px', borderRadius: 6,
+                      border: `1px solid ${C.border}`,
+                      background: 'var(--surface-low, #0d1712)',
+                      color: 'var(--accent-blue, #10b981)',
+                      cursor: 'pointer', fontSize: 11.5, fontFamily: fonts.heading, fontWeight: 700,
+                      transition: 'all 0.12s ease', flexShrink: 0,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-blue, #10b981)'; e.currentTarget.style.background = 'var(--accent-blue-soft, rgba(16,185,129,0.12))' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = 'var(--surface-low, #0d1712)' }}
+                  >
+                    <Play size={11} /> Focus
+                  </button>
+                )}
                 <span style={{ ...chip(pColor), textTransform: 'capitalize' }}>{a.priority || 'medium'}</span>
                 <button onClick={() => deleteAssignment(a.id)} aria-label="Delete assignment" style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  color: C.textFaint, flexShrink: 0, padding: 5, display: 'flex',
+                  color: C.textFaint, flexShrink: 0, padding: 6, display: 'flex',
                   transition: 'color 0.15s ease',
                 }}
-                  onMouseEnter={e => e.currentTarget.style.color = C.pink}
+                  onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
                   onMouseLeave={e => e.currentTarget.style.color = C.textFaint}
                 ><Trash2 size={15} /></button>
               </div>
@@ -219,7 +253,7 @@ export default function Assignments() {
               placeholder={f.placeholder}
               onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
               style={inputStyle}
-              onFocus={e => { e.target.style.borderColor = C.blueDark }}
+              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
               onBlur={e => { e.target.style.borderColor = C.border }}
             />
           </div>
@@ -233,7 +267,7 @@ export default function Assignments() {
             placeholder="Type or pick a subject…"
             onChange={e => setForm(p => ({ ...p, course: e.target.value }))}
             style={inputStyle}
-            onFocus={e => { e.target.style.borderColor = C.blueDark }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
             onBlur={e => { e.target.style.borderColor = C.border }}
           />
           <datalist id="cbse-subjects-list">
@@ -245,12 +279,12 @@ export default function Assignments() {
           <div style={{ display: 'flex', gap: 8 }}>
             {PRIORITIES.map(p => (
               <button key={p} onClick={() => setForm(f => ({ ...f, priority: p }))} style={{
-                padding: '7px 16px', borderRadius: 9,
+                padding: '6px 14px', borderRadius: 8,
                 border: `1px solid ${form.priority === p ? tint(PRIORITY_COLOR[p], 0.5) : C.border}`,
                 background: form.priority === p ? tint(PRIORITY_COLOR[p], 0.12) : 'transparent',
                 color: form.priority === p ? PRIORITY_COLOR[p] : C.textMuted,
-                cursor: 'pointer', fontFamily: fonts.heading, fontSize: 12, fontWeight: 600,
-                textTransform: 'capitalize', transition: 'all 0.15s ease',
+                cursor: 'pointer', fontFamily: fonts.heading, fontSize: 12, fontWeight: 700,
+                textTransform: 'capitalize', transition: 'all 0.12s ease',
               }}>{p}</button>
             ))}
           </div>
@@ -263,7 +297,7 @@ export default function Assignments() {
             onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
             rows={3}
             style={{ ...inputStyle, resize: 'vertical' }}
-            onFocus={e => { e.target.style.borderColor = C.blueDark }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
             onBlur={e => { e.target.style.borderColor = C.border }}
           />
         </div>

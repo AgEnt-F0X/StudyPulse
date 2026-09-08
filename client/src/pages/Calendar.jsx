@@ -15,9 +15,9 @@ function Modal({ open, onClose, children }) {
       zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
-        background: C.card,
-        border: `1px solid ${C.border}`, borderRadius: 18, padding: 28, width: 'min(440px,92vw)',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+        background: 'var(--bg-card, #101c17)',
+        border: `1px solid ${C.border}`, borderRadius: 14, padding: 26, width: 'min(440px,92vw)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.7)',
       }}>
         {children}
       </div>
@@ -76,28 +76,28 @@ export default function Calendar() {
   const today = new Date()
 
   const navBtn = {
-    background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 9,
+    background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 6,
     color: C.textMuted, cursor: 'pointer', padding: 6, display: 'flex',
-    transition: 'color 0.15s ease, border-color 0.15s ease',
+    transition: 'color 0.12s ease, border-color 0.12s ease',
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 1020, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 'min(1240px, 100%)', margin: '0 auto' }}>
       <PageHeader
         icon={CalendarDays}
         accent={C.orange}
-        title="Calendar"
-        subtitle="Tests, deadlines and everything in between"
+        title="Calendar & Deadlines"
+        subtitle="CBSE exam schedule, project submissions & assignment deadlines"
         actions={
           <button onClick={() => setShowModal(true)} style={btnPrimary}>
-            <Plus size={15} /> Add Event
+            <Plus size={14} /> Add Event
           </button>
         }
       />
 
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
         {/* Calendar grid */}
-        <Card style={{ flex: 1, minWidth: 300 }}>
+        <Card style={{ flex: 1, minWidth: 320, background: 'var(--bg-card, #101c17)' }}>
           {/* Month nav */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <button onClick={prevMonth} aria-label="Previous month" style={navBtn}
@@ -119,25 +119,25 @@ export default function Calendar() {
           </div>
 
           {/* Day cells */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 3 }}>
             {cells.map((d, i) => {
               const isToday = d && today.getDate() === d && today.getMonth() === month && today.getFullYear() === year
               const dayEvents = d ? (eventsByDay[d] || []) : []
               return (
                 <div key={i} style={{
-                  minHeight: 58, padding: '6px 4px', borderRadius: 9,
-                  background: isToday ? tint(C.blue, 0.1) : 'transparent',
-                  border: isToday ? `1px solid ${tint(C.blue, 0.4)}` : '1px solid transparent',
-                  transition: 'background 0.13s ease',
+                  minHeight: 62, padding: '6px 4px', borderRadius: 8,
+                  background: isToday ? 'var(--accent-blue-soft, rgba(59, 130, 246, 0.12))' : 'rgba(255,255,255,0.015)',
+                  border: isToday ? '1px solid var(--accent-blue, #10b981)' : `1px solid ${C.borderSoft}`,
+                  transition: 'background 0.12s ease',
                 }}>
                   {d && (
                     <>
-                      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: isToday ? 700 : 500, color: isToday ? C.blue : C.text, marginBottom: 3 }}>{d}</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: isToday ? 700 : 600, color: isToday ? C.blue : C.text, marginBottom: 3 }}>{d}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {dayEvents.slice(0, 2).map(e => (
                           <div key={e.id} style={{
-                            fontSize: 9, padding: '1.5px 4px', borderRadius: 4,
-                            background: tint(e.color || C.blue, 0.18), color: e.color || C.blue,
+                            fontSize: 9.5, padding: '2px 4px', borderRadius: 4,
+                            background: 'rgba(59, 130, 246, 0.15)', color: C.blue,
                             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600,
                           }}>
                             {e.title}
@@ -154,22 +154,21 @@ export default function Calendar() {
         </Card>
 
         {/* Upcoming sidebar */}
-        <Card style={{ width: 240, flexShrink: 0, alignSelf: 'flex-start', padding: 18 }}>
-          <SectionTitle icon={CalendarDays} color={C.orange}>Upcoming</SectionTitle>
+        <Card style={{ width: 260, flexShrink: 0, alignSelf: 'flex-start', padding: 18, background: 'var(--bg-card, #101c17)' }}>
+          <SectionTitle icon={CalendarDays} color={C.orange}>Upcoming Events</SectionTitle>
           {upcoming.length === 0 ? (
-            <p style={{ fontSize: 12.5, color: C.textMuted }}>No upcoming events. Add tests, club meetings or deadlines.</p>
+            <p style={{ fontSize: 12.5, color: C.textMuted }}>No upcoming events scheduled. Add tests, lab submissions or study sessions.</p>
           ) : upcoming.map(e => (
             <div key={e.id} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${C.borderSoft}` }}>
               <div style={{
                 width: 8, height: 8, borderRadius: '50%', background: e.color || C.blue, marginTop: 4, flexShrink: 0,
-                boxShadow: `0 0 8px ${tint(e.color || C.blue, 0.6)}`,
               }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12.5, fontWeight: 600, color: C.text }}>{e.title}</div>
-                <div style={{ fontSize: 10.5, color: C.textFaint }}>{new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{e.time ? ` · ${e.time}` : ''}</div>
+                <div style={{ fontSize: 10.5, color: C.textMuted }}>{new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{e.time ? ` · ${e.time}` : ''}</div>
               </div>
               <button onClick={() => deleteEvent(e.id)} aria-label="Delete event" style={{ background: 'none', border: 'none', color: C.textFaint, cursor: 'pointer', flexShrink: 0, padding: 2, display: 'flex' }}
-                onMouseEnter={ev => ev.currentTarget.style.color = C.pink}
+                onMouseEnter={ev => ev.currentTarget.style.color = '#f87171'}
                 onMouseLeave={ev => ev.currentTarget.style.color = C.textFaint}
               ><Trash2 size={12} /></button>
             </div>
@@ -178,9 +177,9 @@ export default function Calendar() {
       </div>
 
       <Modal open={showModal} onClose={() => setShowModal(false)}>
-        <h2 style={{ fontFamily: fonts.heading, fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 18 }}>New Event</h2>
+        <h2 style={{ fontFamily: fonts.heading, fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>New Event</h2>
         {[
-          { label: 'Title', key: 'title', type: 'text', placeholder: 'Event name' },
+          { label: 'Title', key: 'title', type: 'text', placeholder: 'e.g. Physics Midterm Exam' },
           { label: 'Date', key: 'date', type: 'date', placeholder: '' },
           { label: 'Time', key: 'time', type: 'time', placeholder: '' },
         ].map(f => (
@@ -189,24 +188,12 @@ export default function Calendar() {
             <input type={f.type} value={form[f.key]} placeholder={f.placeholder}
               onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
               style={inputStyle}
-              onFocus={e => { e.target.style.borderColor = C.blueDark }}
+              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
               onBlur={e => { e.target.style.borderColor = C.border }}
             />
           </div>
         ))}
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 700 }}>Color</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[C.blue, C.purple, C.green, C.pink, C.orange].map(col => (
-              <button key={col} onClick={() => setForm(f => ({ ...f, color: col }))} aria-label={`Color ${col}`} style={{
-                width: 26, height: 26, borderRadius: '50%', background: col,
-                border: form.color === col ? '2px solid #fff' : '2px solid transparent', cursor: 'pointer',
-                boxShadow: form.color === col ? `0 0 12px ${tint(col, 0.6)}` : 'none',
-              }} />
-            ))}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
           <button onClick={() => setShowModal(false)} style={{ ...btnGhost, color: C.textMuted }}>Cancel</button>
           <button onClick={handleAdd} style={btnPrimary}>Add Event</button>
         </div>

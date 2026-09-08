@@ -14,7 +14,7 @@ export default function ProSuccess() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0b0e14',
+      background: 'var(--bg-primary, #0a120e)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

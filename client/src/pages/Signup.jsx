@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { AlertCircle, MailCheck } from 'lucide-react'
+import { AlertCircle, MailCheck, Zap } from 'lucide-react'
 import { useAuthStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary } from '../utils/theme'
 import GoogleButton from '../components/GoogleButton'
@@ -42,20 +42,22 @@ export default function Signup() {
     }}>
       <div className="page-enter" style={{
         width: '100%', maxWidth: 410, position: 'relative',
-        background: C.card,
+        background: 'var(--bg-card, #101c17)',
         border: `1px solid ${C.border}`,
-        borderRadius: 20, padding: '38px 32px',
+        borderRadius: 16, padding: '36px 30px',
         boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ textAlign: 'center', marginBottom: 26 }}>
           <div style={{
-            width: 52, height: 52, borderRadius: 6, margin: '0 auto 14px',
-            background: C.purpleDark,
+            width: 48, height: 48, borderRadius: 10, margin: '0 auto 14px',
+            background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: fonts.heading, fontWeight: 700, fontSize: 24, color: '#0b0e14',
-          }}>栞</div>
+            boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35)',
+          }}>
+            <Zap size={24} color="#ffffff" strokeWidth={2.5} />
+          </div>
           <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 19, color: C.text }}>Create your study space</div>
-          <div style={{ fontSize: 13, color: C.textMuted, marginTop: 5 }}>Free for students — takes 30 seconds</div>
+          <div style={{ fontSize: 13, color: C.textMuted, marginTop: 4 }}>Free for students — takes 30 seconds</div>
         </div>
 
         {displayErr && (

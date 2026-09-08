@@ -4,23 +4,23 @@ const TimeTrackerBars = () => {
   const now = new Date()
 
   const dayProgress = ((now.getHours() * 60 + now.getMinutes()) / (24 * 60)) * 100
-  const dayLabel = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} / 24H`
+  const dayLabel = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} / 24h`
 
   const monthDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
   const monthProgress = (now.getDate() / monthDays) * 100
-  const monthLabel = `${now.getDate()} / ${monthDays} DAYS`
+  const monthLabel = `${now.getDate()} / ${monthDays} days`
 
   const yearStart = new Date(now.getFullYear(), 0, 0)
   const yearEnd = new Date(now.getFullYear() + 1, 0, 0)
   const yearDayOfYear = Math.floor((now - yearStart) / (24 * 60 * 60 * 1000))
   const daysInYear = Math.floor((yearEnd - yearStart) / (24 * 60 * 60 * 1000))
   const yearProgress = (yearDayOfYear / daysInYear) * 100
-  const yearLabel = `${yearDayOfYear} / ${daysInYear} DAYS`
+  const yearLabel = `${yearDayOfYear} / ${daysInYear} days`
 
   const trackers = [
-    { label: 'TODAY', progress: dayProgress, unit: dayLabel, color: '#afc6ff' },
-    { label: 'THIS MONTH', progress: monthProgress, unit: monthLabel, color: '#d7ffc5' },
-    { label: 'THIS YEAR', progress: yearProgress, unit: yearLabel, color: '#e5b5ff' }
+    { label: 'Today', progress: dayProgress, unit: dayLabel, color: '#afc6ff' },
+    { label: 'This month', progress: monthProgress, unit: monthLabel, color: '#d7ffc5' },
+    { label: 'This year', progress: yearProgress, unit: yearLabel, color: '#e5b5ff' }
   ]
 
   return (
@@ -42,7 +42,7 @@ const TimeTrackerBars = () => {
           >
             <div className="flex items-center justify-between mb-2">
               <h4
-                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.7rem', color: tracker.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.7rem', color: tracker.color, textTransform: 'none', letterSpacing: '0.01em' }}
               >
                 {tracker.label}
               </h4>

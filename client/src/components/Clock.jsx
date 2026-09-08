@@ -39,8 +39,8 @@ const Clock = () => {
         fontFamily: "'Space Grotesk', sans-serif"
       }}
     >
-      <p className="text-[0.6rem] on-surface-tertiary mb-0.5" style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        CURRENT TIME
+      <p className="text-[0.6rem] on-surface-tertiary mb-0.5" style={{ fontWeight: 600, textTransform: 'none', letterSpacing: '0.01em' }}>
+        Current time
       </p>
       <p
         style={{

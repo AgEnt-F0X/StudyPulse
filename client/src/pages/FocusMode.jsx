@@ -1,11 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
-import { Target, Play, Pause, RotateCcw, Coffee, Zap } from 'lucide-react'
+import { Target, Play, Pause, ArrowCounterClockwise, Coffee, Lightning, SpeakerHigh, SpeakerSimpleX, Waveform } from '@phosphor-icons/react'
 import { C, fonts, tint } from '../utils/theme'
 
 const PRESETS = [
-  { label: '25 / 5', work: 25, brk: 5 },
-  { label: '50 / 10', work: 50, brk: 10 },
-  { label: '90 / 20', work: 90, brk: 20 },
+  { label: '25 / 5', work: 25, brk: 5, mode: 'Work' },
+  { label: '50 / 10', work: 50, brk: 10, mode: 'Work' },
+  { label: '90 / 20', work: 90, brk: 20, mode: 'Deep work' },
+]
+
+const AMBIENT = [
+  { key: 'lofi', label: 'Lo-Fi' },
+  { key: 'rain', label: 'Rain' },
+  { key: 'forest', label: 'Forest' },
+  { key: 'white', label: 'White noise' },
 ]
 
 export default function FocusMode() {
@@ -14,6 +21,8 @@ export default function FocusMode() {
   const [running, setRunning] = useState(false)
   const [isBreak, setIsBreak] = useState(false)
   const [task, setTask] = useState('')
+  const [ambient, setAmbient] = useState(null)
+  const [muted, setMuted] = useState(false)
   const intervalRef = useRef(null)
 
   const total = isBreak ? PRESETS[preset].brk * 60 : PRESETS[preset].work * 60
@@ -56,112 +65,175 @@ export default function FocusMode() {
 
   const circumference = 2 * Math.PI * 96
   const dash = circumference * (1 - pct / 100)
-  const phaseColor = isBreak ? C.green : C.blue
-  const phaseColorDark = isBreak ? C.greenDark : C.blueDark
+  const phaseColor = isBreak ? '#34d399' : 'var(--primary, #10b981)'
+  const phaseBg = isBreak ? 'rgba(52, 211, 153, 0.10)' : 'var(--accent-blue-soft, rgba(16,185,129,0.12))'
+  const phaseBorder = isBreak ? 'rgba(52, 211, 153, 0.35)' : 'rgba(52,211,153,0.30)'
 
   return (
     <div style={{
       fontFamily: fonts.body, color: C.text,
-      minHeight: 'calc(100vh - 150px)',
+      minHeight: 'calc(100vh - 140px)',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       position: 'relative',
     }}>
 
       <h1 style={{
         display: 'flex', alignItems: 'center', gap: 9,
-        fontFamily: fonts.heading, fontSize: 18, fontWeight: 700,
-        color: C.textMuted, marginBottom: 32, letterSpacing: '0.14em',
+        fontFamily: fonts.heading, fontSize: 14, fontWeight: 700,
+        color: C.textMuted, marginBottom: 20, letterSpacing: '-0.01em',
       }}>
-        <Target size={18} color={phaseColor} /> FOCUS MODE
+        <Target size={18} weight="duotone" color={C.primary} /> Pomodoro focus
       </h1>
+
+      {/* Segmented Work / Break pill */}
+      <div style={{
+        display: 'flex', padding: 3, borderRadius: 999, marginBottom: 22,
+        background: 'var(--surface-low, #0d1712)',
+        border: `1px solid ${C.borderSoft}`,
+      }}>
+        {['Work', 'Short break', 'Long break'].map((m) => {
+          const selected = (m === 'Work' && !isBreak) || (m !== 'Work' && isBreak)
+          return (
+            <button key={m} onClick={() => setIsBreak(m !== 'Work')} style={{
+              padding: '6px 16px', borderRadius: 999, border: 'none', cursor: 'pointer',
+              background: selected ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+              color: selected ? C.primary : C.textFaint,
+              fontFamily: fonts.body, fontSize: 12, fontWeight: 700,
+            }}>{m}</button>
+          )
+        })}
+      </div>
 
       {/* Phase label */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 7,
-        padding: '5px 18px', borderRadius: 999, marginBottom: 26,
-        background: tint(phaseColorDark, 0.1),
-        border: `1px solid ${tint(phaseColorDark, 0.45)}`,
-        fontFamily: fonts.heading, fontSize: 12, fontWeight: 700,
-        color: phaseColor, letterSpacing: '0.1em',
+        padding: '5px 16px', borderRadius: 999, marginBottom: 26,
+        background: phaseBg,
+        border: `1px solid ${phaseBorder}`,
+        fontFamily: fonts.body, fontSize: 12, fontWeight: 700,
+        color: phaseColor, letterSpacing: '0.01em',
       }}>
-        {isBreak ? <><Coffee size={13} /> BREAK TIME</> : <><Zap size={13} /> FOCUS SESSION</>}
+        {isBreak ? <><Coffee size={13} /> Break time</> : <><Lightning size={13} /> Focus session</>}
       </div>
 
-      {/* Circular timer */}
-      <div style={{ position: 'relative', width: 230, height: 230, marginBottom: 32 }}>
+      {/* SVG Radial Arc — 2px glowing botanical ring */}
+      <div style={{ position: 'relative', width: 230, height: 230, marginBottom: 26 }}>
         <svg width="230" height="230" style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx="115" cy="115" r="96" fill="none" stroke={C.border} strokeWidth="7" />
           <circle
-            cx="115" cy="115" r="96" fill="none"
-            stroke={phaseColorDark}
-            strokeWidth="7" strokeLinecap="round"
+            cx="115" cy="115" r="96"
+            fill="transparent"
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="2"
+          />
+          <circle
+            cx="115" cy="115" r="96"
+            fill="transparent"
+            stroke={phaseColor}
+            strokeWidth="2"
             strokeDasharray={circumference}
             strokeDashoffset={dash}
-            style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.4s ease' }}
+            strokeLinecap="round"
+            style={{
+              transition: 'stroke-dashoffset 0.8s ease, stroke 0.3s ease',
+              filter: 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.45))',
+            }}
           />
         </svg>
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         }}>
-          <div style={{ fontFamily: fonts.heading, fontSize: 50, fontWeight: 700, color: C.text, lineHeight: 1, letterSpacing: '-0.02em' }}>
+          <div style={{ fontFamily: fonts.heading, fontSize: 52, fontWeight: 700, color: C.text, lineHeight: 1, letterSpacing: '-0.03em' }}>
             {mins}:{secs}
           </div>
-          <div style={{ fontSize: 11, color: C.textFaint, marginTop: 6 }}>{pct}% elapsed</div>
+          <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 8, fontFamily: fonts.heading, fontWeight: 600 }}>{pct}% complete</div>
         </div>
       </div>
 
       {/* Controls */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
         <button onClick={() => setRunning(r => !r)} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          padding: '13px 34px', borderRadius: 12, border: 'none',
-          background: running ? tint(C.pink, 0.15) : C.blueDark,
-          color: running ? C.pink : '#0b0e14',
-          cursor: 'pointer', fontFamily: fonts.heading, fontSize: 15, fontWeight: 700,
+          padding: '12px 32px', borderRadius: 8,
+          background: running ? 'rgba(248, 113, 113, 0.15)' : 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+          border: running ? '1px solid rgba(248, 113, 113, 0.35)' : 'none',
+          boxShadow: running ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(16,185,129,0.22)',
+          color: running ? '#f87171' : '#04120c',
+          cursor: 'pointer', fontFamily: fonts.heading, fontSize: 14, fontWeight: 700,
           minWidth: 130,
-          transition: 'all 0.2s ease',
+          transition: 'all 0.15s ease',
         }}>
-          {running ? <><Pause size={16} /> Pause</> : <><Play size={16} /> Start</>}
+          {running ? <><Pause size={16} weight="fill" /> Pause</> : <><Play size={16} weight="fill" /> Start session</>}
         </button>
         <button onClick={reset} style={{
           display: 'flex', alignItems: 'center', gap: 7,
-          padding: '13px 22px', borderRadius: 12,
+          padding: '12px 20px', borderRadius: 8,
           border: `1px solid ${C.border}`, background: 'transparent',
           color: C.textMuted, cursor: 'pointer',
-          fontFamily: fonts.heading, fontSize: 14, fontWeight: 600,
-        }}><RotateCcw size={14} /> Reset</button>
+          fontFamily: fonts.heading, fontSize: 13, fontWeight: 600,
+        }}><ArrowCounterClockwise size={15} weight="bold" /> Reset</button>
       </div>
 
       {/* Preset selector */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {PRESETS.map((p, i) => (
           <button key={i} onClick={() => handlePreset(i)} style={{
-            padding: '7px 18px', borderRadius: 999,
-            border: `1px solid ${preset === i ? tint(C.blue, 0.45) : C.border}`,
-            background: preset === i ? tint(C.blue, 0.1) : 'transparent',
-            color: preset === i ? C.blue : C.textMuted,
-            cursor: 'pointer', fontFamily: fonts.heading, fontSize: 12, fontWeight: 600,
-            transition: 'all 0.15s ease',
-          }}>{p.label}</button>
+            padding: '6px 16px', borderRadius: 999,
+            border: `1px solid ${preset === i ? 'rgba(52,211,153,0.45)' : C.border}`,
+            background: preset === i ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+            color: preset === i ? C.primary : C.textMuted,
+            cursor: 'pointer', fontFamily: fonts.body, fontSize: 12, fontWeight: 700,
+            transition: 'all 0.12s ease',
+          }}>{p.label} min</button>
         ))}
       </div>
 
+      {/* Ambient audio dock */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24,
+        padding: '8px 10px', borderRadius: 12,
+        background: 'var(--bg-card, #101c17)', border: `1px solid ${C.borderSoft}`,
+      }}>
+        <button
+          onClick={() => setMuted(m => !m)}
+          title={muted ? 'Unmute ambient' : 'Mute ambient'}
+          style={{
+            display: 'flex', padding: 7, borderRadius: 8, cursor: 'pointer',
+            background: 'transparent', border: `1px solid ${C.borderSoft}`, color: C.textMuted,
+          }}
+        >{muted ? <SpeakerSimpleX size={15} weight="duotone" /> : <SpeakerHigh size={15} weight="duotone" />}</button>
+        {AMBIENT.map(a => {
+          const selected = ambient === a.key && !muted
+          return (
+            <button key={a.key} onClick={() => setAmbient(a.key === ambient ? null : a.key)} style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '6px 12px', borderRadius: 999, cursor: 'pointer',
+              border: `1px solid ${selected ? 'rgba(52,211,153,0.45)' : C.borderSoft}`,
+              background: selected ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+              color: selected ? C.primary : C.textMuted,
+              fontFamily: fonts.body, fontSize: 12, fontWeight: 700,
+            }}>
+              {selected && <Waveform size={13} weight="bold" className="pulse" />}{a.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Current task */}
-      <div style={{ width: '100%', maxWidth: 380, position: 'relative' }}>
+      <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
         <input
           value={task}
           onChange={e => setTask(e.target.value)}
-          placeholder="What are you working on?"
+          placeholder="What are you focusing on?"
           style={{
-            width: '100%', padding: '12px 16px', borderRadius: 12,
-            background: C.card, border: `1px solid ${C.border}`,
-            color: C.text, fontSize: 14, fontFamily: fonts.body,
+            width: '100%', padding: '12px 16px', borderRadius: 8,
+            background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}`,
+            color: C.text, fontSize: 13.5, fontFamily: fonts.body,
             textAlign: 'center', boxSizing: 'border-box', outline: 'none',
-            transition: 'border-color 0.15s ease',
+            transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
           }}
-          onFocus={e => { e.target.style.borderColor = C.blueDark }}
-          onBlur={e => { e.target.style.borderColor = C.border }}
+          onFocus={e => { e.target.style.borderColor = 'var(--primary, #10b981)'; e.target.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.15)' }}
+          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none' }}
         />
       </div>
     </div>
