@@ -22,24 +22,68 @@ async function callGemini(model, systemContext, userMessage) {
   const chat = model.startChat({
     history: [
       { role: 'user', parts: [{ text: systemContext }] },
-      { role: 'model', parts: [{ text: 'Understood. I am StudyPulse, your AI study companion. I will help you stay on top of your academics.' }] }
+      { role: 'model', parts: [{ text: 'Understood. Operating under this contract for this session.' }] }
     ]
   })
   const result = await chat.sendMessage(userMessage)
   return result.response.text()
 }
 
-// AI Chat endpoint
+// ── Deterministic pedagogical mode contracts ──────────────────
+// Mirrors client/src/utils/aiModes.js — keep the two in sync.
+
+const MODE_CONTRACTS = {
+  hint: `OPERATING CONTRACT (Diagnostic Hint Mode — non-negotiable):
+1. Analyze the student's current problem, derivation, code, or query. Identify the SINGLE most consequential flaw — logical, syntactical, or conceptual. If there is no flaw, identify the weakest assumption in their approach.
+2. NEVER give the final answer, the completed formula, the corrected code, or the worked solution. Partial hints at the mechanism level are allowed; results are not.
+3. Reference the student's live telemetry when relevant.
+4. End your reply with EXACTLY ONE targeted guiding question, on its own line, prefixed with "GUIDING: ".
+5. Maximum 120 words. No preamble, no pleasantries.`,
+  cbse: `OPERATING CONTRACT (CBSE Evaluator Mode — non-negotiable):
+1. Grade the student's answer STRICTLY against the CBSE marking scheme. Default: 1 mark per valid step/point unless the standard scheme says otherwise.
+2. Output EXACTLY this structure:
+   MARKS: <earned>/<total>
+   STEP BREAKDOWN:
+   - <step or keyword> — <✓ awarded X M | ✗ missing/incorrect — what the scheme expects>
+   KEYWORD CHECKS:
+   - <required NCERT keyword/term> — <present | absent | paraphrased-unacceptable>
+   BOARD TRAPS: <1-2 lines: common examiner penalties for THIS question type>
+   VERDICT: <one line: what to add to reach full marks>
+3. Keyword checks must reference NCERT terminology; rejected paraphrases count as absent.
+4. Be strict. Maximum 250 words. No motivational language.`,
+  deep: `OPERATING CONTRACT (Deep Breakdown Mode — non-negotiable):
+1. Explain the underlying concept from first principles for the student's specific question.
+2. For any procedure, formula, or code, include an EXECUTION TRACE: numbered walkthrough showing the state of every relevant term after each step.
+3. Include an EDGE-CASE COMPARISON: correct vs incorrect application on at least two concrete edge cases (boundary values, degenerate inputs, sign/unit traps).
+4. Close with ONE invariant, on its own line, prefixed with "INVARIANT: ".
+5. Maximum 300 words. Use fenced code blocks with a language tag.`,
+}
+
+function buildTelemetry(tel) {
+  if (!tel) return 'STUDENT TELEMETRY: unavailable.'
+  const lines = ['STUDENT TELEMETRY (live, from StudyPulse session):']
+  if (tel.student) lines.push(`- Student: ${tel.student}`)
+  if (tel.activeSubject) lines.push(`- Active subject: ${tel.activeSubject}`)
+  if (tel.currentTask) lines.push(`- Current task: ${tel.currentTask}`)
+  if (tel.timer) lines.push(`- Focus timer: ${tel.timer}`)
+  if (typeof tel.pendingCount === 'number') lines.push(`- Pending work: ${tel.pendingCount} assignment(s)`)
+  if (Array.isArray(tel.upcoming) && tel.upcoming.length) lines.push(`- Nearest: ${tel.upcoming.join('; ')}`)
+  if (typeof tel.focusStreak === 'number') lines.push(`- Focus streak: ${tel.focusStreak} day(s)`)
+  if (typeof tel.focusMinutesToday === 'number') lines.push(`- Focused today: ${tel.focusMinutesToday} min`)
+  if (typeof tel.xp === 'number') lines.push(`- Progress: ${tel.xp} XP${tel.level ? `, Level ${tel.level}` : ''}`)
+  return lines.join('\n')
+}
+
+// AI Chat endpoint — mode-aware tutoring with telemetry injection
 router.post('/chat', async (req, res) => {
   try {
-    const { message, context } = req.body
+    const { message, context, mode, telemetry } = req.body || {}
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' })
     }
 
     const assignments = context?.assignments || []
-    const courses = context?.courses || []
     const pendingAssignments = assignments.filter(a => a.status !== 'graded')
     const upcomingDeadlines = pendingAssignments
       .filter(a => a.dueDate)
@@ -48,15 +92,29 @@ router.post('/chat', async (req, res) => {
     const courseNames = [...new Set(assignments.map(a => a.courseName).filter(Boolean))]
     const subjectsText = courseNames.length > 0 ? courseNames.join(', ') : 'your courses'
 
+    // Server-side telemetry fallback when the client didn't send a block.
+    const telBlock = telemetry && Object.keys(telemetry).length > 0
+      ? buildTelemetry(telemetry)
+      : buildTelemetry({
+          pendingCount: pendingAssignments.length,
+          upcoming: upcomingDeadlines.map(a =>
+            `"${a.title}" (${a.courseName || 'Unknown'}, due ${new Date(a.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
+          ),
+          activeSubject: courseNames[0] || null,
+        })
+
+    const contract = MODE_CONTRACTS[mode] || MODE_CONTRACTS.hint
+    const modeName = (mode === 'cbse' && 'CBSE Evaluator') || (mode === 'deep' && 'Deep Breakdown') || 'Diagnostic Hint'
+
     const model = await getGemini()
     if (model) {
-      const systemContext = `You are StudyPulse (栞), a warm and knowledgeable AI study companion for students. You have access to the student's current academic data:
-- Total assignments: ${assignments.length}
-- Pending assignments: ${pendingAssignments.length}
-- Subjects: ${subjectsText}
-- Upcoming deadlines: ${upcomingDeadlines.map(a => `"${a.title}" (${a.courseName || 'Unknown'}) due ${new Date(a.dueDate).toLocaleDateString()}`).join('; ') || 'none'}
+      const systemContext = `You are StudyPulse's tutoring engine, currently in ${modeName}. The student is a Class 11-12 CBSE student.
 
-Keep responses concise (2-4 sentences), encouraging, and actionable. You can suggest generating a study plan, analyzing grades, or reviewing deadlines. Use the student's actual data in your responses.`
+${telBlock}
+
+${contract}
+
+Never produce marketing language, emojis, or filler.`
 
       try {
         const text = await callGemini(model, systemContext, message)
@@ -65,6 +123,7 @@ Keep responses concise (2-4 sentences), encouraging, and actionable. You can sug
           (lowerMsg.includes('study') || lowerMsg.includes('plan') || lowerMsg.includes('schedule'))
         return res.json({
           message: text,
+          mode: modeName,
           ...(wantsStudyPlan && pendingAssignments.length > 0 ? { shouldGeneratePlan: true } : {})
         })
       } catch (geminiErr) {
@@ -75,61 +134,32 @@ Keep responses concise (2-4 sentences), encouraging, and actionable. You can sug
     // Fallback rule-based responses when Gemini is unavailable
     const lowerMessage = message.toLowerCase()
     const gradedAssignments = assignments.filter(a => a.status === 'graded' && a.grade)
-    let response = "I'm here to help you study smarter! I can analyze your assignments, create personalized study plans, and track your deadlines. What would you like to work on?"
+    let response = pendingAssignments.length > 0
+      ? `${pendingAssignments.length} pending assignments across ${subjectsText}. Ask about deadlines, or run a mode query with an API key configured.`
+      : 'No pending work on the board.'
 
-    if (lowerMessage.includes('assignment') || lowerMessage.includes('homework')) {
-      if (upcomingDeadlines.length > 0) {
-        const list = upcomingDeadlines.map(a =>
-          `• ${a.title} (${a.courseName || 'Unknown'}): ${new Date(a.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-        ).join('\n')
-        response = `You have ${pendingAssignments.length} pending assignments. Upcoming deadlines:\n${list}\n\nWant me to generate a study plan around these?`
-      } else {
-        response = "No pending assignments! Great work staying ahead. Want me to help you prepare for upcoming topics?"
-      }
-    } else if (lowerMessage.includes('study') || lowerMessage.includes('plan') || lowerMessage.includes('schedule')) {
-      if (pendingAssignments.length > 0) {
-        response = `I'll create a personalized study plan for your ${pendingAssignments.length} pending assignments across ${subjectsText}. Say "generate study plan" and I'll schedule optimal sessions based on your deadlines!`
-      } else {
-        response = "No pending assignments right now! Add some tasks or let me know what subjects you're studying and I'll build a plan."
-      }
+    if (lowerMessage.includes('due') || lowerMessage.includes('deadline')) {
+      response = upcomingDeadlines.length > 0
+        ? `Upcoming deadlines:\n${upcomingDeadlines.map(a =>
+            `- ${a.title} (${a.courseName || 'Unknown'}) — ${new Date(a.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+          ).join('\n')}`
+        : 'No upcoming deadlines.'
     } else if (lowerMessage.includes('grade') || lowerMessage.includes('gpa')) {
       if (gradedAssignments.length > 0) {
         const avg = gradedAssignments.reduce((s, a) => s + (parseFloat(a.grade?.percentage) || 0), 0) / gradedAssignments.length
-        response = `You have ${gradedAssignments.length} graded assignments with an average of ${avg.toFixed(1)}%. Want me to break it down by subject or calculate what you need to hit your target grade?`
+        response = `${gradedAssignments.length} graded assignments, average ${avg.toFixed(1)}%.`
       } else {
-        response = "No graded assignments yet. Keep working and I'll help you track your progress!"
+        response = 'No graded assignments yet.'
       }
-    } else if (lowerMessage.includes('deadline') || lowerMessage.includes('due')) {
-      if (upcomingDeadlines.length > 0) {
-        const list = upcomingDeadlines.map(a =>
-          `• ${a.title} - ${a.courseName || 'Unknown'} — Due: ${new Date(a.dueDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`
-        ).join('\n')
-        response = `Here are your upcoming deadlines:\n${list}\n\nI can build a study schedule to help you hit everything on time!`
-      } else {
-        response = "No upcoming deadlines — you're all caught up! Want to add new assignments or study proactively?"
-      }
-    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-      const status = pendingAssignments.length > 0
-        ? `You have ${pendingAssignments.length} tasks pending.`
-        : "You're all caught up!"
-      response = `Hey! I'm StudyPulse, your AI study companion. ${status} How can I help you today?`
-    } else if (lowerMessage.includes('help')) {
-      response = `I can help with:\n• Analyzing your ${assignments.length} assignments across ${subjectsText}\n• Creating personalized study plans\n• Tracking grades and GPA\n• Managing deadlines\n\nJust ask, or say "generate study plan" to get started!`
-    }
-
-    const wantsStudyPlan = lowerMessage.includes('generate') && (
-      lowerMessage.includes('study') || lowerMessage.includes('plan') || lowerMessage === 'yes'
-    )
-
-    if (wantsStudyPlan && pendingAssignments.length > 0) {
+    } else if (lowerMessage.includes('plan') || lowerMessage.includes('schedule')) {
       return res.json({
-        message: response,
-        shouldGeneratePlan: true,
+        message: `${pendingAssignments.length} assignments available to schedule. Run Generate Plan.`,
+        shouldGeneratePlan: pendingAssignments.length > 0,
         planContext: { assignments: pendingAssignments, courses: courseNames, subjects: subjectsText }
       })
     }
 
-    res.json({ message: response })
+    res.json({ message: response, mode: modeName })
   } catch (error) {
     console.error('AI chat error:', error)
     res.status(500).json({ error: 'Failed to process message' })
@@ -149,15 +179,15 @@ router.post('/study-plan', async (req, res) => {
       .filter(a => a.status !== 'graded' && a.dueDate)
       .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
 
-    // Try Gemini for smarter study plan advice
+    // Try Gemini for study plan insight
     const model = await getGemini()
     let aiInsight = null
     if (model && pending.length > 0) {
       try {
-        const prompt = `A student has these upcoming assignments: ${pending.map(a =>
+        const prompt = `Student workload: ${pending.map(a =>
           `"${a.title}" (${a.courseName || 'Unknown'}) due ${new Date(a.dueDate).toLocaleDateString()}`
-        ).join(', ')}. They study ${daysPerWeek} days/week, ${hoursPerDay} hours/day. Give ONE specific, actionable study tip in 1-2 sentences.`
-        aiInsight = await callGemini(model, 'You are a helpful study advisor. Give concise, practical advice.', prompt)
+        ).join(', ')}. Capacity: ${daysPerWeek} days/week, ${hoursPerDay} hours/day. Give ONE specific scheduling recommendation in 1-2 sentences, referencing the actual deadlines. No generic advice.`
+        aiInsight = await callGemini(model, 'You are a scheduling analyst. Concise, specific, no filler.', prompt)
       } catch (e) {
         // ignore gemini errors for study plan insight
       }

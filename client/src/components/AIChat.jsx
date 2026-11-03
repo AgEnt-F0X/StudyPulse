@@ -1,80 +1,58 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Send, X, Sparkles, Zap, ArrowRight, FileText, CheckCircle2, Layers } from 'lucide-react'
+import { X, PaperPlaneRight, ArrowClockwise, SpinnerGap } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
-import { generateAI, aiAvailable } from '../utils/ai'
-import { hasClientKey } from '../utils/gemini'
+import { callGeminiWithMeta, hasClientKey, getKeyProvider } from '../utils/gemini'
+import { buildTutorRequest, extractStructured, AI_MODES, MODE_IDS, isModeId } from '../utils/aiModes'
 import { executeAIAssistantCommand } from '../utils/aiActions'
-import { useAuthStore, useAssignmentsStore, useNotesStore, useFlashcardsStore, useStudyPlansStore } from '../stores'
-import { C, fonts, tint, btnGhost } from '../utils/theme'
+import { useAuthStore, useAssignmentsStore, useNotesStore, useFlashcardsStore, useStudyPlansStore, usePomodoroStore, useHabitsStore, useXPStore } from '../stores'
+import { calcStreak } from '../stores'
+import { C, fonts } from '../utils/theme'
 import MarkdownContent from './MarkdownContent'
 
+const MODE_LABELS = MODE_IDS.map(id => AI_MODES[id].short)
+
+const ACTION_INTENT_RE = /^(add|create|generate|make|build|summar\w*|quiz|test me|flashcard|evaluate|check|grade|mark|review|solve|derive)\b/i
+
 const QUICK_PROMPTS = [
-  "What's due this week?",
-  "Add assignment: Physics homework due Friday",
-  "Generate a 5-question quiz on Motion",
-  "Summarize key formulas for Chemistry",
+  'What should I work on first?',
+  'Grade my answer against the CBSE scheme',
+  'Explain wave-particle duality with an execution trace',
+  'Add assignment: Physics numericals due Friday',
 ]
 
-// Local heuristic responder — works on real or demo data with no API key.
+// Offline heuristic responder — no key required, real data only.
 const getLocalResponse = (message, assignments) => {
   const msg = message.toLowerCase()
   const pending = assignments.filter(a => a.status !== 'graded')
-  const today = new Date()
 
-  const soonest = pending
-    .filter(a => a.dueDate)
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]
-
-  if (msg.includes('due') || msg.includes('deadline') || msg.includes('week')) {
+  if (msg.includes('due') || msg.includes('deadline') || msg.includes('week') || msg.includes('first') || msg.includes('priorit')) {
     const upcoming = pending
-      .filter(a => a.dueDate && new Date(a.dueDate) <= new Date(today.getTime() + 7 * 86400000))
+      .filter(a => a.dueDate && new Date(a.dueDate) <= new Date(Date.now() + 7 * 86400000))
       .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
     if (upcoming.length > 0) {
-      return `You have ${upcoming.length} assignment${upcoming.length > 1 ? 's' : ''} due this week:\n\n${upcoming.map(a =>
-        `• ${a.title} (${a.courseName}) — ${new Date(a.dueDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`
-      ).join('\n')}\n\nI'd prioritize the ${upcoming[0].title} first since it's coming up soonest.`
+      return `Due within 7 days (${upcoming.length}):\n\n${upcoming.map(a =>
+        `- ${a.title} (${a.courseName}) — ${new Date(a.dueDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`
+      ).join('\n')}\n\nStart with ${upcoming[0].title} — nearest deadline.`
     }
-    return "You're all caught up this week — no assignments due in the next 7 days!"
+    return 'Nothing due in the next 7 days.'
   }
 
-  if (msg.includes('first') || msg.includes('priority') || msg.includes('start') || msg.includes('which')) {
-    if (soonest) {
-      const high = pending.filter(a => a.priority === 'high')
-      const top = high.length > 0 ? high[0] : soonest
-      return `Start with **${top.title}** (${top.courseName}). It's ${top.priority === 'high' ? 'high priority' : 'coming up soon'} and estimated at ${top.estimatedHours || 2} hours. Tackle it when you're fresh — morning focus sessions work best for problem sets.`
-    }
-    return "You're all caught up! No pending assignments right now."
+  if (msg.includes('plan') || msg.includes('schedule') || msg.includes('generat')) {
+    return `Study plans are generated from your ${pending.length} pending assignments. Open Study Plans and run Generate Plan.`
   }
 
-  if (msg.includes('plan') || msg.includes('schedule') || msg.includes('generate')) {
-    return `I can generate a personalized study plan for your ${pending.length} pending assignments! Go to the **Study Plans** tab and click "Generate Plan" — I'll build a day-by-day schedule based on your deadlines and estimated hours.`
+  if (msg.includes('help') || msg.includes('hi') || msg.includes('hello')) {
+    return `Diagnostic tutor, offline engine. I can see ${pending.length} pending assignments.\n\nWithout an API key (Settings → AI Engine) I handle scheduling queries only. With a key, switch modes above: HINT diagnoses the flaw in your attempt, CBSE grades to the marking scheme, DEEP traces the mechanism.`
   }
 
-  if (msg.includes('grade') || msg.includes('gpa') || msg.includes('score')) {
-    return `Based on your current grades across all courses, you're averaging around 87% — solid B+ territory. Your Physics and CS grades are strongest. Want me to help you figure out what scores you need on upcoming assignments to hit your target GPA?`
+  if (pending.length > 0) {
+    const soonest = pending.filter(a => a.dueDate).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]
+    return soonest
+      ? `Nearest deadline: **${soonest.title}** (${soonest.courseName}) — ${new Date(soonest.dueDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}.`
+      : `${pending.length} pending, none dated.`
   }
-
-  if (msg.includes('help') || msg.includes('what can') || msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
-    return `Hey! I'm StudyPulse, your AI study companion. I can see you have ${pending.length} pending assignments right now.\n\nHere's what I can do:\n• Prioritize your tasks by deadline + weight\n• Generate personalized study plans\n• Track your grades and predict final scores\n• Answer questions about your schedule\n\nWhat would you like to tackle first?`
-  }
-
-  if (msg.includes('tip') || msg.includes('advice') || msg.includes('study')) {
-    const tips = [
-      "The Pomodoro technique works great for your schedule — 25 min focused on one task, then a 5 min break. There's a timer built into StudyPulse!",
-      "Space your study sessions across multiple days rather than cramming the night before. Your brain consolidates memory during sleep.",
-      "For your Calculus assignments, try working through one example problem fully before moving to the next. Understanding > volume.",
-      "Set your hardest task as the first thing you do — your willpower is highest in the morning.",
-    ]
-    return tips[Math.floor(Math.random() * tips.length)]
-  }
-
-  // Default contextual response
-  if (soonest) {
-    return `Good question! Right now your most pressing item is **${soonest.title}** due ${new Date(soonest.dueDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}. Would you like me to help you break it down into a study plan?`
-  }
-
-  return `I'm here to help you stay on top of your academics! You currently have ${pending.length} pending assignments. Ask me about deadlines, grades, or say "generate a study plan" to get started.`
+  return 'No pending work. Configure an API key in Settings to enable the tutor modes.'
 }
 
 const AIChat = ({ onClose }) => {
@@ -84,56 +62,105 @@ const AIChat = ({ onClose }) => {
   const { addNote } = useNotesStore()
   const { addDeck, addCard } = useFlashcardsStore()
   const { addStudyPlan } = useStudyPlansStore()
+
+  // Live telemetry for the header strip
+  const { isRunning, isBreak, secondsLeft, dailyFocusLog } = usePomodoroStore()
+  const habits = useHabitsStore((s) => s.habits)
+  const xp = useXPStore((s) => s.xp)
+  const focusStreak = useMemo(() => calcStreak(dailyFocusLog || {}), [dailyFocusLog])
+  const habitStreak = useMemo(() => (habits || []).reduce((m, h) => Math.max(m, h.streak || 0), 0), [habits])
+  const pendingCount = useMemo(() => (assignments || []).filter(a => a.status !== 'graded' && !a.completed).length, [assignments])
+
+  const [mode, setMode] = useState('hint')
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [lastFailure, setLastFailure] = useState(null) // { text, kind }
   const messagesEndRef = useRef(null)
+  const textareaRef = useRef(null)
+
+  const hasKey = hasClientKey()
+  const provider = getKeyProvider()
 
   useEffect(() => {
-    if (messages.length === 0 && (assignments || []).length > 0) {
-      const pending = assignments.filter(a => a.status !== 'graded')
-      const soonest = pending.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]
-      setTimeout(() => {
-        setMessages([{
-          id: Date.now(),
-          role: 'assistant',
-          content: `Hey! I'm StudyPulse AI. I can see you have ${pending.length} pending assignments.\n\nMost urgent: **${soonest?.title}** (${soonest?.courseName || soonest?.course || 'CBSE'}) due ${soonest ? new Date(soonest.dueDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) : 'soon'}.\n\nAsk me about deadlines, revision tips, or say "generate a study plan"!`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }])
-      }, 300)
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [messages, generating])
+
+  // Ctrl+Enter from the status bar / global handler + external prefill (SQL Pulse tutor hand-off)
+  useEffect(() => {
+    const onSend = () => sendMessageRef.current()
+    const onFocus = () => textareaRef.current?.focus()
+    const onPrefill = (e) => {
+      const text = e?.detail?.text || ''
+      if (text) setInput(text)
+      setTimeout(() => textareaRef.current?.focus(), 60)
     }
-  }, [assignments]) // eslint-disable-line
+    window.addEventListener('studypulse-ai-send', onSend)
+    window.addEventListener('studypulse-ai-focus', onFocus)
+    window.addEventListener('studypulse-ai-prefill', onPrefill)
+    return () => {
+      window.removeEventListener('studypulse-ai-send', onSend)
+      window.removeEventListener('studypulse-ai-focus', onFocus)
+      window.removeEventListener('studypulse-ai-prefill', onPrefill)
+    }
+  }, [])
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  const addMessage = (role, content, actionCard = null) => ({
+  const addMessage = (role, content, extra = {}) => ({
     id: Date.now() + Math.random(),
     role,
     content,
-    actionCard,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    ...extra,
   })
 
+  // Core engine call — mode system prompt + live telemetry injection.
+  const tutorCall = async (text, modeId) => {
+    const { system, text: promptText } = buildTutorRequest(modeId, text)
+    const result = await callGeminiWithMeta(promptText, { system, timeoutMs: 20000 })
+    if (result.ok) {
+      const { body, pinned } = extractStructured(result.text)
+      return { replyText: body || result.text, pinned }
+    }
+    return {
+      replyText: null,
+      error: result.error === 'no_key' ? 'NO_KEY'
+        : result.rateLimited ? 'RATE_LIMITED'
+        : result.error === 'timeout' ? 'TIMEOUT' : 'FAILED',
+    }
+  }
+
   const sendMessage = async (text) => {
-    const msgText = text || input.trim()
+    const msgText = (typeof text === 'string' ? text : input).trim()
     if (!msgText || generating) return
 
     setMessages(prev => [...prev, addMessage('user', msgText)])
     setGenerating(true)
     setInput('')
+    setLastFailure(null)
 
     try {
-      const stores = { addAssignment, addNote, addDeck, addCard, addStudyPlan, assignments }
-      const res = await executeAIAssistantCommand(msgText, stores, hasClientKey())
-      setMessages(prev => [...prev, addMessage('assistant', res.replyText, res.actionCard)])
+      // Route: /run and conversational queries → tutor engine; explicit
+      // task commands (add/quiz/flashcards/plans/evaluate) → action executor.
+      if (hasKey && (msgText.startsWith('/run ') || !ACTION_INTENT_RE.test(msgText))) {
+        const res = await tutorCall(msgText, mode)
+        if (res.replyText) {
+          setMessages(prev => [...prev, addMessage('assistant', res.replyText, { pinned: res.pinned, mode })])
+        } else {
+          setLastFailure({ text: msgText, kind: res.error })
+        }
+      } else {
+        const stores = { addAssignment, addNote, addDeck, addCard, addStudyPlan, assignments }
+        const res = await executeAIAssistantCommand(msgText, stores, hasKey, mode)
+        setMessages(prev => [...prev, addMessage('assistant', res.replyText, { actionCard: res.actionCard })])
+      }
     } catch {
-      setMessages(prev => [...prev, addMessage('assistant', getLocalResponse(msgText, assignments))])
+      setLastFailure({ text: msgText, kind: 'FAILED' })
     }
 
     setGenerating(false)
   }
+  const sendMessageRef = useRef(sendMessage)
+  sendMessageRef.current = sendMessage
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -142,216 +169,404 @@ const AIChat = ({ onClose }) => {
     }
   }
 
+  const codeActions = {
+    onInsert: (content) => {
+      setInput((prev) => (prev ? `${prev}\n${content}` : content))
+      textareaRef.current?.focus()
+    },
+    onRun: (content) => sendMessage(`/run ${content}`),
+  }
+
+  // Telemetry strip values
+  const timerState = isRunning ? (isBreak ? 'BREAK' : 'FOCUS') : 'IDLE'
+  const timerStatus = isRunning ? (isBreak ? 'warning' : 'success') : 'neutral'
+  const activeSubject =
+    (assignments || []).filter(a => a.status !== 'graded' && a.dueDate)
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]
+    ?.courseName || '—'
+
+  const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" style={{ background: C.card }}>
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ background: '#14181e', borderBottom: '1px solid rgba(66,71,84,0.30)' }}
+        className="flex items-center justify-between px-3 flex-shrink-0"
+        style={{ height: 44, borderBottom: `1px solid ${C.border}` }}
       >
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 flex items-center justify-center rounded-lg"
-            style={{
-              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
-              color: '#04120c',
-              boxShadow: '0 8px 32px rgba(16,185,129,0.22)',
-            }}
-          >
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <p style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '0.9rem', color: C.text }}>
-              StudyPulse AI
-            </p>
-            <p style={{ fontFamily: fonts.body, fontSize: '0.75rem', color: C.textMuted }}>
-              {hasClientKey() ? '⚡ Connected to AI Engine' : '✨ Instant Study Assistant'}
-            </p>
-          </div>
+          <span style={{
+            fontFamily: fonts.mono, fontSize: 10.5, fontWeight: 500,
+            letterSpacing: '0.08em', textTransform: 'uppercase', color: C.text,
+          }}>
+            AI Tutor
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span className={`dot dot-${hasKey ? 'success' : 'warning'}`} />
+            <span style={{ fontFamily: fonts.mono, fontSize: 10, color: C.textFaint }}>
+              {hasKey ? provider || 'LLM' : 'offline engine'}
+            </span>
+          </span>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg transition-sa"
-            style={{ color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = C.text }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = C.textMuted }}
+            aria-label="Close panel"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 26, height: 26, borderRadius: 4, color: C.textFaint,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              transition: 'background 0.12s ease, color 0.12s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = C.cardHover; e.currentTarget.style.color = C.text }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textFaint }}
           >
-            <X className="w-5 h-5" />
+            <X size={15} weight="regular" />
           </button>
         )}
       </div>
 
+      {/* Mode switcher */}
+      <div style={{ padding: '10px 12px 0', flexShrink: 0 }}>
+        <div style={{
+          display: 'flex', gap: 2, padding: 2,
+          border: `1px solid ${C.border}`, borderRadius: 4,
+          background: C.bgSoft,
+        }}>
+          {MODE_IDS.map((id) => {
+            const active = mode === id
+            return (
+              <button
+                key={id}
+                onClick={() => setMode(id)}
+                title={AI_MODES[id].description}
+                style={{
+                  flex: 1, padding: '5px 0', borderRadius: 3,
+                  border: 'none',
+                  background: active ? C.cardHover : 'transparent',
+                  color: active ? C.text : C.textFaint,
+                  cursor: 'pointer',
+                  fontFamily: fonts.mono, fontSize: 10, fontWeight: 500,
+                  letterSpacing: '0.08em',
+                  transition: 'background 0.12s ease, color 0.12s ease',
+                }}
+              >
+                {AI_MODES[id].short}
+              </button>
+            )
+          })}
+        </div>
+        <p style={{
+          fontFamily: fonts.body, fontSize: 11, color: C.textFaint,
+          margin: '6px 0 0', lineHeight: 1.4,
+        }}>
+          {AI_MODES[mode]?.description}
+          {isModeId(mode) ? '' : ''}
+        </p>
+      </div>
+
+      {/* Telemetry strip */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        margin: '10px 12px 0', padding: '6px 10px',
+        border: `1px solid ${C.borderSoft}`, borderRadius: 4,
+        background: C.bgSoft,
+        fontFamily: fonts.mono, fontSize: 10,
+        fontVariantNumeric: 'tabular-nums', color: C.textFaint,
+        flexShrink: 0, overflow: 'hidden', whiteSpace: 'nowrap',
+      }}>
+        <span style={{ color: C.textMuted }}>SUBJ <span style={{ color: C.text }}>{activeSubject}</span></span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          <span className={`dot dot-${timerStatus}`} />
+          {timerState} {fmt(secondsLeft)}
+        </span>
+        <span>STREAK <span style={{ color: Math.max(focusStreak, habitStreak) > 0 ? C.text : C.textFaint }}>{Math.max(focusStreak, habitStreak)}d</span></span>
+        <span>PENDING <span style={{ color: pendingCount > 0 ? C.text : C.textFaint }}>{pendingCount}</span></span>
+        <span style={{ marginLeft: 'auto' }}>XP <span style={{ color: C.text }}>{xp}</span></span>
+      </div>
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4" style={{ background: 'var(--surface-low, #0d1712)' }}>
+      <div className="flex-1 overflow-y-auto" style={{ padding: '14px 12px' }}>
         {messages.length === 0 && (
-          <div className="text-center py-6">
-            <div
-              className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-xl"
-              style={{
-                background: 'rgba(59, 130, 246, 0.12)',
-                border: '1px solid rgba(59, 130, 246, 0.25)',
-              }}
-            >
-              <Sparkles className="w-6 h-6" style={{ color: C.blue }} />
-            </div>
-            <p style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '0.95rem', color: C.text }}>
-              How can I assist your study session today?
+          <div style={{ padding: '8px 2px' }}>
+            <p style={{ fontFamily: fonts.mono, fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.textFaint, marginBottom: 8 }}>
+              Session queries
             </p>
-            <p style={{ fontFamily: fonts.body, fontSize: '0.8rem', color: C.textMuted, marginTop: 4 }}>
-              Ask questions, parse syllabi, or generate customized study plans.
-            </p>
-            <div className="mt-4 space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {QUICK_PROMPTS.map(prompt => (
                 <button
                   key={prompt}
                   onClick={() => sendMessage(prompt)}
-                  className="w-full text-left px-3 py-2.5 rounded-lg transition-sa"
                   style={{
-                    background: 'var(--bg-card, #101c17)',
-                    border: `1px solid ${C.border}`,
-                    color: C.text,
-                    fontFamily: fonts.body,
-                    fontSize: '0.825rem',
+                    textAlign: 'left', padding: '7px 10px', borderRadius: 4,
+                    background: 'transparent',
+                    border: `1px solid ${C.borderSoft}`,
+                    color: C.textMuted,
+                    fontFamily: fonts.body, fontSize: 12,
                     cursor: 'pointer',
+                    transition: 'background 0.12s ease, color 0.12s ease, border-color 0.12s ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.45)'; e.currentTarget.style.background = 'var(--surface-card-hover, #1d273e)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = 'var(--bg-card, #101c17)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = C.cardHover; e.currentTarget.style.color = C.text; e.currentTarget.style.borderColor = C.border }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textMuted; e.currentTarget.style.borderColor = C.borderSoft }}
                 >
-                  <Zap size={12} color={C.blue} style={{ display: 'inline', marginRight: 7 }} />
                   {prompt}
                 </button>
               ))}
             </div>
+            <p style={{ fontFamily: fonts.body, fontSize: 11, color: C.textFaint, marginTop: 10, lineHeight: 1.5 }}>
+              Telemetry is injected into every request — the tutor knows your timer state, streak, and pending work.
+            </p>
           </div>
         )}
 
         {messages.map((msg) => (
           <motion.div
             key={msg.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15 }}
+            style={{ marginBottom: 16 }}
           >
-            <div
-              className="max-w-[85%] px-4 py-3 flex flex-col gap-2"
-              style={{
-                fontFamily: fonts.body,
-                fontSize: '0.875rem',
-                lineHeight: 1.6,
-                whiteSpace: 'pre-wrap',
-                background: msg.role === 'user' ? 'var(--accent-blue, #10b981)' : 'var(--bg-card, #101c17)',
-                color: msg.role === 'user' ? '#ffffff' : C.text,
-                borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                border: msg.role === 'user' ? 'none' : `1px solid ${C.border}`,
-                boxShadow: msg.role === 'user' ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 3px rgba(0,0,0,0.2)',
-              }}
-            >
-              {msg.role === 'user' ? (
-                <p style={{ margin: 0 }}>{msg.content}</p>
-              ) : (
-                <MarkdownContent content={msg.content} />
-              )}
-              
-              {/* Action Cards */}
-              {msg.actionCard?.type === 'assignment' && (
-                <div style={{
-                  padding: '8px 12px', borderRadius: 8,
-                  background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <CheckCircle2 size={14} color="#4ade80" />
-                    <span style={{ fontSize: 11, color: '#4ade80', fontWeight: 600 }}>
-                      Added (Due: {msg.actionCard.dueDate})
+            {/* Message header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+              <span style={{
+                fontFamily: fonts.mono, fontSize: 9.5, fontWeight: 500,
+                letterSpacing: '0.08em', color: msg.role === 'user' ? C.text : C.textFaint,
+              }}>
+                {msg.role === 'user' ? 'YOU' : `TUTOR · ${AI_MODES[msg.mode]?.short || 'SYSTEM'}`}
+              </span>
+              <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, fontVariantNumeric: 'tabular-nums' }}>
+                {msg.timestamp}
+              </span>
+            </div>
+
+            {msg.role === 'user' ? (
+              <div style={{
+                padding: '8px 12px', borderRadius: 4,
+                background: C.cardHover,
+                border: `1px solid ${C.border}`,
+                fontFamily: fonts.body, fontSize: 13, lineHeight: 1.55,
+                color: C.text, whiteSpace: 'pre-wrap',
+              }}>
+                {msg.content}
+              </div>
+            ) : (
+              <div style={{
+                paddingLeft: 12,
+                borderLeft: `2px solid ${C.borderStrong}`,
+              }}>
+                <MarkdownContent content={msg.content} codeActions={codeActions} />
+
+                {/* Pinned structured lines (GUIDING / INVARIANT / MARKS) */}
+                {(msg.pinned || []).map((p, i) => (
+                  <div key={i} style={{
+                    marginTop: 8, padding: '6px 10px',
+                    borderRadius: 4,
+                    background: C.bgSoft,
+                    border: `1px solid ${C.borderSoft}`,
+                    borderLeft: `2px solid ${p.kind === 'guiding' ? C.warning : p.kind === 'marks' ? C.text : C.success}`,
+                  }}>
+                    <span className="metric-label" style={{ display: 'block', marginBottom: 2, padding: 0 }}>
+                      {p.kind === 'guiding' ? 'Guiding question' : p.kind === 'invariant' ? 'Invariant' : 'Marks'}
+                    </span>
+                    <span style={{ fontFamily: fonts.body, fontSize: 12.5, color: C.text, lineHeight: 1.5 }}>
+                      {p.text}
                     </span>
                   </div>
-                  <button onClick={() => navigate('/assignments')} style={{ ...btnGhost, fontSize: 10, padding: '2px 8px', color: C.blue }}>
-                    View <ArrowRight size={10} />
-                  </button>
-                </div>
-              )}
+                ))}
 
-              {msg.actionCard?.type === 'save_note' && (
-                <div style={{
-                  padding: '8px 12px', borderRadius: 8,
-                  background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                }}>
-                  <span style={{ fontSize: 11, color: C.blue, fontWeight: 600 }}>Summary Note</span>
-                  <button
+                {/* Action cards */}
+                {msg.actionCard?.type === 'assignment' && (
+                  <ActionRow
+                    dot="success"
+                    label={`Added — due ${msg.actionCard.dueDate}`}
+                    actionLabel="Open"
+                    onClick={() => navigate('/assignments')}
+                  />
+                )}
+                {msg.actionCard?.type === 'save_note' && (
+                  <ActionRow
+                    dot="success"
+                    label="Summary note ready"
+                    actionLabel="Save"
+                    onClick={() => addNote({ title: msg.actionCard.title, content: msg.actionCard.content, color: '#EDEDED' })}
+                  />
+                )}
+                {msg.actionCard?.type === 'save_flashcards' && msg.actionCard.cards && (
+                  <ActionRow
+                    dot="success"
+                    label={`${msg.actionCard.cards.length} flashcards — ${msg.actionCard.topic}`}
+                    actionLabel="Save deck"
                     onClick={() => {
-                      addNote({ title: msg.actionCard.title, content: msg.actionCard.content, color: '#3b82f6' })
+                      const deckId = addDeck({ name: msg.actionCard.topic || 'AI Flashcards', description: 'Generated in tutor' })
+                      msg.actionCard.cards.forEach(c => addCard(deckId, { front: c.front, back: c.back }))
                     }}
-                    style={{ ...btnGhost, fontSize: 10, padding: '2px 8px', color: C.blue }}
-                  >
-                    + Save to Notes
-                  </button>
-                </div>
-              )}
-
-              <p style={{ fontSize: '0.68rem', marginTop: 2, color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : C.textMuted }}>
-                {msg.timestamp}
-              </p>
-            </div>
+                  />
+                )}
+                {msg.actionCard?.type === 'study_plan' && (
+                  <ActionRow
+                    dot="success"
+                    label={`4-week plan — ${msg.actionCard.subject}`}
+                    actionLabel="Open"
+                    onClick={() => navigate('/study-plans')}
+                  />
+                )}
+                {(msg.actionCard?.type === 'evaluation' || msg.actionCard?.type === 'solution') && (
+                  <ActionRow
+                    dot="neutral"
+                    label={msg.actionCard.type === 'evaluation' ? 'Graded against CBSE scheme' : 'Deep breakdown'}
+                  />
+                )}
+              </div>
+            )}
           </motion.div>
         ))}
 
+        {/* Generating indicator */}
         {generating && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-            <div style={{
-              padding: '12px 16px', borderRadius: '12px 12px 12px 2px',
-              background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}`,
-            }}>
-              <div className="flex gap-1.5 items-center">
-                {[0, 1, 2].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: C.blue, display: 'block' }}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0 4px 12px', borderLeft: `2px solid ${C.borderStrong}` }}>
+            <SpinnerGap size={13} className="spin" style={{ color: C.textFaint }} />
+            <span style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.08em', color: C.textFaint }}>
+              {AI_MODES[mode].short} ENGINE
+            </span>
+          </div>
+        )}
+
+        {/* Failure / retry state */}
+        {lastFailure && !generating && (
+          <div style={{
+            margin: '4px 0', padding: '8px 10px',
+            borderRadius: 4,
+            background: C.bgSoft,
+            border: `1px solid ${C.border}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+              <span className="dot dot-error" />
+              <span style={{ fontFamily: fonts.mono, fontSize: 10.5, color: C.textMuted }}>
+                {lastFailure.kind === 'RATE_LIMITED' && 'RATE LIMIT — provider throttled. Retry in a moment.'}
+                {lastFailure.kind === 'TIMEOUT' && 'TIMEOUT — engine did not respond in 20s.'}
+                {lastFailure.kind === 'NO_KEY' && 'NO KEY — add one in Settings → AI Engine.'}
+                {['FAILED', 'network', 'auth', 'http_429'].includes(lastFailure.kind) && 'REQUEST FAILED — provider unreachable.'}
+                {lastFailure.kind.startsWith('http_') && !['http_429'].includes(lastFailure.kind) && `PROVIDER ERROR — ${lastFailure.kind}`}
+              </span>
+            </span>
+            {lastFailure.kind !== 'NO_KEY' && (
+              <button
+                onClick={() => {
+                  const { text } = lastFailure
+                  setLastFailure(null)
+                  sendMessage(text)
+                }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '3px 9px', borderRadius: 3,
+                  background: C.cardHover, border: `1px solid ${C.border}`,
+                  color: C.text, cursor: 'pointer',
+                  fontFamily: fonts.mono, fontSize: 10, fontWeight: 500,
+                  letterSpacing: '0.06em',
+                }}
+              >
+                <ArrowClockwise size={11} weight="bold" /> RETRY
+              </button>
+            )}
+          </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Bar */}
-      <div className="p-3 flex-shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: 'var(--bg-primary, #0a120e)' }}>
+      {/* Input */}
+      <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div
-          className="flex items-center gap-2 px-3 py-2 rounded-xl"
-          style={{ background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}` }}
+          style={{
+            display: 'flex', alignItems: 'flex-end', gap: 8,
+            padding: '8px 10px', borderRadius: 4,
+            background: C.bgSoft, border: `1px solid ${C.border}`,
+            transition: 'border-color 0.13s ease',
+          }}
+          onClick={() => textareaRef.current?.focus()}
         >
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask StudyPulse..."
-            rows={1}
-            className="flex-1 bg-transparent resize-none outline-none min-h-[24px] text-sm"
-            style={{ fontFamily: fonts.body, color: C.text }}
+            placeholder={`Query in ${AI_MODES[mode].short} mode — telemetry attached automatically`}
+            rows={2}
+            className="flex-1 resize-none outline-none"
+            style={{
+              background: 'transparent', border: 'none', outline: 'none',
+              fontFamily: fonts.body, color: C.text,
+              fontSize: 13, lineHeight: 1.5,
+              minHeight: 36, resize: 'none',
+            }}
           />
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || generating}
-            className="p-2 rounded-lg transition-sa"
+            title="Send (Enter) — Ctrl+Enter works globally"
             style={{
-              background: input.trim() && !generating ? 'var(--accent-blue, #10b981)' : 'rgba(255,255,255,0.06)',
-              color: input.trim() && !generating ? '#ffffff' : C.textFaint,
-              border: 'none', cursor: input.trim() ? 'pointer' : 'default',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 28, height: 28, borderRadius: 4,
+              background: input.trim() && !generating ? C.fill : 'transparent',
+              color: input.trim() && !generating ? C.fillText : C.textFaint,
+              border: input.trim() && !generating ? 'none' : `1px solid ${C.border}`,
+              cursor: input.trim() && !generating ? 'pointer' : 'default',
+              flexShrink: 0,
             }}
           >
-            <Send className="w-4 h-4" style={{ display: 'block' }} />
+            <PaperPlaneRight size={13} weight="bold" />
           </button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <kbd className="kbd">↵</kbd>
+            <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>send</span>
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <kbd className="kbd">⇧↵</kbd>
+            <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>newline</span>
+          </span>
+          <span style={{ marginLeft: 'auto', fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>
+            {user?.name || 'local session'}
+          </span>
         </div>
       </div>
     </div>
   )
 }
+
+const ActionRow = ({ dot, label, actionLabel, onClick }) => (
+  <div style={{
+    marginTop: 8, padding: '6px 10px', borderRadius: 4,
+    background: C.bgSoft, border: `1px solid ${C.borderSoft}`,
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+  }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+      <span className={`dot dot-${dot || 'neutral'}`} />
+      <span style={{
+        fontFamily: fonts.mono, fontSize: 10.5, color: C.textMuted,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>
+        {label}
+      </span>
+    </span>
+    {actionLabel && (
+      <button
+        onClick={onClick}
+        style={{
+          padding: '2px 8px', borderRadius: 3, flexShrink: 0,
+          background: C.cardHover, border: `1px solid ${C.border}`,
+          color: C.text, cursor: 'pointer',
+          fontFamily: fonts.mono, fontSize: 10, fontWeight: 500,
+          letterSpacing: '0.06em', textTransform: 'uppercase',
+        }}
+      >
+        {actionLabel}
+      </button>
+    )}
+  </div>
+)
 
 export default AIChat

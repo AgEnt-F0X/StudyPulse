@@ -5,8 +5,8 @@ export function aiAvailable() {
 }
 
 export function aiModeLabel() {
-  if (hasClientKey()) return 'Gemini 2.0 Flash'
-  return 'Instant Engine'
+  if (hasClientKey()) return 'LLM Engine'
+  return 'Offline Engine'
 }
 
 function generateLocalFallback(prompt) {

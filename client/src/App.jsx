@@ -29,6 +29,7 @@ const Signup = lazy(() => import('./pages/Signup'))
 const Demo = lazy(() => import('./pages/Demo'))
 const Profile = lazy(() => import('./pages/Profile'))
 const AIAssistant = lazy(() => import('./pages/AIAssistant'))
+const SqlPulse = lazy(() => import('./pages/SqlPulse'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const PageSkeleton = () => (
@@ -82,6 +83,7 @@ function App() {
                 <Route path="/habits" element={<Habits />} />
                 <Route path="/focus" element={<FocusMode />} />
                 <Route path="/quiz" element={<Quiz />} />
+                <Route path="/sql" element={<SqlPulse />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/import" element={<SyllabusImport />} />
                 <Route path="/settings" element={<Settings />} />

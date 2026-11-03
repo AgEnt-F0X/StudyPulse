@@ -1,72 +1,75 @@
-// StudyPulse Botanical Scholar Design System — LOCKED
-// Pine base + Emerald action + Brass reward. Flat reading surfaces,
-// gradients only on 4 brand moments (logo/CTA/hero/reward).
+// StudyPulse Workbench Design System — OBSIDIAN
+// Matte surfaces + hairline grid + monochrome actions. Semantic status
+// lives in 6px dots only. No gradients on surfaces. No glass. No glow.
 
 export const C = {
-  // Surfaces (CSS var refs with fallbacks)
-  bg: 'var(--bg-primary, #0a120e)',
-  bgSoft: 'var(--surface-low, #0d1712)',
-  card: 'var(--bg-card, #101c17)',
-  cardGlass: 'var(--bg-card-glass, rgba(16, 28, 22, 0.75))',
-  cardSoft: 'var(--surface-card-soft, #14231c)',
-  cardHover: 'var(--surface-card-hover, #182b22)',
-  border: 'var(--border-color, rgba(52, 211, 153, 0.14))',
-  borderSoft: 'var(--border-soft, rgba(52, 211, 153, 0.10))',
+  // Surfaces (CSS var refs with obsidian fallbacks)
+  bg: 'var(--bg-primary, #09090B)',
+  bgSoft: 'var(--surface-low, #0C0C0E)',
+  card: 'var(--bg-card, #121215)',
+  cardGlass: 'var(--bg-card, #121215)',
+  cardSoft: 'var(--surface-card-soft, #18181C)',
+  cardHover: 'var(--surface-card-hover, #18181C)',
+  border: 'var(--border-color, #232329)',
+  borderSoft: 'var(--border-soft, #1C1C21)',
+  borderStrong: '#2E2E36',
 
   // Ink
-  text: 'var(--text-primary, #f0fdf4)',
-  textMuted: 'var(--text-secondary, #a7c4b5)',
-  textFaint: 'var(--text-muted, #769989)',
+  text: 'var(--text-primary, #FAFAFA)',
+  textMuted: 'var(--text-secondary, #A1A1AA)',
+  textFaint: 'var(--text-muted, #71717A)',
 
-  // Action — Emerald Sage (go / progress / correct)
-  primary: 'var(--primary, #10b981)',
-  primaryDeep: 'var(--primary-deep, #059669)',
-  primaryGlow: 'var(--primary-glow, #34d399)',
-  green: '#34d399',
-  greenDark: '#10b981',
+  // Action — monochrome. Primary fills are #EDEDED with #09090B ink.
+  primary: 'var(--primary, #EDEDED)',
+  primaryDeep: 'var(--primary-deep, #A1A1AA)',
+  primaryGlow: 'var(--primary-glow, #FAFAFA)',
+  fill: '#EDEDED',
+  fillText: '#09090B',
 
-  // Reward — Warm Brass (streak / XP / AI magic only)
-  amber: 'var(--accent-amber, #f59e0b)',
-  amberDeep: 'var(--accent-amber-deep, #d97706)',
+  // Semantic status — the only chromatic ink in the system
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
 
-  // Legacy accents (remapped to botanical scale for consistency —
-  // C.blue now resolves emerald so ~100 secondary-page usages follow the theme)
-  blue: '#34d399',
-  blueDark: '#10b981',
-  purple: '#c084fc',
-  purpleDark: '#a855f7',
-  pink: '#f472b6',
-  orange: '#fb923c',
-  yellow: '#facc15',
-  red: '#f87171',
+  // Legacy accents (remapped: blue→neutral, chromatics→semantic status)
+  blue: '#EDEDED',
+  blueDark: '#A1A1AA',
+  green: '#10B981',
+  greenDark: '#059669',
+  amber: '#F59E0B',
+  amberDeep: '#D97706',
+  red: '#EF4444',
+  orange: '#F59E0B',
+  yellow: '#F59E0B',
+  purple: '#A1A1AA',
+  purpleDark: '#71717A',
+  pink: '#EF4444',
 }
 
-// 4 brand gradients ONLY — never on reading surfaces
+// Flat solids — legacy gradient consumers resolve to matte fills
 export const gradients = {
-  logo: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
-  primary: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
-  reward: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
-  hero: 'var(--grad-hero)',
+  logo: 'var(--grad-logo, #EDEDED)',
+  primary: 'var(--grad-primary, #EDEDED)',
+  reward: 'var(--grad-reward, #F59E0B)',
+  hero: 'none',
 }
 
-// Translucent tint for subtle accent badges / borders
+// Translucent tint for subtle borders / hovers (neutral by default)
 export const tint = (hex, a = 0.12) => {
-  if (!hex || typeof hex !== 'string') return `rgba(16,185,129,${a})`
+  if (!hex || typeof hex !== 'string') return `rgba(255,255,255,${a})`
   let targetHex = hex
   if (targetHex.startsWith('var(')) {
     const match = targetHex.match(/#[0-9a-fA-F]{3,6}/)
     if (match) {
       targetHex = match[0]
-    } else if (targetHex.includes('primary') || targetHex.includes('blue') || targetHex.includes('green')) {
-      targetHex = '#10b981'
-    } else if (targetHex.includes('amber') || targetHex.includes('orange')) {
-      targetHex = '#f59e0b'
-    } else if (targetHex.includes('purple')) {
-      targetHex = '#c084fc'
-    } else if (targetHex.includes('pink') || targetHex.includes('red')) {
-      targetHex = '#f472b6'
+    } else if (targetHex.includes('amber') || targetHex.includes('orange') || targetHex.includes('yellow')) {
+      targetHex = '#F59E0B'
+    } else if (targetHex.includes('red') || targetHex.includes('pink') || targetHex.includes('error')) {
+      targetHex = '#EF4444'
+    } else if (targetHex.includes('green') || targetHex.includes('success')) {
+      targetHex = '#10B981'
     } else {
-      targetHex = '#10b981'
+      targetHex = '#FFFFFF'
     }
   }
   const cleanHex = targetHex.startsWith('#') ? targetHex.slice(1) : targetHex
@@ -77,122 +80,109 @@ export const tint = (hex, a = 0.12) => {
     return `rgba(${r},${g},${b},${a})`
   }
   const n = parseInt(cleanHex, 16)
-  if (isNaN(n)) return `rgba(16,185,129,${a})`
+  if (isNaN(n)) return `rgba(255,255,255,${a})`
   const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255
   return `rgba(${r},${g},${b},${a})`
 }
 
 export const fonts = {
-  heading: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  mono: "'JetBrains Mono', 'SFMono-Regular', Menlo, monospace",
 }
 
-export const radius = { sm: 4, md: 6, lg: 8, xl: 12, xxl: 16, pill: 999 }
+export const radius = { sm: 3, md: 4, lg: 6, xl: 6, xxl: 8, pill: 999 }
 
 export const shadow = {
-  card: 'var(--shadow-card, 0 1px 3px rgba(0,0,0,0.4))',
-  lift: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
-  modal: '0 24px 64px rgba(0,0,0,0.7)',
-  glowEmerald: 'var(--shadow-glow-emerald, 0 4px 20px rgba(0,0,0,0.4))',
-  glowAmber: 'var(--shadow-glow-amber, 0 4px 20px rgba(0,0,0,0.4))',
+  card: '0 1px 2px rgba(0,0,0,0.5)',
+  lift: '0 8px 24px rgba(0,0,0,0.5)',
+  modal: '0 16px 48px rgba(0,0,0,0.7)',
+  glowEmerald: 'none',
+  glowAmber: 'none',
 }
 
 export const elevation = {
-  card: {
-    boxShadow: 'var(--shadow-card, 0 1px 3px rgba(0,0,0,0.4))',
-  },
-  lift: {
-    boxShadow: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
-  },
-  glowEmerald: {
-    boxShadow: 'var(--shadow-glow-emerald, 0 4px 20px rgba(0,0,0,0.4))',
-  },
-  glowAmber: {
-    boxShadow: 'var(--shadow-glow-amber, 0 4px 20px rgba(0,0,0,0.4))',
-  },
-  sheenTop: {
-    boxShadow: 'var(--sheen-top, inset 0 1px 0 rgba(255,255,255,0.08))',
-  },
+  card: { boxShadow: shadow.card },
+  lift: { boxShadow: shadow.lift },
+  glowEmerald: {},
+  glowAmber: {},
+  sheenTop: {},
 }
 
 // ---- Reusable style objects ----
-// Flat surfaces, hairline botanical borders, top-edge sheen (no left bars).
+// Flat panels, hairline borders, hover = surface fill change only.
 
 export const card = {
   background: C.card,
   border: `1px solid ${C.border}`,
-  borderRadius: radius.xxl,
-  padding: '20px 22px',
-  boxShadow: `${shadow.card}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+  borderRadius: radius.lg,
+  padding: '16px 18px',
 }
 
 export const cardFlat = {
   background: C.card,
   border: `1px solid ${C.border}`,
-  borderRadius: radius.xl,
-  padding: '16px 18px',
+  borderRadius: radius.lg,
+  padding: '14px 16px',
 }
 
-// DEPRECATED: left-border accent (AI-slop). Use cardTop instead.
+// Hairline accent panel — a bordered cell, not a decorated card
 export const cardAccent = (color) => ({
   ...card,
-  borderTop: `2px solid ${color}`,
+  borderTop: `1px solid ${C.border}`,
 })
 
-// Botanical accent: top-edge rule, not left bar
-export const cardTop = (color) => ({
-  ...card,
-  borderTop: `2px solid ${color}`,
-})
+export const cardTop = cardAccent
 
 export const inputStyle = {
   width: '100%',
-  padding: '9px 14px',
-  minHeight: 36,
+  padding: '8px 12px',
+  minHeight: 34,
   borderRadius: radius.lg,
   background: C.bgSoft,
   border: `1px solid ${C.border}`,
   color: C.text,
-  fontSize: 14,
+  fontSize: 13,
   fontFamily: fonts.body,
+  fontVariantNumeric: 'tabular-nums',
   boxSizing: 'border-box',
   outline: 'none',
-  transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+  transition: 'border-color 0.15s ease, background 0.15s ease',
 }
 
+// Primary action — high-contrast monochrome fill
 export const btnPrimary = {
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-  padding: '10px 18px',
+  padding: '8px 14px',
   borderRadius: radius.lg,
   border: 'none',
-  background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
-  color: '#04120c',
+  background: C.fill,
+  color: C.fillText,
   cursor: 'pointer',
-  fontFamily: fonts.heading,
-  fontSize: 13.5, fontWeight: 700,
-  letterSpacing: '0.01em',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(16,185,129,0.22)',
-  transition: 'transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease',
+  fontFamily: fonts.body,
+  fontSize: 12.5, fontWeight: 600,
+  letterSpacing: '-0.01em',
+  transition: 'background 0.13s ease, opacity 0.13s ease',
 }
 
+// Reward / warning action — solid semantic fill, no gradient
 export const btnAmber = {
   ...btnPrimary,
-  background: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
-  color: '#1a1005',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(245,158,11,0.22)',
+  background: C.warning,
+  color: '#09090B',
 }
 
 export const btnGhost = {
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-  padding: '9px 16px',
+  padding: '7px 12px',
   borderRadius: radius.lg,
   border: `1px solid ${C.border}`,
   background: 'transparent',
   color: C.text,
   cursor: 'pointer',
-  fontFamily: fonts.heading,
-  fontSize: 13, fontWeight: 600,
-  transition: 'border-color 0.15s ease, background 0.15s ease, color 0.15s ease',
+  fontFamily: fonts.body,
+  fontSize: 12.5, fontWeight: 500,
+  transition: 'border-color 0.13s ease, background 0.13s ease, color 0.13s ease',
 }
 
 export const btnAccent = (color) => ({
@@ -202,27 +192,40 @@ export const btnAccent = (color) => ({
   background: tint(color, 0.08),
 })
 
-// Tag chip — sentence case, botanical border
+// Tag chip — mono, uppercase, hairline
 export const chip = (color) => ({
   display: 'inline-flex', alignItems: 'center', gap: 6,
-  padding: '3px 8px',
+  padding: '2px 7px',
   borderRadius: radius.sm,
-  background: tint(color, 0.12),
+  background: tint(color, 0.10),
   border: `1px solid ${tint(color, 0.28)}`,
   color,
-  fontFamily: fonts.body,
-  fontSize: 11, fontWeight: 700,
-  letterSpacing: '0.02em',
+  fontFamily: fonts.mono,
+  fontSize: 10, fontWeight: 500,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  fontVariantNumeric: 'tabular-nums',
   whiteSpace: 'nowrap',
 })
 
-// Optical icon frame — 32/40px squircle, 10% tint
+// Semantic status dot — the sole chromatic indicator in the system
+export const statusDot = (kind = 'neutral', size = 6) => ({
+  width: size, height: size,
+  borderRadius: '50%',
+  flexShrink: 0,
+  background: kind === 'success' ? C.success
+    : kind === 'warning' ? C.warning
+    : kind === 'error' ? C.error
+    : C.textFaint,
+})
+
+// Optical icon frame — kept for compatibility, restyled hairline/neutral
 export const iconBox = (color, size = 36) => ({
   width: size, height: size,
   borderRadius: radius.lg,
   flexShrink: 0,
-  background: tint(color, 0.10),
-  border: `1px solid ${tint(color, 0.25)}`,
+  background: C.cardSoft,
+  border: `1px solid ${C.border}`,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  color,
+  color: C.text,
 })

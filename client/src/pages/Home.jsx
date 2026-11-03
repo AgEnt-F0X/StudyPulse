@@ -1,15 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  ClipboardText, ChartBar, Notebook, CheckCircle,
-  Target, Brain, Cards, ArrowRight, Lightning,
-  Sparkle, ArrowClockwise, SpinnerGap, Play
-} from '@phosphor-icons/react'
+import { SpinnerGap, ArrowClockwise, Play } from '@phosphor-icons/react'
 import { useAuthStore, useAssignmentsStore, useGradesStore, useNotesStore, useXPStore, useUIStore, usePomodoroStore, pctToGPA, calcStreak } from '../stores'
 import { hasClientKey, callGeminiClient, getKeyProvider } from '../utils/gemini'
-import { C, fonts, tint, btnPrimary, iconBox } from '../utils/theme'
+import { C, fonts } from '../utils/theme'
 import { StatCard, SectionTitle, Card } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
+
 const stripMarkdown = (str) => {
   if (!str) return ''
   return str
@@ -45,8 +42,6 @@ export default function Home() {
   const xp = xpStore.xp
 
   const name = user?.firstName || user?.name?.split(' ')[0] || 'Student'
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
   const todayAssignments = useMemo(() => {
@@ -101,25 +96,23 @@ export default function Home() {
       }).length
       const noteCount = notes?.length || 0
       const focusStreak = streak
+      const focusToday = dailyFocusLog?.[todayKey] || 0
 
       const context = `Student: ${name}, Level ${xpLevel?.level || 1}, ${xp} XP.
 Assignments due today: ${dueToday}. Due this week: ${dueThisWeek}.
-Total notes: ${noteCount}. Focus streak: ${focusStreak} days.
+Total notes: ${noteCount}. Focus streak: ${focusStreak} days. ${focusToday} min focused today.
 Subjects: Physics, Chemistry, Mathematics, Biology, English (CBSE Class 11).
 Upcoming assignments: ${upcoming.slice(0, 3).map(a => `${a.title} (${a.course || a.courseName}, ${Math.ceil((new Date(a.dueDate) - new Date()) / 86400000)}d left)`).join('; ') || 'None'}`
 
-      const prompt = `You are a friendly AI study coach for a CBSE Class 11 student. Based on this data, write a SHORT personalized daily study brief (4-5 lines max).
+      const prompt = `You are StudyPulse's session planner. Based on the telemetry below, write a SHORT daily brief (4-5 lines max).
 
 Rules:
-- Start with an encouraging opening line
-- Mention specific priorities for today (assignments due, subjects to focus on)
-- Give ONE specific actionable tip
-- End with a motivational closing
-- Keep it warm, concise, and actionable
-- Use emojis sparingly (1-2 max)
-- DO NOT use markdown headers or bullet points - just flowing text
+- Line 1: the single highest-priority item for today and why (deadline or weight).
+- Line 2-3: what to focus on, referencing the student's actual data.
+- Line 4: one concrete, specific study action (not generic advice).
+- No emojis. No markdown headers. No pleasantries. Flowing text only.
 
-Student data:
+Student telemetry:
 ${context}`
 
       const result = await callGeminiClient(prompt, { timeoutMs: 10000 })
@@ -142,166 +135,180 @@ ${context}`
   }, []) // eslint-disable-line
 
   const quickActions = [
-    { icon: Target, label: 'Start Focus Mode', path: '/focus', color: C.primary },
-    { icon: Brain, label: 'Take a Quiz', path: '/quiz', color: C.amber },
-    { icon: Cards, label: 'Review Flashcards', path: '/flashcards', color: C.green },
-    { icon: ChartBar, label: 'Check Grades', path: '/grades', color: C.orange },
+    { label: 'Start Focus Mode', path: '/focus' },
+    { label: 'Take a Quiz', path: '/quiz' },
+    { label: 'Review Flashcards', path: '/flashcards' },
+    { label: 'Check Grades', path: '/grades' },
   ]
 
   return (
     <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 'min(1280px, 100%)', margin: '0 auto' }}>
-      {/* Top Greeting & Status Bar */}
+      {/* Header row */}
       <div style={{
         display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 16, marginBottom: 24,
+        flexWrap: 'wrap', gap: 16, marginBottom: 20,
       }}>
         <div>
           <h1 style={{
-            fontFamily: fonts.heading, fontSize: 26, fontWeight: 700,
-            color: C.text, marginBottom: 4, letterSpacing: '-0.02em',
+            fontFamily: fonts.body, fontSize: 18, fontWeight: 600,
+            color: C.text, marginBottom: 3, letterSpacing: '-0.02em',
           }}>
-            {greeting}, {name}
+            {name}
           </h1>
-          <p style={{ fontSize: 13.5, color: C.textMuted }}>
-            {today} · <span style={{ color: C.primary, fontWeight: 600 }}>{todayAssignments.length} due today</span>
+          <p style={{ fontFamily: fonts.mono, fontSize: 11, color: C.textFaint, fontVariantNumeric: 'tabular-nums' }}>
+            {today} · <span style={{ color: todayAssignments.length > 0 ? C.warning : C.success }}>
+              {todayAssignments.length} due today
+            </span> · {streak}d streak
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             onClick={() => navigate('/assistant')}
             style={{
-              ...btnPrimary,
-              padding: '8px 14px',
-              fontSize: 12.5,
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              padding: '6px 14px', borderRadius: 4,
+              background: C.fill, color: C.fillText,
+              border: 'none', cursor: 'pointer',
+              fontFamily: fonts.body, fontSize: 12.5, fontWeight: 600,
+              letterSpacing: '-0.01em',
             }}
           >
-            <Sparkle size={15} weight="duotone" /> Ask AI Coach
+            Ask Tutor
+          </button>
+          <button
+            onClick={() => navigate('/focus')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              padding: '6px 14px', borderRadius: 4,
+              background: 'transparent', color: C.text,
+              border: `1px solid ${C.border}`, cursor: 'pointer',
+              fontFamily: fonts.body, fontSize: 12.5, fontWeight: 500,
+            }}
+          >
+            Focus
           </button>
         </div>
       </div>
 
-      {/* XP Level Progress Tracker */}
-      <Card style={{ padding: '16px 20px', marginBottom: 22, background: 'var(--bg-card-glass, rgba(16,28,22,0.75))' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 24, height: 24, borderRadius: 7,
-              background: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
-              boxShadow: '0 8px 32px rgba(245,158,11,0.22)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Lightning size={14} weight="duotone" color="#1a1005" />
-            </div>
-            <span style={{ fontFamily: fonts.heading, fontSize: 13, fontWeight: 700, color: C.text }}>
-              {xpLevel?.title || 'Freshman'} <span style={{ color: C.amber }}>· Level {xpLevel?.level || 1}</span>
-            </span>
-          </div>
-          <span style={{ fontSize: 12, color: C.textMuted, fontFamily: fonts.heading, fontWeight: 600 }}>
-            {xp} XP {xpNext ? `· ${xpToNext - (xp - xpLevel.min)} XP to Level ${(xpLevel?.level || 1) + 1}` : '· Max level reached'}
-          </span>
-        </div>
-        <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+      {/* XP progress — hairline meter */}
+      <div style={{
+        border: `1px solid ${C.border}`, borderRadius: 4,
+        background: C.card, padding: '12px 16px', marginBottom: 16,
+        display: 'flex', alignItems: 'center', gap: 16,
+      }}>
+        <span style={{
+          fontFamily: fonts.mono, fontSize: 11, fontWeight: 500,
+          color: C.text, letterSpacing: '0.02em', whiteSpace: 'nowrap',
+        }}>
+          L{xpLevel?.level || 1} · {xpLevel?.title || 'Freshman'}
+        </span>
+        <div style={{ flex: 1, height: 4, background: C.cardSoft, borderRadius: 2, overflow: 'hidden' }}>
           <div style={{
             height: '100%', width: `${Math.min(100, Math.max(0, xpPct))}%`,
-            background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
-            borderRadius: 3, transition: 'width 0.4s ease',
+            background: C.text, borderRadius: 2, transition: 'width 0.3s ease',
           }} />
         </div>
-      </Card>
-
-      {/* Stats Grid */}
-      <div className="stat-grid" style={{ marginBottom: 24 }}>
-        <StatCard icon={ClipboardText} label="Due today" value={todayAssignments.length} color={todayAssignments.length > 0 ? C.pink : C.primary} />
-        <StatCard icon={ChartBar} label="Current GPA" value={currentGPA} color={C.primary} />
-        <StatCard icon={Notebook} label="Study Notes" value={notes?.length || 0} color={C.amber} />
-        <StatCard icon={CheckCircle} label="Completed Tasks" value={(assignments || []).filter(a => a.completed).length} color={C.green} />
+        <span style={{
+          fontFamily: fonts.mono, fontSize: 10.5, color: C.textFaint,
+          fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap',
+        }}>
+          {xp} XP{xpNext ? ` · ${xpToNext - (xp - xpLevel.min)} to L${(xpLevel?.level || 1) + 1}` : ' · max'}
+        </span>
       </div>
 
-      {/* AI Daily Study Brief — Botanical hero */}
+      {/* Stats — hairline grid cells */}
+      <div className="stat-grid" style={{ marginBottom: 20 }}>
+        <StatCard
+          label="Due today"
+          value={todayAssignments.length}
+          status={todayAssignments.length > 0 ? 'warning' : 'success'}
+        />
+        <StatCard label="GPA" value={currentGPA} />
+        <StatCard label="Notes" value={notes?.length || 0} />
+        <StatCard
+          label="Completed"
+          value={(assignments || []).filter(a => a.completed).length}
+          status="success"
+        />
+      </div>
+
+      {/* Daily brief */}
       {hasClientKey() && (
-        <Card style={{
-          marginBottom: 24,
-          padding: '20px 22px',
-          background: 'var(--bg-card, #101c17)',
-          border: `1px solid ${C.border}`,
-          boxShadow: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
+        <div style={{
+          marginBottom: 20, borderRadius: 4,
+          background: C.card, border: `1px solid ${C.border}`,
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <Brain size={18} weight="duotone" color={C.primary} />
-              <div>
-                <span style={{ fontFamily: fonts.heading, fontSize: 13.5, fontWeight: 700, color: C.text }}>
-                  Today's Study Brief
-                </span>
-                <span style={{ fontSize: 11, color: C.textMuted, marginLeft: 8, fontFamily: fonts.heading, fontWeight: 600 }}>
-                  ({getKeyProvider()})
-                </span>
-              </div>
-            </div>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '10px 16px', borderBottom: `1px solid ${C.borderSoft}`,
+          }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot dot-success" />
+              <span className="metric-label" style={{ padding: 0 }}>Daily brief</span>
+              <span style={{ fontFamily: fonts.mono, fontSize: 10, color: C.textFaint }}>
+                {getKeyProvider()}
+              </span>
+            </span>
             <button
               onClick={generateBrief}
               disabled={briefLoading}
               style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '4px 10px', borderRadius: 6,
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`,
-                color: C.textMuted, fontSize: 11.5, cursor: briefLoading ? 'wait' : 'pointer',
-                fontFamily: fonts.heading, fontWeight: 600,
-                transition: 'color 0.12s ease, border-color 0.12s ease',
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '3px 9px', borderRadius: 3,
+                background: 'transparent', border: `1px solid ${C.border}`,
+                color: C.textMuted, fontSize: 11, cursor: briefLoading ? 'wait' : 'pointer',
+                fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.04em',
+                transition: 'color 0.12s ease, background 0.12s ease',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = C.text }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = C.textMuted }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = C.text; e.currentTarget.style.background = C.cardHover }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = C.textMuted; e.currentTarget.style.background = 'transparent' }}
             >
-              {briefLoading ? <SpinnerGap size={12} className="spin" weight="bold" /> : <ArrowClockwise size={12} weight="bold" />}
-              {briefLoading ? 'Generating...' : 'Refresh'}
+              {briefLoading ? <SpinnerGap size={11} className="spin" weight="bold" /> : <ArrowClockwise size={11} weight="bold" />}
+              {briefLoading ? 'RUNNING' : 'REFRESH'}
             </button>
           </div>
-          {dailyBrief ? (
-            <div style={{
-              fontSize: 13.5, lineHeight: 1.65, color: C.text,
-              background: 'var(--surface-low, #0d1712)',
-              padding: '14px 16px', borderRadius: 8,
-              border: `1px solid ${C.borderSoft}`,
-            }}>
-              {dailyBrief}
-            </div>
-          ) : briefLoading ? (
-            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>
-              Analyzing curriculum, upcoming deadlines, and generating personalized study priorities...
-            </p>
-          ) : (
-            <p style={{ fontSize: 13, color: C.textMuted, margin: '8px 0 0' }}>
-              Add an API key in Settings to activate real-time AI study briefs.
-            </p>
-          )}
-        </Card>
+          <div style={{ padding: '12px 16px' }}>
+            {dailyBrief ? (
+              <p style={{ fontSize: 13, lineHeight: 1.65, color: C.text }}>
+                {dailyBrief}
+              </p>
+            ) : briefLoading ? (
+              <p style={{ fontFamily: fonts.mono, fontSize: 11, color: C.textFaint }}>
+                Generating from session telemetry…
+              </p>
+            ) : (
+              <p style={{ fontFamily: fonts.body, fontSize: 12.5, color: C.textFaint }}>
+                Add an API key in Settings to enable the daily brief.
+              </p>
+            )}
+          </div>
+        </div>
       )}
 
-      {/* Main Dual Columns */}
-      <div className="grid-2" style={{ marginBottom: 28 }}>
-        {/* Upcoming Assignments */}
-        <Card style={{ padding: '18px 20px' }}>
+      {/* Dual columns */}
+      <div className="grid-2" style={{ marginBottom: 24 }}>
+        {/* Upcoming deadlines — tabular rows */}
+        <div style={{
+          borderRadius: 4, background: C.card, border: `1px solid ${C.border}`, padding: '14px 16px',
+        }}>
           <SectionTitle
-            icon={ClipboardText}
-            color={C.primary}
             action={
               <button onClick={() => navigate('/assignments')} style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 12, color: C.primary, background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: fonts.heading, fontWeight: 700,
-              }}>View all <ArrowRight size={12} weight="bold" /></button>
+                fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase',
+                color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer',
+              }}>All →</button>
             }
           >Upcoming deadlines</SectionTitle>
           {upcoming.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px 0 12px' }}>
-              <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14 }}>
-                {connected ? 'No pending assignments — all caught up!' : 'Sync Google Classroom or create assignments.'}
+            <div style={{ textAlign: 'center', padding: '20px 0 10px' }}>
+              <p style={{ fontSize: 12.5, color: C.textMuted, marginBottom: 12 }}>
+                {connected ? 'No pending assignments.' : 'Sync Google Classroom or add assignments.'}
               </p>
               <button onClick={handleSync} disabled={syncing} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
-                padding: '8px 16px', borderRadius: 8, border: 'none',
-                background: '#ffffff', color: '#090d16', cursor: syncing ? 'not-allowed' : 'pointer',
-                fontFamily: fonts.heading, fontSize: 12.5, fontWeight: 700,
+                padding: '6px 14px', borderRadius: 4, border: 'none',
+                background: '#ffffff', color: '#09090B', cursor: syncing ? 'not-allowed' : 'pointer',
+                fontFamily: fonts.body, fontSize: 12.5, fontWeight: 600,
               }}>
                 <GoogleLogo size={14} /> {syncing ? 'Syncing…' : connected ? 'Sync Classroom' : 'Connect Classroom'}
               </button>
@@ -310,126 +317,117 @@ ${context}`
             upcoming.map(a => {
               const due = new Date(a.dueDate)
               const daysLeft = Math.ceil((due - new Date()) / (1000 * 60 * 60 * 24))
+              const urgency = daysLeft <= 1 ? 'error' : daysLeft <= 3 ? 'warning' : 'neutral'
               return (
                 <div key={a.id} className="hover-row" style={{
                   display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 10px', margin: '0 -6px',
+                  padding: '8px 8px', margin: '0 -8px',
                   borderBottom: `1px solid ${C.borderSoft}`,
                 }}>
-                  <div style={{
-                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                    background: daysLeft <= 1 ? C.pink : daysLeft <= 3 ? C.orange : C.green,
-                  }} />
+                  <span className={`dot dot-${urgency}`} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 500, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {a.title}
                     </div>
-                    <div style={{ fontSize: 11.5, color: C.textMuted }}>{a.course || a.courseName}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                    <div style={{
-                      fontSize: 11.5, fontWeight: 700,
-                      color: daysLeft <= 1 ? C.pink : C.textMuted,
-                      fontFamily: fonts.heading,
-                    }}>
-                      {daysLeft === 0 ? 'Due Today' : daysLeft === 1 ? 'Tomorrow' : `${daysLeft}d left`}
+                    <div style={{ fontFamily: fonts.mono, fontSize: 10.5, color: C.textFaint }}>
+                      {a.course || a.courseName}
                     </div>
-                    <button
-                      onClick={() => {
-                        usePomodoroStore.getState().setActiveAssignment(a.id)
-                        navigate('/focus')
-                      }}
-                      title="Focus on this assignment with Pomodoro"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 4,
-                        padding: '3px 8px', borderRadius: 6,
-                        background: 'var(--surface-low, #0d1712)',
-                        border: `1px solid ${C.borderSoft}`,
-                        color: C.primary, fontSize: 11, cursor: 'pointer',
-                        fontFamily: fonts.heading, fontWeight: 700,
-                        transition: 'all 0.12s ease',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.background = 'var(--accent-blue-soft, rgba(16,185,129,0.12))' }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = C.borderSoft; e.currentTarget.style.background = 'var(--surface-low, #0d1712)' }}
-                    >
-                      <Play size={10} weight="fill" /> Focus
-                    </button>
                   </div>
+                  <span style={{
+                    fontFamily: fonts.mono, fontSize: 10.5, fontWeight: 500,
+                    fontVariantNumeric: 'tabular-nums',
+                    color: daysLeft <= 1 ? C.error : C.textMuted,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {daysLeft === 0 ? 'TODAY' : daysLeft === 1 ? '+1D' : `${daysLeft}D`}
+                  </span>
+                  <button
+                    onClick={() => {
+                      // Store expects the assignment object, not an id.
+                      usePomodoroStore.getState().setActiveAssignment(a)
+                      navigate('/focus')
+                    }}
+                    title="Focus on this assignment"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '3px 8px', borderRadius: 3,
+                      background: 'transparent',
+                      border: `1px solid ${C.borderSoft}`,
+                      color: C.textMuted, cursor: 'pointer',
+                      fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.04em',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = C.borderStrong; e.currentTarget.style.background = C.cardHover; e.currentTarget.style.color = C.text }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = C.borderSoft; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textMuted }}
+                  >
+                    <Play size={9} weight="fill" /> FOCUS
+                  </button>
                 </div>
               )
             })
           )}
-        </Card>
+        </div>
 
-        {/* Recent Notes */}
-        <Card style={{ padding: '18px 20px' }}>
+        {/* Recent notes */}
+        <div style={{
+          borderRadius: 4, background: C.card, border: `1px solid ${C.border}`, padding: '14px 16px',
+        }}>
           <SectionTitle
-            icon={Notebook}
-            color={C.primary}
             action={
               <button onClick={() => navigate('/notes')} style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 12, color: C.primary, background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: fonts.heading, fontWeight: 700,
-              }}>View all <ArrowRight size={12} weight="bold" /></button>
+                fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase',
+                color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer',
+              }}>All →</button>
             }
           >Recent notes</SectionTitle>
           {recentNotes.length === 0 ? (
-            <p style={{ fontSize: 13, color: C.textMuted, textAlign: 'center', padding: '24px 0' }}>
-              No notes saved yet. Capture your lecture points anytime.
+            <p style={{ fontSize: 12.5, color: C.textMuted, textAlign: 'center', padding: '20px 0' }}>
+              No notes yet.
             </p>
           ) : (
             recentNotes.map(n => {
               const cleanText = stripMarkdown(n.content || '')
               return (
                 <div key={n.id} className="hover-row" style={{
-                  padding: '10px 10px', margin: '0 -6px',
+                  padding: '8px 8px', margin: '0 -8px',
                   borderBottom: `1px solid ${C.borderSoft}`, cursor: 'pointer',
                 }} onClick={() => navigate('/notes')}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{n.title || 'Untitled note'}</div>
-                  <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 3 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 500, color: C.text }}>{n.title || 'Untitled'}</div>
+                  <div style={{ fontFamily: fonts.body, fontSize: 11.5, color: C.textFaint, marginTop: 2 }}>
                     {cleanText.slice(0, 65)}{cleanText.length > 65 ? '…' : ''}
                   </div>
                 </div>
               )
             })
           )}
-        </Card>
+        </div>
       </div>
 
-      {/* Quick Action Tiles */}
+      {/* Quick actions — flat command row */}
       <div>
-        <SectionTitle icon={Lightning} color={C.amber}>Quick study actions</SectionTitle>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          {quickActions.map(a => {
-            const Icon = a.icon
-            return (
-              <button
-                key={a.path}
-                onClick={() => navigate(a.path)}
-                className="hover-lift"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 11,
-                  padding: '14px 16px', borderRadius: 16,
-                  border: `1px solid ${C.border}`,
-                  background: 'var(--bg-card, #101c17)',
-                  color: C.text,
-                  cursor: 'pointer',
-                  fontFamily: fonts.heading,
-                  fontSize: 13, fontWeight: 600,
-                  textAlign: 'left',
-                  transition: 'border-color 0.15s ease, background 0.15s ease',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = tint(typeof a.color === 'string' && a.color.startsWith('var(') ? '#10b981' : a.color, 0.45) }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border }}
-              >
-                <div style={iconBox(typeof a.color === 'string' && a.color.startsWith('var(') ? '#10b981' : a.color, 32)}>
-                  <Icon size={18} weight="duotone" />
-                </div>
-                <span>{a.label}</span>
-              </button>
-            )
-          })}
+        <SectionTitle>Quick actions</SectionTitle>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
+          {quickActions.map(a => (
+            <button
+              key={a.path}
+              onClick={() => navigate(a.path)}
+              className="hover-lift"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '11px 14px', borderRadius: 4,
+                border: `1px solid ${C.border}`,
+                background: C.card,
+                color: C.text,
+                cursor: 'pointer',
+                fontFamily: fonts.body,
+                fontSize: 12.5, fontWeight: 500,
+                textAlign: 'left',
+                transition: 'background 0.13s ease, border-color 0.13s ease',
+              }}
+            >
+              <span>{a.label}</span>
+              <span style={{ fontFamily: fonts.mono, fontSize: 11, color: C.textFaint }}>→</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>

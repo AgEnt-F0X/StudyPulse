@@ -1,40 +1,48 @@
-// Shared UI primitives for the Impeccable design system.
+// Shared UI primitives for the Obsidian workbench design system.
 import { motion } from 'motion/react'
-import { C, fonts, tint, iconBox, card, btnPrimary, btnGhost, radius } from '../utils/theme'
+import { C, fonts, tint, card, btnPrimary, btnGhost, radius, statusDot } from '../utils/theme'
 
 const revealProps = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.18, ease: 'easeOut' },
 }
 
-export function PageHeader({ icon: Icon, title, subtitle, accent = C.blue, actions }) {
+export function PageHeader({ icon: _Icon, title, subtitle, accent = C.blue, actions, status }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      {...revealProps}
       style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 16, flexWrap: 'wrap', marginBottom: 24,
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+        gap: 16, flexWrap: 'wrap', marginBottom: 20,
       }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-        {Icon && (
-          <div style={iconBox(accent, 40)}>
-            <Icon size={20} weight="duotone" />
-          </div>
-        )}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, minWidth: 0 }}>
         <div style={{ minWidth: 0 }}>
           <h1 style={{
-            fontFamily: fonts.heading, fontSize: 22, fontWeight: 700,
-            color: C.text, lineHeight: 1.2, margin: 0, letterSpacing: '-0.01em',
+            fontFamily: fonts.body, fontSize: 18, fontWeight: 600,
+            color: C.text, lineHeight: 1.25, margin: 0, letterSpacing: '-0.02em',
           }}>{title}</h1>
           {subtitle && (
-            <p style={{ fontSize: 13, color: C.textMuted, marginTop: 3 }}>{subtitle}</p>
+            <p style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>{subtitle}</p>
           )}
         </div>
       </div>
-      {actions && <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>{actions}</div>}
+      {(actions || status) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {status && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontFamily: fonts.mono, fontSize: 10.5, letterSpacing: '0.06em',
+              textTransform: 'uppercase', color: C.textFaint,
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              <span className={`dot dot-${status.kind || 'neutral'}`} />
+              {status.label}
+            </span>
+          )}
+          {actions}
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -44,13 +52,18 @@ export function Card({ children, style, className = '', onClick, lift }) {
     <motion.div
       {...revealProps}
       onClick={onClick}
-      whileHover={onClick || lift ? { y: -2, borderColor: 'var(--border-color, #2d374e)' } : undefined}
       className={className}
       style={{
         ...card,
         cursor: onClick ? 'pointer' : undefined,
-        transition: 'border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease',
+        transition: 'border-color 0.13s ease, background 0.13s ease',
         ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (onClick || lift) e.currentTarget.style.borderColor = C.borderStrong
+      }}
+      onMouseLeave={(e) => {
+        if (onClick || lift) e.currentTarget.style.borderColor = C.border
       }}
     >
       {children}
@@ -58,52 +71,58 @@ export function Card({ children, style, className = '', onClick, lift }) {
   )
 }
 
-export function StatCard({ icon: Icon, label, value, color = C.blue, sub }) {
+// Telemetry cell — hairline-grid panel, mono tabular value, uppercase label
+export function StatCard({ icon: _Icon, label, value, color = C.text, sub, status }) {
   return (
     <motion.div
       {...revealProps}
-      whileHover={{ y: -2, borderColor: tint(color, 0.45) }}
       style={{
         ...card,
-        padding: '16px 18px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        transition: 'border-color 0.15s ease, transform 0.15s ease',
+        padding: '13px 16px',
+        borderRadius: 0,
+        boxShadow: 'none',
+        background: 'transparent',
+        minWidth: 0,
+        transition: 'background 0.13s ease',
       }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-card-soft, #18181C)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
-      {Icon && (
-        <div style={iconBox(color, 38)}>
-          <Icon size={19} weight="duotone" />
-        </div>
-      )}
-      <div style={{ minWidth: 0 }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8,
+      }}>
+        {status && <span className={`dot dot-${status}`} />}
+        <span className="metric-label">{label}</span>
+      </div>
+      <div style={{
+        fontFamily: fonts.mono, fontSize: 20, fontWeight: 600,
+        color: color === C.text ? C.text : color,
+        lineHeight: 1.1, letterSpacing: '-0.01em',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        {value}
+      </div>
+      {sub && (
         <div style={{
-          fontFamily: fonts.heading, fontSize: 22, fontWeight: 700,
-          color: C.text, lineHeight: 1.1, letterSpacing: '-0.02em',
-        }}>
-          {value}
-        </div>
-        <div style={{
-          fontSize: 12, color: C.textMuted, marginTop: 4,
+          fontSize: 11, color: C.textFaint, marginTop: 4,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
-          {label}{sub ? <span style={{ color: C.textFaint }}> · {sub}</span> : null}
+          {sub}
         </div>
-      </div>
+      )}
     </motion.div>
   )
 }
 
-export function SectionTitle({ icon: Icon, children, color = C.blue, action }) {
+export function SectionTitle({ icon: _Icon, children, color = C.blue, action }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
       <h2 style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        fontFamily: fonts.heading, fontSize: 14.5, fontWeight: 700,
-        color: C.text, margin: 0, letterSpacing: '0.01em',
+        fontFamily: fonts.mono, fontSize: 10.5, fontWeight: 500,
+        color: C.textFaint, margin: 0,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+        fontVariantNumeric: 'tabular-nums',
       }}>
-        {Icon && <Icon size={15} color={color} strokeWidth={2.4} />}
         {children}
       </h2>
       {action}
@@ -111,24 +130,19 @@ export function SectionTitle({ icon: Icon, children, color = C.blue, action }) {
   )
 }
 
-export function Empty({ icon: Icon, title, description, action, actionLabel, accent = C.blue }) {
+export function Empty({ icon: _Icon, title, description, action, actionLabel, accent = C.blue }) {
   return (
     <div className="page-enter" style={{
       textAlign: 'center', padding: '48px 24px',
-      background: 'var(--surface-low, #0d1712)',
-      border: `1px dashed ${C.border}`,
+      background: 'var(--surface-low, #0C0C0E)',
+      border: `1px solid ${C.border}`,
       borderRadius: radius.lg,
     }}>
-      {Icon && (
-        <div style={{ ...iconBox(accent, 54), margin: '0 auto 16px' }}>
-          <Icon size={24} strokeWidth={1.8} />
-        </div>
-      )}
-      <h3 style={{ fontFamily: fonts.heading, fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 6 }}>
+      <h3 style={{ fontFamily: fonts.body, fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 6, letterSpacing: '-0.01em' }}>
         {title}
       </h3>
       {description && (
-        <p style={{ fontSize: 13, color: C.textMuted, maxWidth: 400, margin: '0 auto 18px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 12.5, color: C.textMuted, maxWidth: 400, margin: '0 auto 18px', lineHeight: 1.6 }}>
           {description}
         </p>
       )}
@@ -147,14 +161,14 @@ export function Skeleton({ width = '100%', height = 20, borderRadius = radius.md
         width,
         height,
         borderRadius,
-        background: 'var(--surface-card-soft, #182033)',
+        background: 'var(--surface-card-soft, #18181C)',
         ...style,
       }}
     />
   )
 }
 
-export function Spinner({ size = 20, color = C.blue }) {
+export function Spinner({ size = 18, color = C.textMuted }) {
   return (
     <div
       className="spin"
@@ -171,10 +185,10 @@ export function Spinner({ size = 20, color = C.blue }) {
 export function PageLoading({ label = 'Loading…' }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '80px 0' }}>
-      <Spinner size={26} />
-      <span style={{ fontSize: 13, color: C.textMuted, fontFamily: fonts.body }}>{label}</span>
+      <Spinner size={22} />
+      <span style={{ fontFamily: fonts.mono, fontSize: 11, color: C.textFaint }}>{label}</span>
     </div>
   )
 }
 
-export { btnPrimary, btnGhost }
+export { btnPrimary, btnGhost, statusDot }

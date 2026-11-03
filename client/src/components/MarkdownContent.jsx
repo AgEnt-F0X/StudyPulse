@@ -1,6 +1,134 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import katex from 'katex'
 import { C, fonts } from '../utils/theme'
+
+// ── Lightweight syntax highlighting ───────────────────────────
+// Restrained palette on obsidian: no neon, no gradients. Keywords white,
+// strings emerald, numbers amber, comments muted. Supports the languages
+// the tutor actually emits: sql, js/ts, python, json, bash, trace.
+
+const KEYWORDS = {
+  sql: /\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|GROUP\s+BY|ORDER\s+BY|HAVING|LIMIT|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|ALTER|DROP|INDEX|AS|AND|OR|NOT|NULL|IN|BETWEEN|LIKE|DISTINCT|COUNT|SUM|AVG|MIN|MAX|CASE|WHEN|THEN|ELSE|END|UNION|WITH|EXISTS|PRIMARY|KEY|FOREIGN|REFERENCES)\b/gi,
+  js: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|class|extends|super|this|import|from|export|default|async|await|try|catch|finally|throw|typeof|instanceof|delete|in|of|null|undefined|true|false|yield|static|get|set)\b/g,
+  python: /\b(def|return|if|elif|else|for|while|import|from|as|class|try|except|finally|raise|with|lambda|pass|break|continue|and|or|not|in|is|None|True|False|global|nonlocal|yield|async|await|assert|del)\b/g,
+  json: /\b(true|false|null)\b/g,
+  bash: /\b(cd|ls|npm|npx|node|git|curl|echo|export|sudo|mkdir|rm|cp|mv|cat|grep|awk|sed|chmod|pip|python|python3|docker)\b/g,
+}
+
+const KEYWORD_COLOR = '#FAFAFA'
+const STRING_COLOR = '#34D399'
+const NUMBER_COLOR = '#F59E0B'
+const COMMENT_COLOR = '#6B7280'
+const FUNCTION_COLOR = '#D4D4D8'
+
+function tokenizeLine(line, lang) {
+  if (!line) return [{ text: '' }]
+
+  const kwRe = KEYWORDS[lang] || KEYWORDS.js
+  const langTag = lang === 'py' ? 'python' : lang === 'ts' ? 'js' : lang === 'shell' || lang === 'sh' ? 'bash' : lang
+
+  // Comment detection per language
+  const commentPrefix = langTag === 'python' || langTag === 'bash' ? '#' : langTag === 'sql' ? '--' : '//'
+  const commentIdx = line.indexOf(commentPrefix)
+
+  const segments = []
+  const push = (text, color, style) => {
+    if (text) segments.push({ text, color, style })
+  }
+
+  // Number-ish and string-ish scanners over the plain part
+  const scanPlain = (plain, baseOffset) => {
+    // strings first (single, double, backtick)
+    const strRe = /('[^'\n]*'|"[^"\n]*"|`[^`]*`)/g
+    let last = 0
+    let m
+    while ((m = strRe.exec(plain)) !== null) {
+      const before = plain.slice(last, m.index)
+      emitTokens(before, last)
+      push(m[0], STRING_COLOR)
+      last = m.index + m[0].length
+    }
+    emitTokens(plain.slice(last), last)
+
+    function emitTokens(chunk, offset) {
+      if (!chunk) return
+      // keywords
+      let kLast = 0
+      let k
+      kwRe.lastIndex = 0
+      while ((k = kwRe.exec(chunk)) !== null) {
+        const gap = chunk.slice(kLast, k.index)
+        emitNumbers(gap, offset + kLast)
+        push(k[0], KEYWORD_COLOR, { fontWeight: 500 })
+        kLast = k.index + k[0].length
+      }
+      emitNumbers(chunk.slice(kLast), offset + kLast)
+    }
+
+    function emitNumbers(chunk, offset) {
+      if (!chunk) return
+      const numRe = /(\b\d+(?:\.\d+)?\b)/g
+      let nLast = 0
+      let n
+      while ((n = numRe.exec(chunk)) !== null) {
+        const gap = chunk.slice(nLast, n.index)
+        emitFns(gap, offset + nLast)
+        push(n[0], NUMBER_COLOR)
+        nLast = n.index + n[0].length
+      }
+      emitFns(chunk.slice(nLast), offset + nLast)
+    }
+
+    function emitFns(chunk, offset) {
+      if (!chunk) return
+      const fnRe = /([A-Za-z_][A-Za-z0-9_]*)(?=\()/g
+      let fLast = 0
+      let f
+      while ((f = fnRe.exec(chunk)) !== null) {
+        push(chunk.slice(fLast, f.index), '#9CA3AF')
+        push(f[0], FUNCTION_COLOR)
+        fLast = f.index + f[0].length
+      }
+      push(chunk.slice(fLast), '#9CA3AF')
+    }
+  }
+
+  if (commentIdx >= 0 && langTag !== 'json') {
+    scanPlain(line.slice(0, commentIdx), 0)
+    push(line.slice(commentIdx), COMMENT_COLOR, { fontStyle: 'italic' })
+  } else {
+    scanPlain(line, 0)
+  }
+  return segments.length ? segments : [{ text: line }]
+}
+
+function HighlightedCode({ code, lang }) {
+  const lines = useMemo(() => {
+    const l = (lang || '').toLowerCase()
+    const supported = ['sql', 'js', 'javascript', 'ts', 'python', 'py', 'json', 'bash', 'sh', 'shell', 'trace']
+    if (!supported.includes(l)) return null
+    return code.split('\n').map((line) => tokenizeLine(line, l === 'trace' ? 'js' : l))
+  }, [code, lang])
+
+  if (!lines) return <code style={{ color: '#D4D4D8' }}>{code}</code>
+
+  return (
+    <code>
+      {lines.map((segments, i) => (
+        <span key={i} style={{ display: 'block' }}>
+          {segments.map((seg, j) => (
+            <span key={j} style={{ color: seg.color, ...seg.style, whiteSpace: 'pre-wrap' }}>
+              {seg.text}
+            </span>
+          ))}
+          {segments.length === 1 && segments[0].text === '' ? '\u00A0' : null}
+        </span>
+      ))}
+    </code>
+  )
+}
+
+// ── Inline markdown ───────────────────────────────────────────
 
 function renderInline(text, keyPrefix = '') {
   if (!text) return null
@@ -26,30 +154,41 @@ function renderInline(text, keyPrefix = '') {
         const html = katex.renderToString(math, { displayMode: false, throwOnError: false })
         tokens.push(<span key={key} dangerouslySetInnerHTML={{ __html: html }} />)
       } catch {
-        tokens.push(<code key={key} style={{ background: 'rgba(255,255,255,0.08)', padding: '2px 5px', borderRadius: 4, fontSize: '0.88em' }}>{math}</code>)
+        tokens.push(
+          <code key={key} style={{
+            background: C.cardSoft,
+            border: `1px solid ${C.borderSoft}`,
+            padding: '1px 5px',
+            borderRadius: 3,
+            fontSize: '0.88em',
+            fontFamily: fonts.mono,
+          }}>{math}</code>
+        )
       }
     } else if (raw.startsWith('`') && raw.endsWith('`') && raw.length >= 2) {
       tokens.push(
         <code key={key} style={{
-          background: 'rgba(255,255,255,0.08)',
-          padding: '2px 5px',
-          borderRadius: 4,
-          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          background: C.cardSoft,
+          border: `1px solid ${C.borderSoft}`,
+          padding: '1px 5px',
+          borderRadius: 3,
+          fontFamily: fonts.mono,
           fontSize: '0.85em',
-          color: 'var(--accent-blue, #10b981)',
+          fontVariantNumeric: 'tabular-nums',
+          color: C.text,
         }}>
           {raw.slice(1, -1)}
         </code>
       )
     } else if (raw.startsWith('**') && raw.endsWith('**') && raw.length >= 4) {
-      tokens.push(<strong key={key} style={{ fontWeight: 650, color: 'var(--text-primary, #f8fafc)' }}>{raw.slice(2, -2)}</strong>)
+      tokens.push(<strong key={key} style={{ fontWeight: 600, color: C.text }}>{raw.slice(2, -2)}</strong>)
     } else if (raw.startsWith('*') && raw.endsWith('*') && raw.length >= 2) {
       tokens.push(<em key={key} style={{ fontStyle: 'italic' }}>{raw.slice(1, -1)}</em>)
     } else if (raw.startsWith('[') && raw.includes('](')) {
       const label = raw.substring(1, raw.indexOf(']('))
       const url = raw.substring(raw.indexOf('](') + 2, raw.length - 1)
       tokens.push(
-        <a key={key} href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-blue, #10b981)', textDecoration: 'underline' }}>
+        <a key={key} href={url} target="_blank" rel="noopener noreferrer" style={{ color: C.text, textDecoration: 'underline', textUnderlineOffset: 2 }}>
           {label}
         </a>
       )
@@ -67,7 +206,9 @@ function renderInline(text, keyPrefix = '') {
   return tokens
 }
 
-export default function MarkdownContent({ content, style }) {
+// ── Block renderer ────────────────────────────────────────────
+
+export default function MarkdownContent({ content, style, codeActions }) {
   const blocks = useMemo(() => {
     if (!content) return []
 
@@ -80,7 +221,6 @@ export default function MarkdownContent({ content, style }) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
 
-      // Handle Code Block start/end
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
           inCodeBlock = true
@@ -88,11 +228,7 @@ export default function MarkdownContent({ content, style }) {
           codeLines = []
         } else {
           inCodeBlock = false
-          parsed.push({
-            type: 'code',
-            lang: codeLang,
-            content: codeLines.join('\n'),
-          })
+          parsed.push({ type: 'code', lang: codeLang, content: codeLines.join('\n') })
         }
         continue
       }
@@ -102,40 +238,21 @@ export default function MarkdownContent({ content, style }) {
         continue
       }
 
-      // Handle Math Block $$ ... $$
       if (line.trim().startsWith('$$') && line.trim().endsWith('$$') && line.trim().length > 4) {
-        parsed.push({
-          type: 'math',
-          content: line.trim().slice(2, -2),
-        })
+        parsed.push({ type: 'math', content: line.trim().slice(2, -2) })
         continue
       }
 
-      // Handle Headings
       const h3Match = line.match(/^###\s+(.*)/)
-      if (h3Match) {
-        parsed.push({ type: 'h3', text: h3Match[1] })
-        continue
-      }
+      if (h3Match) { parsed.push({ type: 'h3', text: h3Match[1] }); continue }
       const h2Match = line.match(/^##\s+(.*)/)
-      if (h2Match) {
-        parsed.push({ type: 'h2', text: h2Match[1] })
-        continue
-      }
+      if (h2Match) { parsed.push({ type: 'h2', text: h2Match[1] }); continue }
       const h1Match = line.match(/^#\s+(.*)/)
-      if (h1Match) {
-        parsed.push({ type: 'h1', text: h1Match[1] })
-        continue
-      }
+      if (h1Match) { parsed.push({ type: 'h1', text: h1Match[1] }); continue }
 
-      // Handle Blockquotes
       const bqMatch = line.match(/^>\s*(.*)/)
-      if (bqMatch) {
-        parsed.push({ type: 'blockquote', text: bqMatch[1] })
-        continue
-      }
+      if (bqMatch) { parsed.push({ type: 'blockquote', text: bqMatch[1] }); continue }
 
-      // Handle Bullet lists (- or *)
       const bulletMatch = line.match(/^(\s*)[-*]\s+(.*)/)
       if (bulletMatch) {
         parsed.push({
@@ -146,7 +263,6 @@ export default function MarkdownContent({ content, style }) {
         continue
       }
 
-      // Handle Numbered lists (1. 2.)
       const numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)/)
       if (numMatch) {
         parsed.push({
@@ -158,22 +274,16 @@ export default function MarkdownContent({ content, style }) {
         continue
       }
 
-      // Empty line
       if (line.trim() === '') {
         parsed.push({ type: 'blank' })
         continue
       }
 
-      // Default paragraph line
       parsed.push({ type: 'paragraph', text: line })
     }
 
     if (inCodeBlock && codeLines.length) {
-      parsed.push({
-        type: 'code',
-        lang: codeLang,
-        content: codeLines.join('\n'),
-      })
+      parsed.push({ type: 'code', lang: codeLang, content: codeLines.join('\n') })
     }
 
     return parsed
@@ -182,7 +292,7 @@ export default function MarkdownContent({ content, style }) {
   return (
     <div style={{
       fontFamily: fonts.body,
-      fontSize: '0.885rem',
+      fontSize: '0.855rem',
       lineHeight: 1.65,
       color: 'inherit',
       display: 'flex',
@@ -192,20 +302,20 @@ export default function MarkdownContent({ content, style }) {
     }}>
       {blocks.map((b, idx) => {
         if (b.type === 'blank') {
-          return <div key={idx} style={{ height: '0.35rem' }} />
+          return <div key={idx} style={{ height: '0.3rem' }} />
         }
 
         if (b.type === 'h1') {
           return (
             <h1 key={idx} style={{
-              fontFamily: fonts.heading,
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: 'var(--text-primary, #f8fafc)',
+              fontFamily: fonts.body,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              color: C.text,
               letterSpacing: '-0.02em',
-              margin: '0.6rem 0 0.2rem',
-              borderBottom: '1px solid rgba(255,255,255,0.08)',
-              paddingBottom: '0.3rem',
+              margin: '0.5rem 0 0.2rem',
+              paddingBottom: '0.25rem',
+              borderBottom: `1px solid ${C.borderSoft}`,
             }}>
               {renderInline(b.text, `h1-${idx}`)}
             </h1>
@@ -215,12 +325,12 @@ export default function MarkdownContent({ content, style }) {
         if (b.type === 'h2') {
           return (
             <h2 key={idx} style={{
-              fontFamily: fonts.heading,
-              fontSize: '1.08rem',
-              fontWeight: 650,
-              color: 'var(--text-primary, #f8fafc)',
+              fontFamily: fonts.body,
+              fontSize: '0.98rem',
+              fontWeight: 600,
+              color: C.text,
               letterSpacing: '-0.015em',
-              margin: '0.5rem 0 0.15rem',
+              margin: '0.45rem 0 0.15rem',
             }}>
               {renderInline(b.text, `h2-${idx}`)}
             </h2>
@@ -230,10 +340,12 @@ export default function MarkdownContent({ content, style }) {
         if (b.type === 'h3') {
           return (
             <h3 key={idx} style={{
-              fontFamily: fonts.heading,
-              fontSize: '0.98rem',
-              fontWeight: 600,
-              color: 'var(--accent-blue, #10b981)',
+              fontFamily: fonts.mono,
+              fontSize: '0.72rem',
+              fontWeight: 500,
+              color: C.textMuted,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
               margin: '0.4rem 0 0.1rem',
             }}>
               {renderInline(b.text, `h3-${idx}`)}
@@ -251,10 +363,10 @@ export default function MarkdownContent({ content, style }) {
               margin: '0.1rem 0',
             }}>
               <span style={{
-                width: 5,
-                height: 5,
+                width: 3,
+                height: 3,
                 borderRadius: '50%',
-                background: 'var(--accent-blue, #10b981)',
+                background: C.textFaint,
                 flexShrink: 0,
                 transform: 'translateY(-2px)',
               }} />
@@ -273,12 +385,13 @@ export default function MarkdownContent({ content, style }) {
               margin: '0.1rem 0',
             }}>
               <span style={{
-                fontFamily: fonts.heading,
-                fontSize: '0.82em',
-                fontWeight: 700,
-                color: 'var(--accent-blue, #10b981)',
+                fontFamily: fonts.mono,
+                fontSize: '0.75em',
+                fontWeight: 500,
+                color: C.textFaint,
                 minWidth: '1.2rem',
                 flexShrink: 0,
+                fontVariantNumeric: 'tabular-nums',
               }}>{b.num}.</span>
               <div style={{ flex: 1 }}>{renderInline(b.text, `n-${idx}`)}</div>
             </div>
@@ -290,11 +403,10 @@ export default function MarkdownContent({ content, style }) {
             <blockquote key={idx} style={{
               margin: '0.3rem 0',
               padding: '6px 12px',
-              borderLeft: '3px solid var(--accent-blue, #10b981)',
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: '0 6px 6px 0',
-              color: 'var(--text-secondary, #94a3b8)',
-              fontStyle: 'italic',
+              borderLeft: `2px solid ${C.borderStrong}`,
+              background: C.bgSoft,
+              borderRadius: '0 3px 3px 0',
+              color: C.textMuted,
             }}>
               {renderInline(b.text, `bq-${idx}`)}
             </blockquote>
@@ -303,39 +415,12 @@ export default function MarkdownContent({ content, style }) {
 
         if (b.type === 'code') {
           return (
-            <div key={idx} style={{
-              margin: '0.4rem 0',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.08)',
-              background: '#090c10',
-              overflow: 'hidden',
-            }}>
-              {b.lang && (
-                <div style={{
-                  padding: '4px 10px',
-                  background: 'rgba(255,255,255,0.04)',
-                  borderBottom: '1px solid rgba(255,255,255,0.06)',
-                  fontSize: '0.72rem',
-                  fontFamily: fonts.heading,
-                  color: 'var(--text-muted, #64748b)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}>
-                  {b.lang}
-                </div>
-              )}
-              <pre style={{
-                margin: 0,
-                padding: '10px 12px',
-                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                fontSize: '0.82rem',
-                lineHeight: 1.5,
-                color: '#e2e8f0',
-                overflowX: 'auto',
-              }}>
-                <code>{b.content}</code>
-              </pre>
-            </div>
+            <CodeBlock
+              key={idx}
+              lang={b.lang}
+              content={b.content}
+              actions={codeActions}
+            />
           )
         }
 
@@ -347,14 +432,13 @@ export default function MarkdownContent({ content, style }) {
             )
           } catch {
             return (
-              <pre key={idx} style={{ margin: '0.4rem 0', padding: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 6 }}>
+              <pre key={idx} style={{ margin: '0.4rem 0', padding: 8, background: C.bgSoft, borderRadius: 4 }}>
                 <code>{b.content}</code>
               </pre>
             )
           }
         }
 
-        // Paragraph
         return (
           <p key={idx} style={{ margin: 0 }}>
             {renderInline(b.text, `p-${idx}`)}
@@ -362,5 +446,88 @@ export default function MarkdownContent({ content, style }) {
         )
       })}
     </div>
+  )
+}
+
+// ── Code block with header actions (copy / insert / run) ──────
+
+export function CodeBlock({ lang, content, actions }) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1400)
+    } catch {}
+  }
+
+  const langLabel = (lang || 'code').toLowerCase()
+
+  return (
+    <div key={langLabel} style={{
+      margin: '0.4rem 0',
+      borderRadius: 4,
+      border: `1px solid ${C.border}`,
+      background: '#0C0C0E',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '4px 8px 4px 10px',
+        background: 'var(--surface-low, #0C0C0E)',
+        borderBottom: `1px solid ${C.borderSoft}`,
+      }}>
+        <span className="metric-label" style={{ padding: 0 }}>{langLabel}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {actions?.onInsert && (
+            <CodeAction label="Insert" onClick={() => actions.onInsert(content)} />
+          )}
+          {actions?.onRun && (
+            <CodeAction label="Run" onClick={() => actions.onRun(content)} />
+          )}
+          <CodeAction label={copied ? 'Copied' : 'Copy'} onClick={copy} />
+        </div>
+      </div>
+      <pre style={{
+        margin: 0,
+        padding: '10px 12px',
+        fontFamily: fonts.mono,
+        fontSize: '0.78rem',
+        lineHeight: 1.55,
+        color: '#D4D4D8',
+        fontVariantNumeric: 'tabular-nums',
+        overflowX: 'auto',
+      }}>
+        <HighlightedCode code={content} lang={langLabel} />
+      </pre>
+    </div>
+  )
+}
+
+function CodeAction({ label, onClick }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        padding: '2px 7px',
+        borderRadius: 3,
+        border: 'none',
+        background: hover ? C.cardHover : 'transparent',
+        color: hover ? C.text : C.textFaint,
+        cursor: 'pointer',
+        fontFamily: fonts.mono,
+        fontSize: 10,
+        fontWeight: 500,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+        fontVariantNumeric: 'tabular-nums',
+      }}
+    >
+      {label}
+    </button>
   )
 }

@@ -338,12 +338,12 @@ Notes:\n${active.content}`
       const result = await callGeminiClient(prompt, { timeoutMs: 15000 })
       if (result) {
         if (action === 'explain' || action === 'formulas') {
-          const separator = action === 'explain' ? '\n\n---\n\n## 💡 AI Explanation\n\n' : '\n\n---\n\n## 📐 Extracted Formulas & Key Points\n\n'
+          const separator = action === 'explain' ? '\n\n---\n\n## AI Explanation\n\n' : '\n\n---\n\n## Extracted Formulas & Key Points\n\n'
           updateNote(active.id, { content: active.content + separator + result })
         } else {
           updateNote(active.id, { content: result })
         }
-        addToast({ type: 'success', message: action === 'enhance' ? 'Notes enhanced! ✨' : action === 'explain' ? 'Explanation added! 💡' : 'Formulas extracted! 📐' })
+        addToast({ type: 'success', message: action === 'enhance' ? 'Notes updated' : action === 'explain' ? 'Explanation added' : 'Formulas extracted' })
       }
     } catch (e) {
       addToast({ type: 'error', message: 'AI processing failed. Try again.' })
@@ -761,7 +761,7 @@ Notes:\n${active.content}`
               }}>
                 {active.content ? renderFormattedNotes(active.content) : <span style={{ color: C.textMuted }}>Nothing to preview.</span>}
                 <div style={{ marginTop: 24, padding: '10px 14px', borderRadius: 8, background: 'var(--surface-low, #0d1712)', border: `1px solid ${C.borderSoft}`, fontSize: 12, color: C.textMuted }}>
-                  ✨ KaTeX live preview active — write inline math like $E = mc^2$ or block math like $$F = ma$$.
+                  KaTeX live preview active — inline math like $E = mc^2$ or block math like $$F = ma$$.
                 </div>
               </div>
             ) : (

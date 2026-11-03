@@ -125,13 +125,13 @@ export default function Settings() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, marginBottom: 16 }}>
             <div style={{ padding: '9px 12px', borderRadius: 8, background: 'var(--surface-low, #0d1712)', border: `1px solid ${C.border}`, fontSize: 12 }}>
-              <span style={{ color: C.blue, fontWeight: 700 }}>⚡ Groq (Recommended — Ultra-Fast ~300 t/s)</span>: Free Llama 3.3 70B & DeepSeek R1.{' '}
+              <span style={{ color: C.blue, fontWeight: 700 }}>Groq — recommended (~300 t/s)</span>: Free Llama 3.3 70B & DeepSeek R1.{' '}
               <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, textDecoration: 'underline', fontWeight: 600 }}>
                 Get free Groq key <ArrowSquareOut size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
               </a>
             </div>
             <div style={{ padding: '9px 12px', borderRadius: 8, background: 'var(--surface-low, #0d1712)', border: `1px solid ${C.border}`, fontSize: 12 }}>
-              <span style={{ color: C.blue, fontWeight: 700 }}>✨ Google Gemini</span>: Free Gemini 2.0 Flash.{' '}
+              <span style={{ color: C.blue, fontWeight: 700 }}>Google Gemini</span>: Free Gemini 2.0 Flash.{' '}
               <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, textDecoration: 'underline', fontWeight: 600 }}>
                 Get free Gemini key <ArrowSquareOut size={10} style={{ display: 'inline', verticalAlign: '-1px' }} />
               </a>

@@ -1,0 +1,198 @@
+// SQL Pulse — CBSE board-style relational datasets.
+// Each bundle is a fresh, deterministic seed: intentional NULLs, duplicate
+// groups for aggregation, and foreign keys across tables. Dates are ISO
+// 'YYYY-MM-DD' text (the MySQL DATE literal form the board exam expects).
+
+export const BUNDLES = {
+  school: {
+    label: 'School — STUDENT / SPORTS',
+    tables: ['STUDENT', 'SPORTS'],
+    seed: `
+CREATE TABLE STUDENT (
+  ADMNO   CHAR(6)      PRIMARY KEY,
+  NAME    VARCHAR(25)  NOT NULL,
+  CLASS   CHAR(2),
+  SECTION CHAR(1),
+  GENDER  CHAR(1),
+  MARKS   DECIMAL(5,2),
+  CITY    VARCHAR(15),
+  DOB     DATE
+);
+
+INSERT INTO STUDENT VALUES ('A1001','Rahul Verma','11','A','M',88.50,'Delhi','2008-04-15');
+INSERT INTO STUDENT VALUES ('A1002','Priya Singh','11','B','F',92.75,'Jaipur','2008-06-22');
+INSERT INTO STUDENT VALUES ('A1003','Arjun Mehta','12','A','M',79.00,'Delhi','2007-01-10');
+INSERT INTO STUDENT VALUES ('A1004','Sana Khan','12','A','F',95.50,'Mumbai','2007-03-05');
+INSERT INTO STUDENT VALUES ('A1005','Vikram Rao','11','A','M',NULL,'Jaipur','2008-09-30');
+INSERT INTO STUDENT VALUES ('A1006','Ananya Das','12','B','F',84.25,'Kolkata','2007-07-12');
+INSERT INTO STUDENT VALUES ('A1007','Karan Malhotra','11','B','M',67.00,NULL,'2008-11-05');
+INSERT INTO STUDENT VALUES ('A1008','Divya Nair','12','A','F',90.00,'Jaipur','2007-04-18');
+INSERT INTO STUDENT VALUES ('A1009','Rohit Sharma','11','C','M',73.50,'Delhi',NULL);
+INSERT INTO STUDENT VALUES ('A1010','Ishita Bose','12','B','F',88.50,'Mumbai','2007-10-09');
+INSERT INTO STUDENT VALUES ('A1011','Aman Verma','11','A','M',58.00,'Jaipur','2008-02-14');
+INSERT INTO STUDENT VALUES ('A1012','Neha Gupta','12','C','F',NULL,'Kolkata','2007-08-21');
+
+CREATE TABLE SPORTS (
+  ADMNO    CHAR(6),
+  GAMENAME VARCHAR(20),
+  COACH    VARCHAR(20),
+  FEE      DECIMAL(7,2),
+  FOREIGN KEY (ADMNO) REFERENCES STUDENT(ADMNO)
+);
+
+INSERT INTO SPORTS VALUES ('A1001','Football','Mr. Khan',500.00);
+INSERT INTO SPORTS VALUES ('A1002','Basketball','Ms. Dsouza',650.00);
+INSERT INTO SPORTS VALUES ('A1003','Cricket','Mr. Sharma',NULL);
+INSERT INTO SPORTS VALUES ('A1005','Cricket','Mr. Sharma',700.00);
+INSERT INTO SPORTS VALUES ('A1007','Chess',NULL,450.00);
+INSERT INTO SPORTS VALUES ('A1008','Football','Mr. Khan',NULL);
+INSERT INTO SPORTS VALUES ('A1009','Tennis','Ms. Rao',800.00);
+INSERT INTO SPORTS VALUES ('A1012','Athletics',NULL,NULL);
+`,
+  },
+
+  hospital: {
+    label: 'Hospital — HOSPITAL',
+    tables: ['HOSPITAL'],
+    seed: `
+CREATE TABLE HOSPITAL (
+  PNO            INT           PRIMARY KEY,
+  PNAME          VARCHAR(20)   NOT NULL,
+  ADMIT          DATE,
+  DISCHARGE_DATE DATE,
+  DISEASE        VARCHAR(15),
+  DOCNAME        VARCHAR(20),
+  CHARGES        DECIMAL(8,2)
+);
+
+INSERT INTO HOSPITAL VALUES (1,'Ravi Menon','2023-11-02','2023-11-10','Fever','Dr. Bose',1200.00);
+INSERT INTO HOSPITAL VALUES (2,'Aditi Rao','2024-02-10',NULL,'Fever','Dr. Ahuja',NULL);
+INSERT INTO HOSPITAL VALUES (3,'Kabir Shah','2023-05-21','2023-06-02','Appendicitis','Dr. Chawla',24000.00);
+INSERT INTO HOSPITAL VALUES (4,'Meera Iyer','2024-01-15','2024-01-22','Gastritis','Dr. Bose',3500.00);
+INSERT INTO HOSPITAL VALUES (5,'Arjun Nair','2024-03-03',NULL,'Migraine','Dr. Chawla',NULL);
+INSERT INTO HOSPITAL VALUES (6,'Sneha Pillai','2024-05-19','2024-05-24','Fever','Dr. Bose',950.00);
+INSERT INTO HOSPITAL VALUES (7,'Dev Patel','2024-04-18',NULL,'Fracture','Dr. Ahuja',18000.00);
+INSERT INTO HOSPITAL VALUES (8,'Isha Kapoor','2023-08-30','2023-09-05','Gastritis','Dr. Anand',4100.00);
+INSERT INTO HOSPITAL VALUES (9,'Yash Gupta','2024-06-07',NULL,'Fever','Dr. Anand',NULL);
+INSERT INTO HOSPITAL VALUES (10,'Tara Joshi','2023-12-25','2024-01-04','Fracture','Dr. Chawla',21000.00);
+`,
+  },
+
+  employee: {
+    label: 'Organisation — EMPLOYEE / DEPT',
+    tables: ['EMPLOYEE', 'DEPT', 'DEPT_BACKUP'],
+    seed: `
+CREATE TABLE EMPLOYEE (
+  EMPNO    INT,
+  ENAME    VARCHAR(20)  NOT NULL,
+  JOB      VARCHAR(15),
+  SALARY   DECIMAL(8,2),
+  COMM     DECIMAL(7,2),
+  HIREDATE DATE,
+  DEPTNO   INT,
+  MGR      INT,
+  FOREIGN KEY (DEPTNO) REFERENCES DEPT(DEPTNO)
+);
+
+INSERT INTO EMPLOYEE VALUES (101,'Sameer Bhatt','Manager',71000.00,5000.00,'2019-04-12',10,NULL);
+INSERT INTO EMPLOYEE VALUES (102,'Rita Jain','Analyst',62000.00,NULL,'2020-07-01',10,101);
+INSERT INTO EMPLOYEE VALUES (103,'Mohan Das','Clerk',30000.00,1200.00,'2021-02-15',30,101);
+INSERT INTO EMPLOYEE VALUES (104,'Farah Ali','Manager',58000.00,NULL,'2018-11-20',20,NULL);
+INSERT INTO EMPLOYEE VALUES (105,'Girish Kumar','Engineer',45000.00,2000.00,'2022-06-05',20,104);
+INSERT INTO EMPLOYEE VALUES (106,'Leena Roy','Engineer',52000.00,NULL,'2021-09-18',20,104);
+INSERT INTO EMPLOYEE VALUES (107,'Amit Joshi','Analyst',38000.00,NULL,'2023-01-30',30,103);
+INSERT INTO EMPLOYEE VALUES (108,'Nisha Pillai','Clerk',28000.00,900.00,'2022-10-11',30,103);
+INSERT INTO EMPLOYEE VALUES (109,'Tarun Sethi','Engineer',35000.00,NULL,'2023-03-25',30,107);
+
+CREATE TABLE DEPT (
+  DEPTNO INT          PRIMARY KEY,
+  DNAME  VARCHAR(15)  NOT NULL,
+  LOC    VARCHAR(15)
+);
+
+INSERT INTO DEPT VALUES (10,'Sales','Delhi');
+INSERT INTO DEPT VALUES (20,'Production','Mumbai');
+INSERT INTO DEPT VALUES (30,'HR','Delhi');
+INSERT INTO DEPT VALUES (40,'Research','Bengaluru');
+
+-- Legacy copy kept only for the DROP TABLE mission.
+CREATE TABLE DEPT_BACKUP (
+  DEPTNO INT,
+  DNAME  VARCHAR(15),
+  LOC    VARCHAR(15)
+);
+
+INSERT INTO DEPT_BACKUP SELECT * FROM DEPT;
+`,
+  },
+
+  org: {
+    label: 'Cartesian set — DEPT / GAMES',
+    tables: ['DEPT', 'GAMES'],
+    seed: `
+CREATE TABLE DEPT (
+  DEPTNO INT          PRIMARY KEY,
+  DNAME  VARCHAR(15)  NOT NULL,
+  LOC    VARCHAR(15)
+);
+
+INSERT INTO DEPT VALUES (10,'Sales','Delhi');
+INSERT INTO DEPT VALUES (20,'Production','Mumbai');
+INSERT INTO DEPT VALUES (30,'HR','Delhi');
+INSERT INTO DEPT VALUES (40,'Research','Bengaluru');
+
+CREATE TABLE GAMES (
+  GNO   INT          PRIMARY KEY,
+  GNAME VARCHAR(15)  NOT NULL,
+  TYPE  VARCHAR(10)
+);
+
+INSERT INTO GAMES VALUES (1,'Chess','Indoor');
+INSERT INTO GAMES VALUES (2,'Football','Outdoor');
+INSERT INTO GAMES VALUES (3,'Basketball','Indoor');
+`,
+  },
+
+  library: {
+    label: 'Library — BOOKS / ISSUED',
+    tables: ['BOOKS', 'ISSUED'],
+    seed: `
+CREATE TABLE BOOKS (
+  BNO    INT           PRIMARY KEY,
+  BNAME  VARCHAR(30)   NOT NULL,
+  AUTHOR VARCHAR(25),
+  PRICE  DECIMAL(7,2),
+  QTY    INT
+);
+
+INSERT INTO BOOKS VALUES (101,'Physics XI','HC Verma',350.00,5);
+INSERT INTO BOOKS VALUES (102,'Chemistry XI','NCERT',280.00,8);
+INSERT INTO BOOKS VALUES (103,'Mathematics XI','RD Sharma',420.00,3);
+INSERT INTO BOOKS VALUES (104,'Biology XII','NCERT',310.00,6);
+INSERT INTO BOOKS VALUES (105,'Computer Science','Sumita Arora',385.00,4);
+INSERT INTO BOOKS VALUES (106,'IP Practicals','NCERT',250.00,0);
+
+CREATE TABLE ISSUED (
+  BNO        INT,
+  SNAME      VARCHAR(25),
+  ISSUE_DATE DATE,
+  RETURN_DATE DATE,
+  FOREIGN KEY (BNO) REFERENCES BOOKS(BNO)
+);
+
+INSERT INTO ISSUED VALUES (101,'Rahul Verma','2024-01-05','2024-01-20');
+INSERT INTO ISSUED VALUES (102,'Priya Singh','2024-02-11',NULL);
+INSERT INTO ISSUED VALUES (103,'Arjun Mehta','2024-01-28','2024-02-15');
+INSERT INTO ISSUED VALUES (103,'Ananya Das','2024-03-02',NULL);
+INSERT INTO ISSUED VALUES (105,'Divya Nair','2024-02-20','2024-03-06');
+INSERT INTO ISSUED VALUES (106,'Rohit Sharma','2024-04-01',NULL);
+INSERT INTO ISSUED VALUES (104,'Sana Khan','2024-03-15','2024-04-02');
+`,
+  },
+}
+
+export function getBundle(key) {
+  const b = BUNDLES[key]
+  if (!b) throw new Error(`Unknown dataset bundle: ${key}`)
+  return b
+}

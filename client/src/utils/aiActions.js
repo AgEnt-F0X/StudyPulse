@@ -1,4 +1,5 @@
-import { callGeminiClient } from './gemini'
+import { callGeminiClient, callGeminiWithMeta } from './gemini'
+import { buildTutorRequest } from './aiModes'
 
 const CBSE_SUBJECTS = [
   'Physics', 'Chemistry', 'Mathematics', 'Maths', 'Biology', 'English',
@@ -99,73 +100,62 @@ export function parseAssignmentIntent(text) {
   }
 }
 
-export async function executeAIAssistantCommand(userText, stores, hasKey) {
+// ── Tutor-intent routing ──────────────────────────────────────
+// Evaluate / solve intents run through the deterministic mode engine with
+// live telemetry. Returns a meta result so callers can render retry states.
+
+export async function runTutorIntent(userText, intent, modeId) {
+  const { system, text } = buildTutorRequest(modeId, userText)
+  const subject = detectSubject(userText)
+  const result = await callGeminiWithMeta(text, { system, timeoutMs: 20000 })
+  if (result.ok) {
+    return {
+      replyText: result.text,
+      actionCard: { type: intent, subject },
+      meta: { mode: modeId },
+    }
+  }
+  return {
+    replyText: null,
+    error: result.error === 'no_key'
+      ? 'NO_KEY'
+      : result.rateLimited
+        ? 'RATE_LIMITED'
+        : result.error === 'timeout'
+          ? 'TIMEOUT'
+          : 'FAILED',
+    actionCard: { type: intent, subject },
+  }
+}
+
+export async function executeAIAssistantCommand(userText, stores, hasKey, modeId = 'hint') {
   const { addAssignment, addNote, addDeck, addCard, addStudyPlan, assignments } = stores
   const textLower = userText.toLowerCase()
 
-  // Evaluate Answer Intent
+  // Evaluate Answer Intent → CBSE Evaluator mode (strict, telemetry-aware)
   const isEvaluate = /(?:evaluate|check|grade|mark|rate|review)\s+(?:my|this|the)?\s*answer/i.test(userText)
   if (isEvaluate) {
     if (!hasKey) {
-      return { replyText: 'To evaluate answers, please add an AI API key in **Settings** → AI Intelligence section. Get a free key from [Groq](https://console.groq.com/keys)!' }
+      return { replyText: 'CBSE evaluation needs an AI key. Add one in **Settings** → AI Engine, then retry.' }
     }
     const answerText = userText.replace(/(?:please\s+)?(?:evaluate|check|grade|mark|rate|review)\s+(?:my|this|the)?\s*answer\s*:?/i, '').trim()
     if (!answerText) {
-      return { replyText: 'Please provide your answer to evaluate. Format: **"Evaluate my answer: [your answer here]"**' }
+      return { replyText: 'Provide the answer to grade. Format: **"Evaluate my answer: [your answer]"**' }
     }
-    const subject = detectSubject(userText)
-    const prompt = `You are a strict but helpful CBSE Class 11 ${subject} examiner. Evaluate this student\'s answer thoroughly.
-
-Rules:
-- Start with **Marks: X/5** (be fair but strict)
-- List ✅ **Correct Points** — what the student got right
-- List ❌ **Missing Points** — what should have been included for full marks
-- Provide a **📝 Model Answer** showing the ideal CBSE response
-- Reference NCERT where applicable
-- Keep feedback constructive and encouraging
-- End with a brief tip for improvement
-
-Student\'s answer:\n${answerText}`
-    try {
-      const result = await callGeminiClient(prompt, { timeoutMs: 12000 })
-      return {
-        replyText: result || 'Could not evaluate the answer. Please try again.',
-        actionCard: { type: 'evaluation', subject }
-      }
-    } catch {
-      return { replyText: 'Evaluation failed. Please check your API key and try again.' }
-    }
+    return runTutorIntent(
+      `Question subject: ${detectSubject(userText)}\n\nStudent's answer to grade:\n${answerText}`,
+      'evaluation',
+      'cbse'
+    )
   }
 
-  // Doubt Solver / Step-by-Step Intent
+  // Doubt Solver Intent → Deep Breakdown mode (execution trace + edge cases)
   const isDoubt = /(?:solve|derive|prove\s+that|explain\s+(?:how|why|what)|what\s+is|why\s+does|how\s+(?:does|do|to|can)|find\s+the|calculate|doubt|step[\s-]*by[\s-]*step)/i.test(textLower)
   if (isDoubt && hasKey) {
-    const subject = detectSubject(userText)
-    const prompt = `You are a brilliant CBSE Class 11 ${subject} teacher known for clear explanations. Solve this step-by-step.
-
-Rules:
-- Format as numbered steps: **Step 1:**, **Step 2:**, etc.
-- Show ALL working clearly — no steps skipped
-- For derivations: show each mathematical step with reasoning
-- For conceptual questions: explain with real-life examples and analogies
-- For numericals: show Given → Required → Formula → Substitution → Calculation → **Answer with SI units**
-- Highlight the **final answer** clearly with ✅
-- Add a "💡 **Key Takeaway**" at the very end (one line summary)
-- Keep language simple for a Class 11 student
-
-Question: ${userText}`
-    try {
-      const result = await callGeminiClient(prompt, { timeoutMs: 15000 })
-      return {
-        replyText: result || 'Could not solve this. Please try rephrasing.',
-        actionCard: { type: 'solution', subject }
-      }
-    } catch {
-      return { replyText: 'Solution generation failed. Please check your API key and try again.' }
-    }
+    return runTutorIntent(userText, 'solution', 'deep')
   }
 
-  // 1. Direct Assignment Intent
+  // 1. Direct Assignment Intent (deterministic — no model round-trip)
   const assignmentData = parseAssignmentIntent(userText)
   if (assignmentData) {
     const newId = Date.now().toString()
@@ -186,7 +176,7 @@ Question: ${userText}`
     })
 
     return {
-      replyText: `I have added the assignment **"${assignmentData.title}"** for **${assignmentData.course}** (Due: ${formattedDate}) to your Assignments list!`,
+      replyText: `Added **"${assignmentData.title}"** — ${assignmentData.course}, due ${formattedDate}.`,
       actionCard: {
         type: 'assignment',
         title: assignmentData.title,
@@ -196,11 +186,11 @@ Question: ${userText}`
     }
   }
 
-  // 2. If Gemini API Key is configured, use structured LLM calling
+  // 2. Structured LLM action protocol (flashcards / summary / study plan)
   if (hasKey) {
     try {
       const pendingList = (assignments || []).map(a => `- ${a.title} (${a.courseName || a.course})`).slice(0, 8).join('\n')
-      const systemPrompt = `You are StudyPulse Agent, an intelligent CBSE study assistant with full tool execution capabilities.
+      const systemPrompt = `You are StudyPulse's task agent — a CBSE study assistant with tool-execution capabilities.
 Student pending assignments:
 ${pendingList}
 
@@ -240,7 +230,7 @@ If general query/explanation, return clear markdown text.`
                 createdAt: new Date().toISOString()
               })
               return {
-                replyText: parsed.reply || `Added assignment "${parsed.title}" for ${parsed.course}!`,
+                replyText: parsed.reply || `Added assignment "${parsed.title}" for ${parsed.course}.`,
                 actionCard: {
                   type: 'assignment',
                   title: parsed.title,
@@ -255,7 +245,7 @@ If general query/explanation, return clear markdown text.`
                 replyText: parsed.summary,
                 actionCard: {
                   type: 'save_note',
-                  title: parsed.title || 'CBSE Study Summary',
+                  title: parsed.title || 'Study Summary',
                   content: parsed.summary
                 }
               }
@@ -263,7 +253,7 @@ If general query/explanation, return clear markdown text.`
 
             if (parsed.action === 'flashcards' && Array.isArray(parsed.cards)) {
               return {
-                replyText: parsed.reply || `Generated ${parsed.cards.length} flashcards for ${parsed.topic || 'your topic'}!`,
+                replyText: parsed.reply || `Generated ${parsed.cards.length} flashcards for ${parsed.topic || 'your topic'}.`,
                 actionCard: {
                   type: 'save_flashcards',
                   topic: parsed.topic || 'AI Flashcards',
@@ -280,10 +270,10 @@ If general query/explanation, return clear markdown text.`
     }
   }
 
-  // 3. Fallback Heuristics for Summaries, Quizzes, Flashcards & Plans
+  // 3. Fallback heuristics for summaries, quizzes, flashcards & plans
   if (textLower.includes('summar') || textLower.includes('notes on')) {
-    const topic = userText.replace(/summarize|summary of|this text|for cbse|notes on|:/gi, '').trim() || 'CBSE Topic Notes'
-    const summary = `# Summary & Key Concepts: ${topic}\n\n## 1. Core Principles\n• Key definitions and fundamental theoretical laws outlined in the NCERT syllabus.\n• Important boundary conditions and underlying assumptions.\n\n## 2. Essential Formulas & SI Units\n• Primary equations and mathematical expressions.\n• Constants and standard conversion factors.\n\n## 3. CBSE Board Exam Tips\n• Ensure step-by-step presentation: State formula, show numerical substitution with units, and box final answer.\n• High-frequency 3-mark & 5-mark conceptual derivation.`
+    const topic = userText.replace(/summarize|summary of|this text|for cbse|notes on|:/gi, '').trim() || 'Topic Notes'
+    const summary = `# Summary & Key Concepts: ${topic}\n\n## 1. Core Principles\n• Key definitions and fundamental theoretical laws in the NCERT syllabus.\n• Important boundary conditions and underlying assumptions.\n\n## 2. Essential Formulas & SI Units\n• Primary equations and mathematical expressions.\n• Constants and standard conversion factors.\n\n## 3. Board Exam Notes\n• Step presentation: state formula, show substitution with units, box the final answer.\n• High-frequency 3-mark & 5-mark conceptual derivations.`
     return {
       replyText: summary,
       actionCard: {
@@ -295,22 +285,22 @@ If general query/explanation, return clear markdown text.`
   }
 
   if (textLower.includes('quiz') || textLower.includes('test me')) {
-    const topic = userText.replace(/generate a|5-question|quiz on|test me on|:/gi, '').trim() || 'CBSE Science Concepts'
-    const quizContent = `Here is your CBSE Quiz on **${topic}**:\n\n**1. What is the fundamental principle of this concept?**\n(A) Conservation laws & empirical relations\n(B) Random variation\n(C) Arbitrary definitions\n(D) None of the above\n*Answer: (A)*\n\n**2. Which SI unit is used for standard physical calculations?**\n(A) Standard SI (MKS) units\n(B) CGS units only\n(C) Imperial units\n(D) Non-standard units\n*Answer: (A)*\n\n**3. In CBSE board numericals, full marks are awarded when:**\n(A) Formula, substitution with units, and step calculation are shown\n(B) Only final answer number is written\n(C) Calculations are done mentally\n(D) Units are omitted\n*Answer: (A)*\n\n**4. Which type of bond involves sharing of valence electrons?**\n(A) Covalent bond\n(B) Ionic bond\n(C) Metallic bond\n(D) Hydrogen bond only\n*Answer: (A)*\n\n**5. What is the key strategy for solving complex derivations?**\n(A) Draw labeled diagram, state assumptions, derive step-by-step\n(B) Memorize without diagram\n(C) Skip intermediate algebraic steps\n(D) Only write final equation\n*Answer: (A)*`
+    const topic = userText.replace(/generate a|5-question|quiz on|test me on|:/gi, '').trim() || 'Science Concepts'
+    const quizContent = `Here is a quiz on **${topic}**:\n\n**1. What is the fundamental principle of this concept?**\n(A) Conservation laws & empirical relations\n(B) Random variation\n(C) Arbitrary definitions\n(D) None of the above\n*Answer: (A)*\n\n**2. Which SI unit applies to standard physical calculations?**\n(A) Standard SI (MKS) units\n(B) CGS units only\n(C) Imperial units\n(D) Non-standard units\n*Answer: (A)*\n\n**3. In board numericals, full marks are awarded when:**\n(A) Formula, substitution with units, and step calculation are shown\n(B) Only the final number is written\n(C) Calculations are done mentally\n(D) Units are omitted\n*Answer: (A)*\n\n**4. Which type of bond involves sharing of valence electrons?**\n(A) Covalent bond\n(B) Ionic bond\n(C) Metallic bond\n(D) Hydrogen bond only\n*Answer: (A)*\n\n**5. What is the key strategy for complex derivations?**\n(A) Draw labeled diagram, state assumptions, derive step-by-step\n(B) Memorize without diagram\n(C) Skip intermediate algebraic steps\n(D) Only write the final equation\n*Answer: (A)*`
     return { replyText: quizContent }
   }
 
   if (textLower.includes('flashcard')) {
     const topic = userText.replace(/create flashcards for|make flashcards on|generate flashcards for|flashcards on|:/gi, '').trim() || 'Key Concepts'
     return {
-      replyText: `Here are 3 high-yield flashcards for **${topic}**:\n\n**Q1:** What is the primary definition?\n**A1:** The fundamental law or principle governing this phenomenon according to NCERT.\n\n**Q2:** State the primary equation and SI units.\n**A2:** Standard formula relating variables with standard units.\n\n**Q3:** What is a critical board exam tip?\n**A3:** Always show given parameters, substitute with units, and highlight key assumptions.`,
+      replyText: `Three flashcards for **${topic}**:\n\n**Q1:** What is the primary definition?\n**A1:** The fundamental law or principle governing this phenomenon according to NCERT.\n\n**Q2:** State the primary equation and SI units.\n**A2:** Standard formula relating variables with standard units.\n\n**Q3:** What is a critical board exam note?\n**A3:** State given parameters, substitute step-by-step, and box the final answer.`,
       actionCard: {
         type: 'save_flashcards',
         topic,
         cards: [
           { front: `What is the core definition of ${topic}?`, back: 'Fundamental law or principle from the NCERT syllabus.' },
           { front: `State the primary formula for ${topic}`, back: 'Standard formula with appropriate SI units.' },
-          { front: `Key CBSE board exam application for ${topic}`, back: 'State given variables, substitute step-by-step, and box the final answer.' }
+          { front: `Key board exam application for ${topic}`, back: 'State given variables, substitute step-by-step, and box the final answer.' }
         ]
       }
     }
@@ -325,18 +315,18 @@ If general query/explanation, return clear markdown text.`
         { week: 1, topic: 'NCERT Theory & Basic Concepts', tasks: ['Read NCERT Chapters 1-2', 'Prepare Formula Sheet', 'Solve Examples'] },
         { week: 2, topic: 'Exercise Numericals & Derivations', tasks: ['Back Exercises', 'Diagram Practice', 'Doubt Clearing'] },
         { week: 3, topic: 'NCERT Exemplar & Advanced Questions', tasks: ['Exemplar Problems', 'Chapter Summary', '30-min Chapter Quiz'] },
-        { week: 4, topic: 'PYQs & Full Mock Exam', tasks: ['5-Year CBSE PYQs', 'Timed 3-hour Mock Test', 'Final Review'] },
+        { week: 4, topic: 'PYQs & Full Mock Exam', tasks: ['5-Year PYQs', 'Timed 3-hour Mock Test', 'Final Review'] },
       ],
       createdAt: Date.now()
     })
     return {
-      replyText: `I have created and saved a **4-Week Study Plan for ${subject}**! You can track your weekly progress in the Study Plans tab.`,
+      replyText: `Created a **4-week study plan for ${subject}**. Track weekly progress in Study Plans.`,
       actionCard: { type: 'study_plan', subject }
     }
   }
 
   // Default conversational response
   return {
-    replyText: `I'm here to help you ace your studies! You can ask me to:\n• Add assignments: *"Add an assignment: Physics notebook submission on 4 September 2026"*\n• Summarize notes: *"Summarize this text: [paste content]"*\n• Create quizzes: *"Generate a quiz on Chemical Bonding"*\n• Create flashcards: *"Create flashcards for Kinematics"*\n• Build study plans: *"Build a 4-week study plan for Mathematics"*`
+    replyText: `Available commands:\n• Add assignment: *"Add assignment: Physics notebook due Friday"*\n• Summarize: *"Summarize this text: [paste]"*\n• Quiz: *"Generate a quiz on Chemical Bonding"*\n• Flashcards: *"Create flashcards for Kinematics"*\n• Study plan: *"Build a 4-week study plan for Mathematics"*`
   }
 }

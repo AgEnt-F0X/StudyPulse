@@ -13,6 +13,7 @@ const PAGES = [
   { label: 'Notes', path: '/notes', hint: 'Notebook' },
   { label: 'Flashcards', path: '/flashcards', hint: 'Decks' },
   { label: 'Quiz', path: '/quiz', hint: 'Practice' },
+  { label: 'SQL Pulse', path: '/sql', hint: 'MySQL Missions' },
   { label: 'Study Plans', path: '/study-plans', hint: 'Roadmap' },
   { label: 'Focus Mode', path: '/focus', hint: 'Pomodoro' },
   { label: 'Habits', path: '/habits', hint: 'Routines' },

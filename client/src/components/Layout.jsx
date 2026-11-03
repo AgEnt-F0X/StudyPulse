@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { List, Sparkle, MagnifyingGlass, Fire, Lightning, SunDim, MoonStars, SidebarSimple } from '@phosphor-icons/react'
+import { List, MagnifyingGlass, SunDim, MoonStars, SidebarSimple } from '@phosphor-icons/react'
 import Sidebar from './Sidebar'
 import AIChat from './AIChat'
 import CommandPalette from './CommandPalette'
@@ -11,7 +11,16 @@ import InstallBanner from './InstallBanner'
 import DemoTour from './DemoTour'
 import { useUIStore, useAuthStore, useXPStore, usePomodoroStore } from '../stores'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
-import { C, fonts, tint } from '../utils/theme'
+import { C, fonts } from '../utils/theme'
+
+const StatusBarChip = ({ keys, label }) => (
+  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+    {keys.map((k) => (
+      <kbd key={k} className="kbd">{k}</kbd>
+    ))}
+    <span style={{ color: C.textFaint }}>{label}</span>
+  </span>
+)
 
 const Layout = () => {
   const { aiChatOpen, toggleAIChat, toggleSidebar, toggleSidebarMobile, sidebarCollapsed, theme } = useUIStore()
@@ -33,6 +42,7 @@ const Layout = () => {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
   const xp = useXPStore((s) => s.xp || 0)
   const dailyFocusLog = usePomodoroStore((s) => s.dailyFocusLog || {})
+  const { isRunning, isBreak, secondsLeft, sessionCount } = usePomodoroStore()
   const streak = useMemo(() => {
     let count = 0
     const d = new Date()
@@ -46,6 +56,27 @@ const Layout = () => {
   }, [dailyFocusLog])
   const openPalette = () => window.dispatchEvent(new Event('open-command-palette'))
 
+  // Ctrl+Enter — execute the pending AI query (or open the panel when closed)
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault()
+        if (!aiChatOpen) {
+          toggleAIChat()
+          setTimeout(() => window.dispatchEvent(new CustomEvent('studypulse-ai-focus')), 120)
+        } else {
+          window.dispatchEvent(new CustomEvent('studypulse-ai-send'))
+        }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [aiChatOpen, toggleAIChat])
+
+  const timerLabel = isRunning ? (isBreak ? 'BREAK' : 'FOCUS') : 'IDLE'
+  const timerStatus = !isRunning ? 'neutral' : isBreak ? 'warning' : 'success'
+  const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+
   return (
     <div style={{
       display: 'flex',
@@ -57,9 +88,9 @@ const Layout = () => {
       <div
         className="sidebar-spacer"
         style={{
-          width: sidebarCollapsed ? 84 : 272,
+          width: sidebarCollapsed ? 84 : 232,
           flexShrink: 0,
-          transition: 'width 0.22s cubic-bezier(0.2, 0, 0, 1)',
+          transition: 'width 0.18s cubic-bezier(0.2, 0, 0, 1)',
         }}
       />
 
@@ -70,7 +101,6 @@ const Layout = () => {
         flex: 1,
         minHeight: '100vh',
         overflowY: 'auto',
-        scrollbarWidth: 'none',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
@@ -81,50 +111,50 @@ const Layout = () => {
         {isDemo && (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '8px 24px', gap: 12,
-            background: tint(C.purpleDark, 0.14),
-            borderBottom: `1px solid ${tint(C.purpleDark, 0.35)}`,
+            padding: '6px 20px', gap: 12,
+            background: 'var(--surface-card-soft, #18181C)',
+            borderBottom: `1px solid ${C.border}`,
             flexShrink: 0,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-              <span style={{ fontFamily: fonts.heading, fontSize: 13, fontWeight: 600, color: C.purple, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Demo mode — your data is not saved
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot dot-warning" />
+              <span style={{ fontFamily: fonts.mono, fontSize: 10.5, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.textMuted }}>
+                Demo mode — local data only
               </span>
-            </div>
+            </span>
             <button
               onClick={handleExitDemo}
               style={{
-                fontFamily: fonts.heading, fontSize: 12, fontWeight: 700, color: C.pink,
+                fontFamily: fonts.body, fontSize: 12, fontWeight: 500, color: C.text,
                 cursor: 'pointer', background: 'none', border: 'none', flexShrink: 0,
               }}
-            >Sign in →</button>
+            >Sign in</button>
           </div>
         )}
 
         {/* Topbar */}
         <header style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '12px 24px',
-          borderBottom: `1px solid ${C.borderSoft}`,
-          background: 'var(--bg-card-glass, rgba(16,28,22,0.75))',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          padding: '0 16px',
+          height: 44,
+          borderBottom: `1px solid ${C.border}`,
+          background: C.bg,
           position: 'sticky', top: 0, zIndex: 30,
           flexShrink: 0, gap: 12,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
             <button
               onClick={toggleSidebarMobile}
               className="mobile-hamburger"
               aria-label="Open menu"
               style={{
-                display: 'none', padding: '6px 8px', borderRadius: 6,
-                background: 'rgba(255,255,255,0.04)',
+                display: 'none', padding: '6px 8px', borderRadius: 4,
+                background: 'transparent',
                 border: `1px solid ${C.border}`,
                 cursor: 'pointer', color: C.text,
               }}
             >
-              <List size={18} weight="bold" />
+              <List size={16} weight="regular" />
             </button>
             {sidebarCollapsed && (
               <button
@@ -134,15 +164,15 @@ const Layout = () => {
                 aria-label="Expand sidebar (⌘B)"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 30, height: 30, borderRadius: 7,
+                  width: 28, height: 28, borderRadius: 4,
                   background: 'transparent',
                   border: `1px solid ${C.borderSoft}`,
                   color: C.textMuted,
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease',
+                  transition: 'all 0.13s ease',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                  e.currentTarget.style.background = C.cardHover
                   e.currentTarget.style.color = C.text
                   e.currentTarget.style.borderColor = C.border
                 }}
@@ -152,124 +182,126 @@ const Layout = () => {
                   e.currentTarget.style.borderColor = C.borderSoft
                 }}
               >
-                <SidebarSimple size={16} weight="duotone" />
+                <SidebarSimple size={14} weight="regular" />
               </button>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                fontFamily: fonts.heading, fontSize: 13, fontWeight: 700,
-                color: C.text, letterSpacing: '-0.01em',
-              }}>
-                {today}
-              </span>
-            </div>
+            <span style={{
+              fontFamily: fonts.body, fontSize: 12.5, fontWeight: 500,
+              color: C.textMuted, letterSpacing: '-0.01em', whiteSpace: 'nowrap',
+            }}>
+              {today}
+            </span>
             {/* Cmd+K trigger */}
             <button
               onClick={openPalette}
               title="Search & commands (Cmd+K)"
               aria-label="Search and command palette"
-              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 10px', borderRadius: 8, minWidth: 180,
-                background: 'var(--surface-low, #0d1712)',
+                padding: '5px 10px', borderRadius: 4, minWidth: 180,
+                background: C.bgSoft,
                 border: `1px solid ${C.borderSoft}`,
                 color: C.textFaint, cursor: 'pointer',
-                fontFamily: fonts.body, fontSize: 12.5,
+                fontFamily: fonts.body, fontSize: 12,
               }}
             >
-              <MagnifyingGlass size={14} weight="duotone" />
-              <span style={{ flex: 1, textAlign: 'left' }}>Search…</span>
-              <kbd style={{
-                fontFamily: fonts.body, fontSize: 10, fontWeight: 700,
-                padding: '1px 6px', borderRadius: 4,
-                background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`,
-                color: C.textMuted,
-              }}>⌘K</kbd>
+              <MagnifyingGlass size={13} weight="regular" />
+              <span style={{ flex: 1, textAlign: 'left' }}>Search</span>
+              <kbd className="kbd">⌘K</kbd>
             </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Streak + XP mini-badge (interactive link to Profile) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {/* Focus timer telemetry */}
             <button
-              onClick={() => navigate('/profile')}
-              title="View XP & Study Streak in Profile"
-              aria-label="View XP and Study Streak"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '5px 12px', borderRadius: 999,
-                background: tint(C.amberDeep || '#d97706', 0.10),
-                border: `1px solid ${tint('#f59e0b', 0.30)}`,
-                cursor: 'pointer',
-                transition: 'border-color 0.15s ease, background 0.15s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.amber; e.currentTarget.style.background = tint(C.amberDeep || '#d97706', 0.18) }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = tint('#f59e0b', 0.30); e.currentTarget.style.background = tint(C.amberDeep || '#d97706', 0.10) }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: fonts.body, fontSize: 12, fontWeight: 700, color: C.amber }}>
-                <Fire size={15} weight="duotone" />{streak}
-              </span>
-              <span style={{ width: 1, height: 14, background: tint('#f59e0b', 0.30) }} />
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: fonts.body, fontSize: 12, fontWeight: 700, color: C.amber }}>
-                <Lightning size={15} weight="duotone" />{xp}
-              </span>
-            </button>
-
-            {/* AI Assistant Quick Toggle */}
-            <button
-              onClick={toggleAIChat}
-              title="Open AI Study Assistant"
-              aria-label="Open AI Study Assistant"
-              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              onClick={() => navigate('/focus')}
+              title="Open Focus Mode"
               style={{
                 display: 'flex', alignItems: 'center', gap: 7,
-                padding: '6px 12px', borderRadius: 8,
-                background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))',
-                border: '1px solid rgba(52,211,153,0.30)',
-                color: C.primary, cursor: 'pointer',
-                fontFamily: fonts.heading, fontSize: 12.5, fontWeight: 700,
-                transition: 'transform 0.1s ease, background 0.12s ease',
+                padding: '5px 10px', borderRadius: 4,
+                background: 'transparent',
+                border: `1px solid ${C.borderSoft}`,
+                cursor: 'pointer',
+                fontFamily: fonts.mono, fontSize: 11,
+                fontVariantNumeric: 'tabular-nums',
+                color: C.textMuted,
+                transition: 'border-color 0.13s ease, background 0.13s ease',
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.cardHover }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.borderSoft; e.currentTarget.style.background = 'transparent' }}
             >
-              <Sparkle size={15} weight="duotone" />
-              <span className="hide-mobile">AI Assistant</span>
+              <span className={`dot dot-${timerStatus}`} />
+              {timerLabel}
+              <span style={{ color: C.text }}>{fmt(secondsLeft)}</span>
             </button>
 
-            {/* Theme toggle pill with spring */}
+            {/* Streak + XP telemetry */}
+            <button
+              onClick={() => navigate('/profile')}
+              title="XP & study streak"
+              aria-label="XP and study streak"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '5px 10px', borderRadius: 4,
+                background: 'transparent',
+                border: `1px solid ${C.borderSoft}`,
+                cursor: 'pointer',
+                fontFamily: fonts.mono, fontSize: 11,
+                fontVariantNumeric: 'tabular-nums',
+                color: C.textMuted,
+                transition: 'border-color 0.13s ease, background 0.13s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.cardHover }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.borderSoft; e.currentTarget.style.background = 'transparent' }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <span className={`dot dot-${streak > 0 ? 'success' : 'neutral'}`} />
+                {streak}d
+              </span>
+              <span style={{ width: 1, height: 12, background: C.border }} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: C.text }}>
+                {xp}<span style={{ color: C.textFaint }}>XP</span>
+              </span>
+            </button>
+
+            {/* AI panel toggle */}
+            <button
+              onClick={toggleAIChat}
+              title="Open AI tutor (Ctrl+Enter to execute)"
+              aria-label="Open AI tutor panel"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '5px 10px', borderRadius: 4,
+                background: C.cardHover,
+                border: `1px solid ${C.border}`,
+                color: C.text, cursor: 'pointer',
+                fontFamily: fonts.body, fontSize: 12, fontWeight: 500,
+                transition: 'background 0.13s ease, border-color 0.13s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.borderStrong }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border }}
+            >
+              <span className={`dot dot-success`} />
+              <span className="hide-mobile">Tutor</span>
+            </button>
+
+            {/* Theme toggle */}
             <button
               onClick={useUIStore.getState().toggleTheme}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               style={{
-                display: 'flex', alignItems: 'center',
-                padding: 3, borderRadius: 999,
-                background: 'var(--surface-low, #0d1712)',
-                border: `1px solid ${C.border}`,
-                cursor: 'pointer', position: 'relative',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 28, height: 28, borderRadius: 4,
+                background: 'transparent',
+                border: `1px solid ${C.borderSoft}`,
+                color: C.textMuted, cursor: 'pointer',
+                transition: 'border-color 0.13s ease, color 0.13s ease',
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.text }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.borderSoft; e.currentTarget.style.color = C.textMuted }}
             >
-              {['dark', 'light'].map((m) => {
-                const selected = theme === m || (!theme && m === 'dark')
-                return (
-                  <span key={m} style={{ position: 'relative', padding: '4px 8px', display: 'flex' }}>
-                    {selected && (
-                      <motion.span
-                        layoutId="theme-pill"
-                        transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                        style={{
-                          position: 'absolute', inset: 0, borderRadius: 999,
-                          background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))',
-                          border: '1px solid rgba(52,211,153,0.30)',
-                        }}
-                      />
-                    )}
-                    <span style={{ position: 'relative', display: 'flex', color: selected ? C.primary : C.textFaint }}>
-                      {m === 'dark' ? <MoonStars size={14} weight="duotone" /> : <SunDim size={14} weight="duotone" />}
-                    </span>
-                  </span>
-                )
-              })}
+              {theme === 'dark' ? <SunDim size={14} weight="regular" /> : <MoonStars size={14} weight="regular" />}
             </button>
           </div>
         </header>
@@ -277,27 +309,60 @@ const Layout = () => {
         <div key={location.pathname} className="page-enter page-content" style={{ flex: 1 }}>
           <Outlet />
         </div>
+
+        {/* Keyboard shortcut status bar */}
+        <div className="status-bar" style={{
+          position: 'sticky', bottom: 0, zIndex: 30,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          height: 30, padding: '0 16px', gap: 16,
+          background: C.bg,
+          borderTop: `1px solid ${C.border}`,
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, overflow: 'hidden' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none' }} onClick={openPalette}>
+              <StatusBarChip keys={['⌘K']} label="Palette" />
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <StatusBarChip keys={['⌘B']} label="Sidebar" />
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <StatusBarChip keys={['Ctrl', '↵']} label="Execute AI" />
+            </span>
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            fontFamily: fonts.mono, fontSize: 10.5,
+            fontVariantNumeric: 'tabular-nums', color: C.textFaint,
+            whiteSpace: 'nowrap',
+          }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span className={`dot dot-${timerStatus}`} />
+              {sessionCount} sessions
+            </span>
+            <span>{xp} XP · {streak}d streak</span>
+          </div>
+        </div>
       </main>
 
-      {/* AI Chat slide-in panel */}
+      {/* AI panel — right dock, flush hairline, no overlay blur */}
       <AnimatePresence>
         {aiChatOpen && (
           <>
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={toggleAIChat}
-              style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(0,0,0,0.6)' }}
+              style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(0,0,0,0.5)' }}
             />
             <motion.div
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 38 }}
               className="ai-chat-panel"
               style={{
                 position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 121,
-                width: 'min(420px, 100vw)',
-                background: C.bgSoft,
+                width: 'min(440px, 100vw)',
+                background: C.card,
                 borderLeft: `1px solid ${C.border}`,
-                boxShadow: '-16px 0 48px rgba(0,0,0,0.5)',
                 display: 'flex', flexDirection: 'column',
               }}
             >
@@ -312,20 +377,19 @@ const Layout = () => {
       {isDemo && <DemoTour />}
       <ToastContainer />
 
-
-
-
       <style>{`
-        .sidebar-spacer { transition: width 0.22s cubic-bezier(0.2, 0, 0, 1); }
-        .page-content { padding: 24px 28px 48px; background: var(--grad-hero); background-repeat: no-repeat; }
+        .sidebar-spacer { transition: width 0.18s cubic-bezier(0.2, 0, 0, 1); }
+        .page-content { padding: 20px 24px 40px; }
+        .status-bar button { background: none; border: none; padding: 0; font: inherit; }
         @media (max-width: 1023px) {
           .sidebar-spacer { display: none !important; width: 0 !important; }
           .mobile-hamburger { display: flex !important; }
           .desktop-sidebar-toggle { display: none !important; }
           .hide-mobile { display: none; }
+          .status-bar span:last-child { display: none; }
         }
         @media (max-width: 640px) {
-          .page-content { padding: 16px 14px 40px; }
+          .page-content { padding: 14px 14px 32px; }
         }
       `}</style>
     </div>

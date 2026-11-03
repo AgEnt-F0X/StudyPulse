@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Pause, RotateCcw, X, Coffee, Brain, ChevronUp, ChevronDown, Volume2, VolumeX, Maximize2 } from 'lucide-react'
+import { Play, Pause, RotateCcw, X, ChevronUp, ChevronDown, Volume2, VolumeX } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePomodoroStore, useAssignmentsStore, useUIStore } from '../stores'
 import { playDing } from '../utils/sounds'
+import { C, fonts } from '../utils/theme'
 
 const fmt = (secs) => {
   const m = Math.floor(secs / 60)
@@ -11,11 +12,12 @@ const fmt = (secs) => {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-const RADIUS = 36
+const RADIUS = 34
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 const PomodoroTimer = () => {
   const location = useLocation()
+  const navigate = useNavigate()
   const {
     isRunning, isBreak, secondsLeft, workSeconds, breakSeconds,
     sessionCount, totalFocusMinutes, activeAssignment,
@@ -50,94 +52,101 @@ const PomodoroTimer = () => {
   const progress = 1 - secondsLeft / total
   const strokeDashoffset = CIRCUMFERENCE * (1 - progress)
 
+  // Semantic status: green = active focus, amber = break, neutral = idle
+  const statusKind = !isRunning ? 'neutral' : isBreak ? 'warning' : 'success'
+  const statusColor = !isRunning ? C.textFaint : isBreak ? C.warning : C.success
+  const stateLabel = !isRunning ? 'IDLE' : isBreak ? 'BREAK' : 'FOCUS'
+
   const pending = assignments.filter(a => a.status !== 'graded')
-  const accentColor = isBreak ? '#4dff91' : '#c44dff'
   if (location.pathname === '/focus') return null
 
   if (!visible) {
     return (
       <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         onClick={() => setVisible(true)}
         style={{
-          position: 'fixed', bottom: 24, right: 84, zIndex: 90,
-          width: 46, height: 46, borderRadius: '50%',
-          background: 'var(--bg-card, #101c17)',
-          border: '1px solid var(--border-color, #232d42)',
-          boxShadow: '0 8px 24px -4px rgba(0,0,0,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'fixed', bottom: 42, right: 16, zIndex: 90,
+          height: 32, padding: '0 10px',
+          borderRadius: 4,
+          background: C.card,
+          border: `1px solid ${C.border}`,
+          display: 'flex', alignItems: 'center', gap: 8,
           cursor: 'pointer',
+          fontFamily: fonts.mono, fontSize: 11, fontWeight: 500,
+          fontVariantNumeric: 'tabular-nums',
+          color: C.text,
         }}
-        title="Open Pomodoro Timer"
+        title="Open focus timer"
       >
-        {isRunning
-          ? <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 10, fontWeight: 700, color: 'var(--accent-blue, #10b981)' }}>{fmt(secondsLeft)}</span>
-          : <Brain size={18} style={{ color: 'var(--accent-blue, #10b981)' }} />
-        }
+        {isRunning ? (
+          <>
+            <span className={`dot dot-${statusKind}`} />
+            {fmt(secondsLeft)}
+          </>
+        ) : (
+          <>
+            <span className="dot dot-neutral" />
+            FOCUS
+          </>
+        )}
       </motion.button>
     )
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.85, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.85, y: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       style={{
-        position: 'fixed', bottom: 24, right: 84, zIndex: 90,
-        width: expanded ? 290 : 210,
-        borderRadius: 14,
-        background: 'var(--bg-card, #101c17)',
-        border: `1px solid ${isRunning ? 'rgba(59,130,246,0.45)' : 'var(--border-color, #232d42)'}`,
-        boxShadow: '0 12px 36px -8px rgba(0,0,0,0.5)',
+        position: 'fixed', bottom: 42, right: 16, zIndex: 90,
+        width: expanded ? 280 : 224,
+        borderRadius: 6,
+        background: C.card,
+        border: `1px solid ${C.border}`,
         overflow: 'hidden',
-        transition: 'width 0.25s ease, border-color 0.3s',
+        transition: 'width 0.18s ease',
       }}
     >
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 14px 8px',
-        borderBottom: '1px solid var(--border-color, #232d42)',
+        padding: '8px 12px',
+        borderBottom: `1px solid ${C.borderSoft}`,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {isBreak
-            ? <Coffee size={14} style={{ color: '#4ade80' }} />
-            : <Brain size={14} style={{ color: 'var(--accent-blue, #10b981)' }} />
-          }
-          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: isBreak ? '#4ade80' : 'var(--accent-blue, #10b981)', letterSpacing: '0.04em' }}>
-            {isBreak ? 'BREAK' : 'FOCUS'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span className={`dot dot-${statusKind}`} />
+          <span style={{
+            fontFamily: fonts.mono, fontSize: 10, fontWeight: 500,
+            letterSpacing: '0.08em', color: statusColor,
+          }}>
+            {stateLabel}
           </span>
           {sessionCount > 0 && (
-            <span style={{
-              marginLeft: 4, padding: '1px 6px', borderRadius: 100,
-              background: 'rgba(59,130,246,0.15)',
-              fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 700, color: 'var(--accent-blue, #10b981)',
-            }}>
+            <span className="metric-label" style={{ padding: 0 }}>
               ×{sessionCount}
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 2 }}>
           <button
             onClick={() => setPomodoroSound(pomodoroSound === false ? true : false)}
             title={pomodoroSound === false ? 'Enable sounds' : 'Mute sounds'}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textFaint, padding: 3, display: 'flex' }}
           >
             {pomodoroSound === false ? <VolumeX size={13} /> : <Volume2 size={13} />}
           </button>
           <button
             onClick={() => setExpanded(e => !e)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textFaint, padding: 3, display: 'flex' }}
           >
             {expanded ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
           </button>
           <button
             onClick={() => { close(); setVisible(false) }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textFaint, padding: 3, display: 'flex' }}
           >
             <X size={13} />
           </button>
@@ -145,30 +154,34 @@ const PomodoroTimer = () => {
       </div>
 
       {/* Timer ring + time */}
-      <div style={{ padding: '16px 14px 12px', display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ flexShrink: 0, position: 'relative', width: 88, height: 88 }}>
-          <svg width="88" height="88" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="44" cy="44" r={RADIUS} fill="none" stroke="var(--border-color, #232d42)" strokeWidth="5" />
-            <motion.circle
-              cx="44" cy="44" r={RADIUS}
+      <div style={{ padding: '14px 12px 12px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ flexShrink: 0, position: 'relative', width: 80, height: 80 }}>
+          <svg width="80" height="80" style={{ transform: 'rotate(-90deg)' }}>
+            <circle cx="40" cy="40" r={RADIUS} fill="none" stroke={C.border} strokeWidth="3" />
+            <circle
+              cx="40" cy="40" r={RADIUS}
               fill="none"
-              stroke={accentColor}
-              strokeWidth="5"
+              stroke={statusColor}
+              strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={strokeDashoffset}
-              style={{ filter: isRunning ? `drop-shadow(0 0 6px ${accentColor})` : 'none', transition: 'stroke-dashoffset 0.9s linear' }}
+              style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.3s ease' }}
             />
           </svg>
           <div style={{
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 16, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', lineHeight: 1 }}>
+            <span style={{
+              fontFamily: fonts.mono, fontSize: 15, fontWeight: 600,
+              color: C.text, lineHeight: 1,
+              fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em',
+            }}>
               {fmt(secondsLeft)}
             </span>
-            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 10, color: 'var(--text-muted, #64748b)', marginTop: 4 }}>
-              {Math.round((1 - secondsLeft / total) * 100)}%
+            <span className="metric-label" style={{ marginTop: 4, padding: 0 }}>
+              {Math.round(progress * 100)}%
             </span>
           </div>
         </div>
@@ -176,35 +189,35 @@ const PomodoroTimer = () => {
         <div style={{ flex: 1, minWidth: 0 }}>
           {activeAssignment && (
             <p style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-secondary, #94a3b8)',
+              fontFamily: fonts.body, fontSize: 12, color: C.textMuted,
               marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             }}>
-              {activeAssignment.title}
+              {typeof activeAssignment === 'string' ? '' : activeAssignment.title}
             </p>
           )}
           <div style={{ display: 'flex', gap: 6 }}>
             <button
               onClick={isRunning ? pause : start}
               style={{
-                flex: 1, padding: '7px 10px', borderRadius: 8,
-                background: isRunning ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)',
-                border: `1px solid ${isRunning ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.3)'}`,
-                color: isRunning ? '#f87171' : 'var(--accent-blue, #10b981)',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                flex: 1, padding: '6px 10px', borderRadius: 4,
+                background: isRunning ? C.cardSoft : C.fill,
+                border: `1px solid ${isRunning ? C.border : 'transparent'}`,
+                color: isRunning ? C.error : C.fillText,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                fontFamily: fonts.body, fontSize: 12, fontWeight: 500,
               }}
             >
-              {isRunning ? <Pause size={13} /> : <Play size={13} />}
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700 }}>
-                {isRunning ? 'Pause' : 'Start'}
-              </span>
+              {isRunning ? <Pause size={12} /> : <Play size={12} />}
+              {isRunning ? 'Pause' : 'Start'}
             </button>
             <button
               onClick={reset}
+              title="Reset timer"
               style={{
-                padding: '7px 9px', borderRadius: 8,
-                background: 'var(--bg-secondary, #0e131f)',
-                border: '1px solid var(--border-color, #232d42)',
-                color: 'var(--text-muted, #64748b)', cursor: 'pointer',
+                padding: '6px 8px', borderRadius: 4,
+                background: 'transparent',
+                border: `1px solid ${C.border}`,
+                color: C.textMuted, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
@@ -212,8 +225,11 @@ const PomodoroTimer = () => {
             </button>
           </div>
           {totalFocusMinutes > 0 && (
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: 'var(--text-muted, #64748b)', marginTop: 6 }}>
-              {totalFocusMinutes} min focused today
+            <p style={{
+              fontFamily: fonts.mono, fontSize: 10.5, color: C.textFaint,
+              marginTop: 8, fontVariantNumeric: 'tabular-nums',
+            }}>
+              {totalFocusMinutes}m focused
             </p>
           )}
         </div>
@@ -229,30 +245,34 @@ const PomodoroTimer = () => {
             style={{ overflow: 'hidden' }}
           >
             <div style={{
-              borderTop: '1px solid var(--border-color, #232d42)',
-              padding: '10px 14px 14px',
+              borderTop: `1px solid ${C.borderSoft}`,
+              padding: '10px 12px 12px',
             }}>
-              <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 700, color: 'var(--text-muted, #64748b)', marginBottom: 8, letterSpacing: '0.06em' }}>
-                STUDYING:
+              <p className="metric-label" style={{ marginBottom: 8 }}>
+                Studying
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 140, overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 140, overflowY: 'auto' }}>
                 {pending.length > 0 ? pending.slice(0, 6).map(a => (
                   <button
                     key={a.id}
                     onClick={() => setActiveAssignment(a)}
                     style={{
-                      padding: '7px 10px', borderRadius: 6, textAlign: 'left',
-                      background: activeAssignment?.id === a.id ? 'rgba(59,130,246,0.15)' : 'var(--bg-secondary, #0e131f)',
-                      border: `1px solid ${activeAssignment?.id === a.id ? 'rgba(59,130,246,0.35)' : 'var(--border-color, #232d42)'}`,
+                      padding: '6px 8px', borderRadius: 4, textAlign: 'left',
+                      background: activeAssignment?.id === a.id ? C.cardHover : 'transparent',
+                      border: 'none',
                       cursor: 'pointer',
                     }}
                   >
-                    <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: activeAssignment?.id === a.id ? 'var(--accent-blue, #10b981)' : 'var(--text-secondary, #94a3b8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <p style={{
+                      fontFamily: fonts.body, fontSize: 12,
+                      color: activeAssignment?.id === a.id ? C.text : C.textMuted,
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>
                       {a.title}
                     </p>
                   </button>
                 )) : (
-                  <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)' }}>
+                  <p style={{ fontFamily: fonts.body, fontSize: 12, color: C.textFaint }}>
                     No pending assignments
                   </p>
                 )}
