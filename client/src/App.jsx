@@ -30,6 +30,9 @@ const Demo = lazy(() => import('./pages/Demo'))
 const Profile = lazy(() => import('./pages/Profile'))
 const AIAssistant = lazy(() => import('./pages/AIAssistant'))
 const SqlPulse = lazy(() => import('./pages/SqlPulse'))
+const Library = lazy(() => import('./pages/Library'))
+const ChapterReader = lazy(() => import('./pages/ChapterReader'))
+const PYQ = lazy(() => import('./pages/PYQ'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const PageSkeleton = () => (
@@ -84,6 +87,9 @@ function App() {
                 <Route path="/focus" element={<FocusMode />} />
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/sql" element={<SqlPulse />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/read/:chapterId" element={<ChapterReader />} />
+                <Route path="/pyq" element={<PYQ />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/import" element={<SyllabusImport />} />
                 <Route path="/settings" element={<Settings />} />

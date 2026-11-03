@@ -13,6 +13,7 @@ import { gradeSubmission } from '../lib/sqlGrader'
 import { MISSIONS, WORLDS, getMission, getWorldMissions } from '../data/sqlMissions'
 import { getBundle } from '../data/sqlDatasets'
 import { useSqlPulseStore, worldMastery, campaignProgress } from '../stores/sqlPulse'
+import { CONFIDENCE_LEVELS } from '../utils/learnerEngine'
 
 // ── SQL editor ────────────────────────────────────────────────
 
@@ -119,17 +120,21 @@ function SqlEditor({ value, onChange, onExecute }) {
   }
 
   return (
-    <div style={{ display: 'flex', height: 190, background: '#0C0C0E', overflow: 'hidden' }}>
+    <div style={{
+      display: 'flex', height: 190, background: '#0A1410', overflow: 'hidden',
+      borderRadius: 12, border: '1px solid rgba(16,185,129,0.28)',
+      boxShadow: '0 0 0 1px rgba(16,185,129,0.12), 0 0 32px rgba(16,185,129,0.18), inset 0 1px 0 rgba(110,231,183,0.08)',
+    }}>
       {/* Line-number gutter */}
       <div
         ref={gutRef}
         style={{
           width: 40, flexShrink: 0, overflow: 'hidden',
           padding: '10px 6px 10px 0', textAlign: 'right',
-          borderRight: `1px solid ${C.borderSoft}`,
-          background: 'var(--surface-low, #0C0C0E)',
+          borderRight: '1px solid rgba(16,185,129,0.18)',
+          background: 'rgba(8, 16, 12, 0.9)',
           fontFamily: fonts.mono, fontSize: 11, lineHeight: 1.65,
-          color: C.textFaint, fontVariantNumeric: 'tabular-nums',
+          color: 'rgba(110,231,183,0.45)', fontVariantNumeric: 'tabular-nums',
           userSelect: 'none',
         }}
       >
@@ -205,47 +210,96 @@ function PaneCard({ title, right, children, style }) {
 
 function SchemaTable({ info, expanded, onToggle }) {
   const Icon = expanded ? CaretDown : CaretRight
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 })
+  const cardRef = useRef(null)
+  const pkFields = info.fields.filter((f) => f.key === 'PRI')
+
+  const onMouseMove = (e) => {
+    const rect = cardRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setTilt({
+      ry: ((e.clientX - rect.left) / rect.width - 0.5) * 10,
+      rx: -((e.clientY - rect.top) / rect.height - 0.5) * 8,
+    })
+  }
+
   return (
-    <div style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-      <button
-        onClick={onToggle}
+    <div style={{ perspective: 800, marginBottom: 8 }}>
+      <div
+        ref={cardRef}
+        onMouseMove={onMouseMove}
+        onMouseLeave={() => setTilt({ rx: 0, ry: 0 })}
         style={{
-          width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 12px', background: expanded ? C.cardHover : 'transparent',
-          border: 'none', cursor: 'pointer', textAlign: 'left',
+          transformStyle: 'preserve-3d',
+          transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+          transition: 'transform 0.12s ease-out',
+          borderRadius: 12,
+          background: 'linear-gradient(155deg, rgba(30,53,43,0.65), rgba(14,24,19,0.85))',
+          border: `1px solid ${C.border}`,
+          boxShadow: '0 12px 28px rgba(30,25,15,0.3), inset 0 1px 0 rgba(244,240,234,0.06)',
+          overflow: 'hidden',
         }}
       >
-        <Icon size={12} style={{ color: C.textFaint, flexShrink: 0 }} />
-        <span style={{ fontFamily: fonts.mono, fontSize: 11.5, fontWeight: 500, color: C.text, flex: 1 }}>
-          {info.name}
-        </span>
-        <Mono color={C.textFaint} size={10}>D{info.degree} · C{info.cardinality}</Mono>
-      </button>
-      {expanded && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <tbody>
-            {info.fields.map((f, i) => (
-              <tr key={i}>
-                <td style={{
-                  padding: '3px 6px 3px 26px', fontFamily: fonts.mono, fontSize: 10.5,
-                  color: C.text, borderBottom: `1px solid ${C.borderSoft}`, whiteSpace: 'nowrap',
-                }}>{f.name}</td>
-                <td style={{
-                  padding: '3px 6px', fontFamily: fonts.mono, fontSize: 10.5,
-                  color: C.textFaint, borderBottom: `1px solid ${C.borderSoft}`, whiteSpace: 'nowrap',
-                }}>{f.type}</td>
-                <td style={{
-                  padding: '3px 10px 3px 6px', fontFamily: fonts.mono, fontSize: 10,
-                  color: f.key === 'PRI' ? C.success : f.nullable ? C.textFaint : C.warning,
-                  borderBottom: `1px solid ${C.borderSoft}`, whiteSpace: 'nowrap', textAlign: 'right',
-                }}>
-                  {f.key === 'PRI' ? 'PK' : f.nullable ? 'NULL' : 'NOT NULL'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        <button
+          onClick={onToggle}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+            padding: '10px 13px', background: 'transparent',
+            border: 'none', cursor: 'pointer', textAlign: 'left',
+          }}
+        >
+          <Icon size={12} style={{ color: C.primaryBright, flexShrink: 0 }} />
+          <span style={{ fontFamily: fonts.mono, fontSize: 12, fontWeight: 600, color: C.text, flex: 1, letterSpacing: '0.04em' }}>
+            {info.name}
+          </span>
+          <span className="badge3d not_checked" style={{ fontSize: 9, padding: '2px 8px' }}>
+            D{info.degree} · C{info.cardinality}
+          </span>
+        </button>
+        {/* Keys strip */}
+        <div style={{
+          display: 'flex', gap: 5, flexWrap: 'wrap',
+          padding: '0 13px 9px', alignItems: 'center',
+        }}>
+          {pkFields.length > 0 ? (
+            pkFields.map((f) => (
+              <span key={f.name} className="badge3d mastered" style={{ fontSize: 9, padding: '2px 8px' }}>
+                PK · {f.name}
+              </span>
+            ))
+          ) : (
+            <span style={{ fontFamily: fonts.mono, fontSize: 9, color: C.textFaint }}>no primary key</span>
+          )}
+          <span style={{ fontFamily: fonts.mono, fontSize: 9, color: C.textFaint, marginLeft: 'auto' }}>
+            {info.fields.length} fields
+          </span>
+        </div>
+        {expanded && (
+          <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: `1px solid ${C.borderSoft}` }}>
+            <tbody>
+              {info.fields.map((f, i) => (
+                <tr key={i}>
+                  <td style={{
+                    padding: '4px 6px 4px 13px', fontFamily: fonts.mono, fontSize: 10.5,
+                    color: C.text, borderBottom: `1px solid ${C.borderSoft}`, whiteSpace: 'nowrap',
+                  }}>{f.name}</td>
+                  <td style={{
+                    padding: '4px 6px', fontFamily: fonts.mono, fontSize: 10.5,
+                    color: C.textMuted, borderBottom: `1px solid ${C.borderSoft}`, whiteSpace: 'nowrap',
+                  }}>{f.type}</td>
+                  <td style={{
+                    padding: '4px 13px 4px 6px', fontFamily: fonts.mono, fontSize: 9.5,
+                    color: f.key === 'PRI' ? C.success : f.nullable ? C.textFaint : C.warning,
+                    borderBottom: `1px solid ${C.borderSoft}`, whiteSpace: 'nowrap', textAlign: 'right',
+                  }}>
+                    {f.key === 'PRI' ? 'PK' : f.nullable ? 'NULL' : 'NOT NULL'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   )
 }
@@ -255,7 +309,7 @@ function SchemaTable({ info, expanded, onToggle }) {
 export default function SqlPulse() {
   const navigate = useNavigate()
   const { addToast, aiChatOpen, toggleAIChat } = useUIStore()
-  const { completed, attempts, recordAttempt, completeMission, resetProgress } = useSqlPulseStore()
+  const { completed, attempts, recordAttempt, completeMission, resetProgress, logSqlOutcome } = useSqlPulseStore()
 
   const [engineOn, setEngineOn] = useState(false)
   const [engineError, setEngineError] = useState(null)
@@ -271,6 +325,7 @@ export default function SqlPulse() {
   const bundle = getBundle(mission.bundle)
 
   const [sqlText, setSqlText] = useState('')
+  const [confidence, setConfidence] = useState('fairly_sure')
   const [your, setYour] = useState(null)       // last result set from the student db
   const [expected, setExpected] = useState(null)
   const [grade, setGrade] = useState(null)
@@ -379,6 +434,10 @@ export default function SqlPulse() {
       execError: res.error,
     })
     setGrade(result)
+
+    // Feed the attempt (with declared certainty) into Learner Memory —
+    // grader traps become "What StudyPulse noticed" misconceptions.
+    logSqlOutcome({ mission, grade: result, confidence })
 
     if (result.passed && mission.kind !== 'quiz') {
       const { already, xp } = completeMission(mission.id, mission.xp)
@@ -738,7 +797,7 @@ export default function SqlPulse() {
                   <SqlEditor value={sqlText} onChange={setSqlText} onExecute={handleExecute} />
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '8px 12px', borderTop: `1px solid ${C.borderSoft}`, gap: 8,
+                    padding: '8px 12px', borderTop: `1px solid ${C.borderSoft}`, gap: 8, flexWrap: 'wrap',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <button
@@ -771,6 +830,30 @@ export default function SqlPulse() {
                       >
                         <ArrowCounterClockwise size={12} /> RESET DB
                       </button>
+                    </div>
+                    {/* Certainty bar — "a lucky guess never counts" */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Mono color={C.textFaint} size={9}>HOW SURE?</Mono>
+                      <div style={{ display: 'flex', gap: 2, padding: 2, border: `1px solid ${C.borderSoft}`, borderRadius: 4, background: C.bgSoft }}>
+                        {CONFIDENCE_LEVELS.map((c) => {
+                          const active = confidence === c.id
+                          return (
+                            <button
+                              key={c.id}
+                              onClick={() => setConfidence(c.id)}
+                              style={{
+                                padding: '3px 8px', borderRadius: 3, border: 'none',
+                                background: active ? C.cardHover : 'transparent',
+                                color: active ? C.text : C.textFaint,
+                                cursor: 'pointer',
+                                fontFamily: fonts.body, fontSize: 10.5, fontWeight: active ? 600 : 400,
+                              }}
+                            >
+                              {c.label}
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
                     <button
                       onClick={askTutor}

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   House, ClipboardText, CalendarDots, ChartBar, Notebook, Cards,
   Brain, CheckCircle, TrendUp, BookOpenText, Trophy, Target,
-  UploadSimple, User, Gear, X, Sparkle, Database,
+  UploadSimple, User, Gear, X, Sparkle, Database, Books, GraduationCap,
   SidebarSimple
 } from '@phosphor-icons/react'
 import { useAuthStore, useUIStore } from '../stores'
@@ -23,6 +23,8 @@ const navSections = [
     label: 'Study',
     items: [
       { icon: Sparkle, label: 'AI Tutor', path: '/assistant' },
+      { icon: Books, label: 'Library', path: '/library' },
+      { icon: GraduationCap, label: 'PYQ Vault', path: '/pyq' },
       { icon: Notebook, label: 'Notes', path: '/notes', shortcut: 'gn' },
       { icon: Cards, label: 'Flashcards', path: '/flashcards', shortcut: 'gf' },
       { icon: Brain, label: 'Quiz', path: '/quiz', shortcut: 'gq' },

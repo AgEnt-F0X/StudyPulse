@@ -6,9 +6,18 @@ import {
   Cards, Brain
 } from '@phosphor-icons/react'
 import katex from 'katex'
-import { useNotesStore, useUIStore, useFlashcardsStore } from '../stores'
+import { useNotesStore, useUIStore, useFlashcardsStore, useLearnerStore } from '../stores'
 import { C, fonts, tint, btnPrimary } from '../utils/theme'
-import { callGeminiClient, hasClientKey } from '../utils/gemini'
+import { callGeminiClient, hasClientKey, generateChapterNotes, NOTE_FORMATS } from '../utils/gemini'
+import { getLearnerChapters } from '../utils/cbseSubjects'
+
+const HIGHLIGHTS_KEY = 'studypulse-highlights'
+function getSavedHighlights() {
+  try {
+    const all = JSON.parse(localStorage.getItem(HIGHLIGHTS_KEY) || '{}')
+    return Object.values(all).flat()
+  } catch { return [] }
+}
 
 function renderInlineTokens(text) {
   if (!text) return null
@@ -248,6 +257,99 @@ export default function Notes() {
     touchSaved()
   }
 
+  // ── Revision notes generator (6 Vedmi formats) ──
+  const [genOpen, setGenOpen] = useState(false)
+  const [genFormat, setGenFormat] = useState('all_topics')
+  const [genChapterId, setGenChapterId] = useState('')
+  const [genHandwritten, setGenHandwritten] = useState(false)
+  const [genLoading, setGenLoading] = useState(false)
+  const [genResult, setGenResult] = useState(null)
+  const [genError, setGenError] = useState(null)
+  const LEARNER_CHAPTERS = getLearnerChapters()
+
+  const runGenerator = async () => {
+    const ch = LEARNER_CHAPTERS.find((c) => c.id === genChapterId)
+    if (!ch) { setGenError('Pick a chapter first'); return }
+    setGenLoading(true)
+    setGenError(null)
+    const highlights = getSavedHighlights()
+      .filter((h) => h.chapterTitle?.includes(ch.title) || h.subject === ch.subject)
+      .map((h) => h.text)
+    const pageText = ch.pages.map((p) => `${p.heading}\n${p.blocks.map((b) => b.text || b.description || '').join('\n')}`).join('\n\n')
+    const res = await generateChapterNotes({
+      chapterTitle: `${ch.classLevel} ${ch.subject} · ${ch.title}`,
+      pageText, highlights, format: genFormat,
+    })
+    if (res.ok) setGenResult(res)
+    else setGenError(res.error === 'no_key' ? 'Add an API key in Settings first.' : `Generation failed: ${res.error}`)
+    setGenLoading(false)
+  }
+
+  const resultToMarkdown = (result) => {
+    const d = result?.data
+    if (!d) return ''
+    if (result.format === 'all_topics' && Array.isArray(d.sections)) {
+      return d.sections.map((s) => `## ${s.title}\n${(s.points || []).map((p) => `- ${p}`).join('\n')}${s.examTip ? `\n> Board tip: ${s.examTip}` : ''}`).join('\n\n')
+    }
+    if (result.format === 'mind_map' && d.root) {
+      const line = (n, depth) => `${'  '.repeat(depth)}- ${n.label}\n${(n.children || []).map((c) => line(c, depth + 1)).join('')}`
+      return `# ${d.root}\n${(d.children || []).map((c) => line(c, 1)).join('')}`
+    }
+    if (result.format === 'flow_chart' && Array.isArray(d.nodes)) {
+      return d.nodes.map((n) => `- **${n.label}**${n.note ? ` — ${n.note}` : ''}`).join('\n') +
+        (d.edges || []).map((e) => `\n- *${e.from} → ${e.to}*${e.label ? ` (${e.label})` : ''}`).join('')
+    }
+    if (result.format === 'timeline' && Array.isArray(d.events)) {
+      return d.events.map((e) => `- **${e.when}** — ${e.label}${e.description ? `: ${e.description}` : ''}`).join('\n')
+    }
+    if (result.format === 'mnemonics' && Array.isArray(d.items)) {
+      return d.items.map((m) => `- **${m.mnemonic}** — ${m.meaning}${m.topic ? ` (${m.topic})` : ''}`).join('\n')
+    }
+    if (result.format === 'formula_sheet' && Array.isArray(d.groups)) {
+      return d.groups.map((g) => `## ${g.topic}\n${(g.formulas || []).map((f) => `- \`${f.latex}\` — ${f.name}${f.note ? ` (${f.note})` : ''}`).join('\n')}`).join('\n\n')
+    }
+    return JSON.stringify(d, null, 1)
+  }
+
+  const exportResultPDF = async () => {
+    if (!genResult) return
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+      const chapter = LEARNER_CHAPTERS.find((c) => c.id === genChapterId)
+      const label = NOTE_FORMATS.find((f) => f.id === genFormat)?.label || 'Notes'
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(14)
+      doc.text(`${chapter?.title || 'Revision'} — ${label}`, 40, 50)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      const lines = doc.splitTextToSize(resultToMarkdown(genResult).replace(/[#*`>]/g, ''), 515)
+      let y = 80
+      for (const line of lines) {
+        if (y > 780) { doc.addPage(); y = 50 }
+        doc.text(line, 40, y)
+        y += 14
+      }
+      doc.save(`${chapter?.title || 'notes'}-${genFormat}.pdf`)
+      addToast({ type: 'success', message: 'PDF exported' })
+    } catch (e) {
+      addToast({ type: 'error', message: 'PDF export failed' })
+    }
+  }
+
+  const saveResultAsNote = () => {
+    if (!genResult) return
+    const ch = LEARNER_CHAPTERS.find((c) => c.id === genChapterId)
+    const label = NOTE_FORMATS.find((f) => f.id === genFormat)?.label || 'Notes'
+    addNote({
+      title: `${ch?.title || 'Revision'} — ${label}`,
+      content: resultToMarkdown(genResult),
+      subject: ch?.subject || '',
+      color: '#EDEDED',
+    })
+    addToast({ type: 'success', message: 'Saved to your notes' })
+  }
+
   const handleQuizMe = () => {
     if (!active) return
     navigate(`/quiz?noteId=${active.id}`)
@@ -370,6 +472,121 @@ Notes:\n${active.content}`
             <button onClick={handleNew} style={{ ...btnPrimary, padding: '5px 12px', fontSize: 11.5 }}>
               <Plus size={13} weight="bold" /> New
             </button>
+          </div>
+          {/* Revision notes generator */}
+          <div style={{
+            marginBottom: 10, borderRadius: 4,
+            border: `1px solid ${C.borderSoft}`, background: 'var(--surface-low, #0C0C0E)',
+          }}>
+            <button onClick={() => setGenOpen((o) => !o)} style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '7px 10px', background: 'transparent', border: 'none',
+              cursor: 'pointer', color: C.textMuted,
+              fontFamily: fonts.body, fontSize: 11.5, fontWeight: 600,
+            }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <MagicWand size={12} /> Revision generator
+              </span>
+              <span style={{ fontFamily: fonts.mono, fontSize: 10 }}>{genOpen ? '−' : '+'}</span>
+            </button>
+            {genOpen && (
+              <div style={{ padding: '2px 10px 10px' }}>
+                <select value={genChapterId} onChange={(e) => setGenChapterId(e.target.value)} style={{
+                  width: '100%', marginBottom: 6, padding: '6px 8px', borderRadius: 4,
+                  background: 'var(--surface-card-soft, #18181C)', border: `1px solid ${C.border}`,
+                  color: C.text, fontFamily: fonts.body, fontSize: 11.5,
+                }}>
+                  <option value="">— Pick a chapter —</option>
+                  {LEARNER_CHAPTERS.map((c) => (
+                    <option key={c.id} value={c.id}>{c.subject} · {c.title}</option>
+                  ))}
+                </select>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 6 }}>
+                  {NOTE_FORMATS.map((f) => (
+                    <button key={f.id} onClick={() => setGenFormat(f.id)} style={{
+                      padding: '3px 8px', borderRadius: 3,
+                      background: genFormat === f.id ? 'var(--surface-card-hover, #18181C)' : 'transparent',
+                      border: `1px solid ${genFormat === f.id ? C.borderStrong : C.borderSoft}`,
+                      color: genFormat === f.id ? C.text : C.textMuted,
+                      cursor: 'pointer', fontFamily: fonts.body, fontSize: 10.5,
+                    }}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div style={{ display: 'flex', gap: 2, padding: 2, borderRadius: 4, border: `1px solid ${C.borderSoft}` }}>
+                    {['Typed', 'Handwritten'].map((m) => {
+                      const active = (m === 'Handwritten') === genHandwritten
+                      return (
+                        <button key={m} onClick={() => setGenHandwritten(m === 'Handwritten')} style={{
+                          padding: '3px 9px', borderRadius: 3,
+                          background: active ? 'var(--surface-card-hover, #18181C)' : 'transparent',
+                          border: 'none', color: active ? C.text : C.textFaint,
+                          cursor: 'pointer', fontFamily: fonts.body, fontSize: 10.5,
+                        }}>{m}</button>
+                      )
+                    })}
+                  </div>
+                  <button onClick={runGenerator} disabled={genLoading || !genChapterId || !hasClientKey()} style={{
+                    ...btnPrimary, padding: '4px 10px', fontSize: 11,
+                    opacity: genChapterId && hasClientKey() && !genLoading ? 1 : 0.4,
+                  }}>
+                    {genLoading ? <SpinnerGap size={11} className="spin" /> : <Sparkle size={11} weight="duotone" />}
+                    Make notes
+                  </button>
+                </div>
+                {genError && (
+                  <p style={{ fontFamily: fonts.mono, fontSize: 10.5, color: C.error, margin: '0 0 6px' }}>{genError}</p>
+                )}
+                {genResult?.ok && (
+                  <div
+                    className={genHandwritten ? 'paper paper-ruled' : ''}
+                    style={{
+                      borderRadius: genHandwritten ? 10 : 4,
+                      border: genHandwritten ? '1px solid #D8D2C2' : `1px solid ${C.borderSoft}`,
+                      background: genHandwritten ? undefined : 'var(--bg-card, #121215)',
+                      padding: genHandwritten ? '14px 14px 14px 56px' : 10,
+                      maxHeight: 260, overflowY: 'auto',
+                      position: 'relative',
+                      boxShadow: genHandwritten ? '0 10px 24px rgba(30,25,15,0.35)' : 'none',
+                    }}
+                  >
+                    {genHandwritten && genFormat === 'mind_map' && (
+                      <svg width="120" height="34" viewBox="0 0 120 34" style={{ position: 'absolute', top: 6, left: 10, opacity: 0.6 }}>
+                        <path d="M4 28 C 20 10, 40 30, 58 14 S 96 4, 116 16" fill="none" stroke="#B45438" strokeWidth="1.6" strokeLinecap="round" />
+                        <path d="M112 12 L117 17 L111 19" fill="none" stroke="#B45438" strokeWidth="1.6" strokeLinecap="round" />
+                      </svg>
+                    )}
+                    <div style={{
+                      fontFamily: genHandwritten ? "'Caveat', 'Segoe Print', cursive" : fonts.body,
+                      fontSize: genHandwritten ? 17 : 11.5,
+                      color: genHandwritten ? '#2C3A8C' : C.textMuted,
+                      lineHeight: genHandwritten ? 1.45 : 1.6,
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {resultToMarkdown(genResult).replace(/[#*`>]/g, '').split('\n').map((line, i) => (
+                        <span key={i} style={genHandwritten && line.trim().startsWith('-')
+                          ? { background: 'linear-gradient(180deg, transparent 52%, rgba(245,197,24,0.45) 52%)', borderRadius: 2, display: 'inline-block', width: '100%' }
+                          : undefined}>
+                          {line}
+                          {'\n'}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                      <button onClick={exportResultPDF} style={{
+                        ...btnPrimary, padding: '3px 9px', fontSize: 10.5, flex: 1,
+                      }}>Export PDF</button>
+                      <button onClick={saveResultAsNote} style={{
+                        ...btnPrimary, padding: '3px 9px', fontSize: 10.5, flex: 1,
+                        background: 'var(--surface-card-hover, #18181C)', color: C.text,
+                      }}>Save as note</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           {/* Subject filter tabs */}
           <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto' }}>

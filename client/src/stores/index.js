@@ -1136,3 +1136,12 @@ export async function loadUserDataIntoStores(userId) {
     console.warn('[loadUserDataIntoStores]', e)
   }
 }
+
+// ── Learner Memory (adaptive learning core) ───────────────────
+// Tracks per-concept CBSE mastery with confidence-weighted state
+// transitions ("a lucky guess never counts") and a "What StudyPulse
+// noticed" misconception log. Every surface feeds it: Quiz Me, the
+// reader drawer, the SQL Pulse grader and the exam planner read it.
+
+import { useLearnerStore } from './learnerStore'
+export { useLearnerStore }

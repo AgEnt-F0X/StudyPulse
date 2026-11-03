@@ -188,7 +188,11 @@ const AIChat = ({ onClose }) => {
   const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 
   return (
-    <div className="h-full flex flex-col" style={{ background: C.card }}>
+    <div className="h-full flex flex-col" style={{
+      background: 'rgba(18, 29, 24, 0.85)',
+      backdropFilter: 'blur(28px) saturate(1.2)',
+      WebkitBackdropFilter: 'blur(28px) saturate(1.2)',
+    }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-3 flex-shrink-0"

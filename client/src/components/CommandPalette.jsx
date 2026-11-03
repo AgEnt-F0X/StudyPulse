@@ -14,6 +14,8 @@ const PAGES = [
   { label: 'Flashcards', path: '/flashcards', hint: 'Decks' },
   { label: 'Quiz', path: '/quiz', hint: 'Practice' },
   { label: 'SQL Pulse', path: '/sql', hint: 'MySQL Missions' },
+  { label: 'Library', path: '/library', hint: 'NCERT Reader' },
+  { label: 'PYQ Vault', path: '/pyq', hint: 'Board Questions' },
   { label: 'Study Plans', path: '/study-plans', hint: 'Roadmap' },
   { label: 'Focus Mode', path: '/focus', hint: 'Pomodoro' },
   { label: 'Habits', path: '/habits', hint: 'Routines' },
