@@ -28,22 +28,22 @@ const LevelUpOverlay = ({ level, onClose }) => {
         animate={{ y: 0 }}
         style={{
           textAlign: 'center', padding: '40px 52px',
-          background: 'var(--bg-card, #101c17)',
+          background: 'var(--bg-card)',
           border: `1px solid ${level.color}`,
           borderRadius: 16,
           boxShadow: `0 0 40px ${level.color}30, 0 24px 64px rgba(0,0,0,0.7)`,
         }}
       >
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.01em', textTransform: 'none', color: 'var(--text-muted, #64748b)', marginBottom: 8 }}>
+        <div style={{ fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700, letterSpacing: '0.01em', textTransform: 'none', color: 'var(--text-muted)', marginBottom: 8 }}>
           Level up!
         </div>
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 44, fontWeight: 800, color: level.color, letterSpacing: '-0.02em', marginBottom: 4 }}>
+        <div style={{ fontFamily: "var(--md-font-body)", fontSize: 44, fontWeight: 800, color: level.color, letterSpacing: '-0.02em', marginBottom: 4 }}>
           {level.level}
         </div>
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', marginBottom: 12 }}>
+        <div style={{ fontFamily: "var(--md-font-body)", fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
           {level.title}
         </div>
-        <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)' }}>
+        <div style={{ fontFamily: "var(--md-font-body)", fontSize: 12, color: 'var(--text-muted)' }}>
           Click anywhere to continue
         </div>
       </motion.div>
@@ -68,11 +68,11 @@ const XPBar = ({ collapsed }) => {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <Zap size={12} color={cur.color} />
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: cur.color }}>
+              <span style={{ fontFamily: "var(--md-font-body)", fontSize: 11, fontWeight: 700, color: cur.color }}>
                 LV{cur.level} {cur.title}
               </span>
             </div>
-            <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, fontWeight: 600, color: 'var(--text-muted, #64748b)' }}>
+            <span style={{ fontFamily: "var(--md-font-mono)", fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
               {xp} XP
             </span>
           </div>
@@ -90,7 +90,7 @@ const XPBar = ({ collapsed }) => {
           />
         </div>
         {!collapsed && next && (
-          <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 10, color: 'var(--text-muted, #64748b)', marginTop: 4, textAlign: 'right' }}>
+          <div style={{ fontFamily: "var(--md-font-body)", fontSize: 10, color: 'var(--text-muted)', marginTop: 4, textAlign: 'right' }}>
             {xpToNext - xpInLevel} XP → LV{next.level}
           </div>
         )}

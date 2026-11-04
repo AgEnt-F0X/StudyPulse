@@ -1,16 +1,142 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Gear, ArrowsClockwise, Eye, EyeSlash, Check, SignOut, ArrowCounterClockwise, Sparkle, Key, Lightning, ArrowSquareOut } from '@phosphor-icons/react'
+import { Gear, ArrowsClockwise, Eye, EyeSlash, Check, SignOut, ArrowCounterClockwise, Sparkle, Key, Lightning, ArrowSquareOut, Palette } from '@phosphor-icons/react'
 import { useAuthStore, useUIStore, useAssignmentsStore, useEventStore, useGradesStore, useNotesStore, useFlashcardsStore } from '../stores'
-import { C, fonts, tint, inputStyle, btnPrimary, btnGhost } from '../utils/theme'
+import { C, fonts, tint, inputStyle, btnPrimary, btnGhost, getThemePrefs, setThemePrefs, MD3_PALETTES, PALETTE_IDS } from '../utils/theme'
 import { PageHeader, Card } from '../components/ui'
 import { GoogleLogo } from '../components/GoogleButton'
 import { hasClientKey, getKeyProvider } from '../utils/gemini'
 import { DEMO_COURSES, DEMO_ASSIGNMENTS, DEMO_EVENTS, DEMO_GRADES, DEMO_NOTES, DEMO_COURSE_WEIGHTS, DEMO_DECKS, DEMO_QUIZ_HISTORY, DEMO_LEADERBOARD } from '../utils/demoData'
 
+// ── Material You & Appearance Studio ──────────────────────────
+
+function SegRow({ label, options, value, onChange }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <span className="metric-label" style={{ padding: 0, display: 'block', marginBottom: 6 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 2, padding: 2, borderRadius: 999, background: 'var(--md-surface-low)', border: '1px solid var(--md-outline)' }}>
+        {options.map(([id, lab]) => (
+          <button
+            key={id}
+            onClick={() => onChange(id)}
+            className="motion-spring"
+            style={{
+              flex: 1, padding: '7px 0', borderRadius: 999, border: 'none',
+              background: value === id ? 'var(--md-primary)' : 'transparent',
+              color: value === id ? 'var(--md-on-primary)' : 'var(--md-text-muted)',
+              cursor: 'pointer', fontFamily: fonts.body, fontSize: 12, fontWeight: value === id ? 700 : 500,
+            }}
+          >
+            {lab}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ThemeStudio() {
+  const [prefs, setPrefs] = useState(() => getThemePrefs())
+  useEffect(() => {
+    const sync = () => setPrefs(getThemePrefs())
+    window.addEventListener('studypulse-theme-change', sync)
+    return () => window.removeEventListener('studypulse-theme-change', sync)
+  }, [])
+  const update = (partial) => setThemePrefs(partial)
+
+  return (
+    <Card style={{ padding: '20px 22px', marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <Palette size={16} style={{ color: 'var(--md-primary)' }} />
+        <h2 style={{ fontFamily: fonts.body, fontSize: 11.5, fontWeight: 700, color: C.textFaint, letterSpacing: '0.01em', margin: 0 }}>
+          Material You & Appearance Studio
+        </h2>
+      </div>
+
+      <SegRow
+        label="Design language"
+        options={[['material-you', 'Material You (MD3)'], ['spatial-3d', 'Spatial 3D Workbench']]}
+        value={prefs.uiStyle}
+        onChange={(v) => update({ uiStyle: v })}
+      />
+      <SegRow
+        label="Surface mode"
+        options={[['dark', 'Dark Tonal'], ['light', 'Light Editorial'], ['amoled', 'AMOLED Black']]}
+        value={prefs.colorMode}
+        onChange={(v) => update({ colorMode: v })}
+      />
+
+      <span className="metric-label" style={{ padding: 0, display: 'block', margin: '4px 0 8px' }}>Color palette</span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8, marginBottom: 14 }}>
+        {PALETTE_IDS.map((id) => {
+          const pal = MD3_PALETTES[id]
+          const active = prefs.paletteId === id
+          return (
+            <button
+              key={id}
+              onClick={() => update({ paletteId: id })}
+              className="motion-spring"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 9,
+                padding: '10px 12px', borderRadius: 16,
+                background: active ? 'var(--md-primary-container)' : 'var(--md-surface-low)',
+                border: `1px solid ${active ? 'var(--md-primary)' : 'var(--md-outline)'}`,
+                cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <span style={{
+                width: 26, height: 26, borderRadius: 9, flexShrink: 0,
+                background: `linear-gradient(135deg, ${pal.swatch}, ${pal.dark.primary})`,
+                border: '1px solid var(--md-outline)',
+              }} />
+              <span style={{ minWidth: 0 }}>
+                <span style={{
+                  display: 'block', fontFamily: fonts.body, fontSize: 12, fontWeight: active ? 700 : 600,
+                  color: active ? 'var(--md-on-primary-container)' : 'var(--md-text)',
+                }}>{pal.label}</span>
+                <span style={{ display: 'block', fontFamily: fonts.mono, fontSize: 8.5, color: active ? 'var(--md-on-primary-container)' : C.textFaint }}>
+                  {pal.swatch}
+                </span>
+              </span>
+              {active && <Check size={13} weight="bold" style={{ marginLeft: 'auto', color: 'var(--md-on-primary-container)', flexShrink: 0 }} />}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Custom seed picker */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+        padding: '12px 14px', borderRadius: 16,
+        background: prefs.paletteId === 'custom' ? 'var(--md-primary-container)' : 'var(--md-surface-low)',
+        border: `1px solid ${prefs.paletteId === 'custom' ? 'var(--md-primary)' : 'var(--md-outline)'}`,
+      }}>
+        <input
+          type="color"
+          value={prefs.seedHex}
+          onChange={(e) => update({ paletteId: 'custom', seedHex: e.target.value })}
+          style={{ width: 40, height: 40, padding: 0, border: '1px solid var(--md-outline)', borderRadius: 12, background: 'transparent', cursor: 'pointer' }}
+          title="Material You dynamic seed color"
+        />
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700, color: prefs.paletteId === 'custom' ? 'var(--md-on-primary-container)' : 'var(--md-text)' }}>
+            Material You dynamic seed
+          </div>
+          <div style={{ fontFamily: fonts.mono, fontSize: 10, color: prefs.paletteId === 'custom' ? 'var(--md-on-primary-container)' : C.textFaint }}>
+            Pick any color — all tonal tokens regenerate on the fly
+          </div>
+        </div>
+        <span style={{ fontFamily: fonts.mono, fontSize: 11, color: prefs.paletteId === 'custom' ? 'var(--md-on-primary-container)' : C.textFaint, fontVariantNumeric: 'tabular-nums' }}>
+          {prefs.seedHex.toUpperCase()}
+        </span>
+      </div>
+    </Card>
+  )
+}
+
 function Section({ title, children }) {
   return (
-    <Card style={{ padding: '22px 24px', marginBottom: 18, background: 'var(--bg-card, #101c17)' }}>
+    <Card style={{ padding: '22px 24px', marginBottom: 18, background: 'var(--bg-card)' }}>
       <h2 style={{
         fontFamily: fonts.heading, fontSize: 11.5, fontWeight: 700, color: C.textFaint,
         letterSpacing: '0.01em', marginBottom: 16, textTransform: 'none',
@@ -76,8 +202,13 @@ export default function Settings() {
         icon={Gear}
         accent={C.blue}
         title="Settings"
-        subtitle="AI API keys, Classroom integrations, and sample curriculum"
+        subtitle="Theme studio, AI keys, Classroom integrations, and sample curriculum"
       />
+
+      {/* Material You & Appearance Studio */}
+      <ThemeStudio />
+
+      {/* AI Key Section */}
 
       {/* AI Key Section */}
       <Section title="AI Intelligence & Provider Key">
@@ -145,7 +276,7 @@ export default function Settings() {
               onChange={e => setKeyInput(e.target.value)}
               placeholder="Paste your key: gsk_... or AIza... or sk-or-..."
               style={{ ...inputStyle, flex: 1, width: 'auto' }}
-              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
               onBlur={e => { e.target.style.borderColor = C.border }}
             />
             <button onClick={() => setShowKey(s => !s)} aria-label={showKey ? 'Hide key' : 'Show key'} style={{
@@ -156,7 +287,7 @@ export default function Settings() {
             </button>
             <button onClick={saveKey} style={{
               ...btnPrimary,
-              background: keySaved ? '#22c55e' : 'var(--accent-blue, #10b981)',
+              background: keySaved ? '#22c55e' : 'var(--accent-blue)',
               minWidth: 90,
             }}>
               {keySaved ? <><Check size={14} /> Saved</> : 'Save Key'}
@@ -170,7 +301,7 @@ export default function Settings() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 10,
-            background: 'var(--accent-blue, #10b981)',
+            background: 'var(--accent-blue)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: fonts.heading, fontWeight: 700, fontSize: 18, color: '#ffffff',
             boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',

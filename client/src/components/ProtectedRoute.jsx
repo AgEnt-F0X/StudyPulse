@@ -25,11 +25,13 @@ const GUEST_NAME = 'You'
 const SEED_VERSION = 'v4_cbse_clean'
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isLoading, _hasHydrated, setUser, setToken } = useAuthStore()
+  const { isAuthenticated, _hasHydrated, setUser, setToken } = useAuthStore()
 
   useEffect(() => {
     if (_hasHydrated) {
-      if (!isAuthenticated && !isLoading) {
+      // Instant guest bootstrap — never gated on isLoading (network calls
+      // run silently in the background via restoreSession's 2s deadline).
+      if (!isAuthenticated) {
         setUser({ id: GUEST_ID, name: GUEST_NAME, email: '', provider: 'local' })
         setToken(`local-${GUEST_ID}`)
       }
@@ -55,15 +57,16 @@ const ProtectedRoute = ({ children }) => {
         localStorage.setItem('studypulse_seed_version', SEED_VERSION)
       }
     }
-  }, [_hasHydrated, isAuthenticated, isLoading, setUser, setToken])
+  }, [_hasHydrated, isAuthenticated, setUser, setToken])
 
-  // Show a minimal dark screen while zustand rehydrates from localStorage.
-  if (!_hasHydrated || isLoading) {
+  // Gate ONLY on synchronous localStorage hydration — never on network
+  // state. The workspace renders immediately from persisted stores.
+  if (!_hasHydrated) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary, #0a120e)' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--md-bg, #0B0C14)' }}>
         <div style={{
           width: 48, height: 48, borderRadius: 12,
-          background: 'linear-gradient(135deg, #6c63ff, #c44dff)',
+          background: 'var(--md-primary, #818CF8)',
           animation: 'pulse 1.5s ease-in-out infinite',
         }} />
       </div>

@@ -36,7 +36,7 @@ const Clock = () => {
       style={{
         background: 'rgba(24, 28, 34, 0.60)',
         border: '1px solid rgba(66, 71, 84, 0.25)',
-        fontFamily: "'Space Grotesk', sans-serif"
+        fontFamily: "var(--md-font-body)"
       }}
     >
       <p className="text-[0.6rem] on-surface-tertiary mb-0.5" style={{ fontWeight: 600, textTransform: 'none', letterSpacing: '0.01em' }}>
@@ -44,7 +44,7 @@ const Clock = () => {
       </p>
       <p
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "var(--md-font-body)",
           fontWeight: 700,
           fontSize: '0.875rem',
           color: '#afc6ff',
@@ -57,7 +57,7 @@ const Clock = () => {
         style={{
           fontSize: '0.625rem',
           color: '#606080',
-          fontFamily: "'Manrope', sans-serif"
+          fontFamily: "var(--md-font-body)"
         }}
       >
         {user?.country || 'Timezone'}

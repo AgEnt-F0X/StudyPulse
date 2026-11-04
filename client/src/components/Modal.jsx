@@ -59,7 +59,7 @@ const Modal = ({
                   {title && (
                     <h3
                       className="text-lg on-surface-primary"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}
+                      style={{ fontFamily: "var(--md-font-body)", fontWeight: 600 }}
                     >
                       {title}
                     </h3>

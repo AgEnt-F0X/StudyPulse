@@ -30,7 +30,7 @@ const ToastContainer = () => {
                 background: C.card, border: `1px solid ${s.border}`,
                 borderRadius: 12, padding: '12px 14px',
                 boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-                fontFamily: "'Manrope', sans-serif", fontSize: 13, color: C.text,
+                fontFamily: "var(--md-font-body)", fontSize: 13, color: C.text,
               }}
             >
               <span style={{ color: s.color, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>{s.icon}</span>

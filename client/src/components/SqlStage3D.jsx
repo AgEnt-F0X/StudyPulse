@@ -17,16 +17,16 @@ function Tray({ table, highlightSet, dimOthers, width }) {
         transform: 'rotateX(22deg) rotateZ(-8deg)',
         transformStyle: 'preserve-3d',
         width,
-        background: '#101A15',
-        border: `1px solid rgba(52,211,153,0.3)`,
+        background: '#121218',
+        border: `1px solid color-mix(in srgb, var(--md-primary) 30%, transparent)`,
         borderRadius: 10,
-        boxShadow: '14px 18px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(110,231,183,0.1)',
+        boxShadow: '14px 18px 30px rgba(0,0,0,0.5), inset 0 1px 0 color-mix(in srgb, var(--md-primary) 10%, transparent)',
         overflow: 'hidden',
       }}>
         {/* Table name */}
         <div style={{
           height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          background: 'rgba(52,211,153,0.14)', borderBottom: '1px solid rgba(52,211,153,0.3)',
+          background: 'color-mix(in srgb, var(--md-primary) 14%, transparent)', borderBottom: '1px solid color-mix(in srgb, var(--md-primary) 30%, transparent)',
           fontFamily: fonts.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
           color: C.primaryBright,
         }}>
@@ -38,7 +38,7 @@ function Tray({ table, highlightSet, dimOthers, width }) {
           height: 16, display: 'flex', alignItems: 'center', paddingLeft: 8, gap: 10,
           fontFamily: fonts.mono, fontSize: 7.5, color: C.textFaint,
           textTransform: 'uppercase', letterSpacing: '0.08em',
-          borderBottom: '1px solid rgba(52,211,153,0.15)',
+          borderBottom: '1px solid color-mix(in srgb, var(--md-primary) 15%, transparent)',
         }}>
           {cols.map((c) => <span key={c} style={{ width: 52, overflow: 'hidden', whiteSpace: 'nowrap' }}>{c}</span>)}
         </div>
@@ -52,10 +52,10 @@ function Tray({ table, highlightSet, dimOthers, width }) {
                 height: ROW_H - 2, margin: '1px 4px', borderRadius: 4,
                 display: 'flex', alignItems: 'center', paddingLeft: 8, gap: 10,
                 fontFamily: fonts.mono, fontSize: 8, fontVariantNumeric: 'tabular-nums',
-                background: isHit ? 'rgba(16,185,129,0.28)' : 'rgba(52,211,153,0.06)',
-                border: isHit ? '1px solid rgba(16,185,129,0.65)' : '1px solid rgba(52,211,153,0.08)',
+                background: isHit ? 'color-mix(in srgb, var(--md-primary) 28%, transparent)' : 'color-mix(in srgb, var(--md-primary) 6%, transparent)',
+                border: isHit ? '1px solid color-mix(in srgb, var(--md-primary) 65%, transparent)' : '1px solid color-mix(in srgb, var(--md-primary) 8%, transparent)',
                 color: dim ? 'rgba(250,247,242,0.25)' : isHit ? '#FAF7F2' : C.textMuted,
-                boxShadow: isHit ? '0 0 14px rgba(16,185,129,0.55), 0 6px 0 rgba(16,185,129,0.25)' : 'none',
+                boxShadow: isHit ? '0 0 14px color-mix(in srgb, var(--md-primary) 55%, transparent), 0 6px 0 color-mix(in srgb, var(--md-primary) 25%, transparent)' : 'none',
                 transform: isHit ? 'translateZ(24px) translateY(-3px)' : 'translateZ(0px)',
                 opacity: dim ? 0.25 : 1,
                 transition: 'transform 380ms cubic-bezier(0.22,1,0.36,1), box-shadow 380ms ease, opacity 380ms ease, background 380ms ease',
@@ -66,7 +66,7 @@ function Tray({ table, highlightSet, dimOthers, width }) {
                   return (
                     <span key={ci} style={{
                       width: 52, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-                      color: ci === 0 && isHit ? '#6EE7B7' : undefined, fontWeight: ci === 0 ? 700 : 400,
+                      color: ci === 0 && isHit ? 'var(--md-primary)' : undefined, fontWeight: ci === 0 ? 700 : 400,
                     }}>
                       {v === null || v === undefined ? 'NULL' : String(v)}
                     </span>
@@ -96,15 +96,15 @@ function BeamLayer({ countA, countB, links }) {
             <path
               d={`M 0 ${y1} C ${mx} ${y1}, ${mx} ${y2}, 72 ${y2}`}
               fill="none"
-              stroke="#10B981"
+              stroke="var(--md-primary)"
               strokeWidth="1.6"
               opacity="0.85"
               strokeDasharray="5 4"
               className="sql-beam"
-              style={{ animationDelay: `${i * 90}ms`, filter: 'drop-shadow(0 0 4px rgba(16,185,129,0.8))' }}
+              style={{ animationDelay: `${i * 90}ms`, filter: 'drop-shadow(0 0 4px color-mix(in srgb, var(--md-primary) 80%, transparent))' }}
             />
-            <circle cx="0" cy={y1} r="2.5" fill="#6EE7B7" />
-            <circle cx="72" cy={y2} r="2.5" fill="#6EE7B7" />
+            <circle cx="0" cy={y1} r="2.5" fill="var(--md-primary)" />
+            <circle cx="72" cy={y2} r="2.5" fill="var(--md-primary)" />
           </g>
         )
       })}
@@ -133,7 +133,7 @@ function GroupBuckets({ buckets, aggLabel }) {
       <div style={{
         transform: 'rotateX(16deg) rotateZ(-4deg)',
         transformStyle: 'preserve-3d',
-        background: '#101A15',
+        background: '#121218',
         border: `1px solid rgba(245,158,11,0.35)`,
         borderRadius: 10,
         padding: '12px 14px',
@@ -153,9 +153,9 @@ function GroupBuckets({ buckets, aggLabel }) {
                 }}>{b.value}</div>
                 <div style={{
                   width: 34, height: `${hPct}%`, minHeight: 6,
-                  background: 'linear-gradient(180deg, #6EE7B7, #059669)',
+                  background: 'linear-gradient(180deg, var(--md-primary), var(--md-secondary))',
                   borderRadius: '4px 4px 0 0',
-                  boxShadow: '0 0 10px rgba(16,185,129,0.4), inset -3px 0 0 rgba(0,0,0,0.25)',
+                  boxShadow: '0 0 10px color-mix(in srgb, var(--md-primary) 40%, transparent), inset -3px 0 0 rgba(0,0,0,0.25)',
                   transformOrigin: 'bottom',
                   transform: 'scaleY(1)',
                   animation: `bucketRise 480ms cubic-bezier(0.22,1,0.36,1) ${i * 70}ms both`,
@@ -197,8 +197,8 @@ export default function SqlStage3D({ tables = [], highlights = {}, joinLinks = n
   return (
     <div style={{
       borderRadius: 14,
-      background: 'radial-gradient(600px 220px at 50% 0%, rgba(52,211,153,0.08), transparent 65%), #0A1410',
-      border: `1px solid rgba(52,211,153,0.24)`,
+      background: 'radial-gradient(600px 220px at 50% 0%, color-mix(in srgb, var(--md-primary) 8%, transparent), transparent 65%), #101014',
+      border: `1px solid color-mix(in srgb, var(--md-primary) 24%, transparent)`,
       padding: '16px 18px',
       contain: 'layout style paint',
       overflowX: 'auto',

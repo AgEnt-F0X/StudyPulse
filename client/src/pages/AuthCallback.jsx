@@ -80,17 +80,17 @@ export default function AuthCallback() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary, #0a120e)', color: 'var(--text-primary, #f0f4fc)', fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: "var(--md-font-body)" }}>
       <div style={{ textAlign: 'center' }}>
         <div className="pulse" style={{
           width: 56, height: 56, borderRadius: 16, margin: '0 auto 18px',
-          background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+          background: 'var(--grad-logo)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 8px 32px rgba(59,130,246,0.4)',
         }}>
           <Zap size={28} color="#ffffff" />
         </div>
-        <div style={{ color: 'var(--text-secondary, #94a3b8)', fontFamily: "'Manrope', sans-serif", fontSize: 14 }}>Signing you in…</div>
+        <div style={{ color: 'var(--text-secondary)', fontFamily: "var(--md-font-body)", fontSize: 14 }}>Signing you in…</div>
       </div>
     </div>
   )

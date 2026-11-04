@@ -14,12 +14,12 @@ export default function ProSuccess() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--bg-primary, #0a120e)',
+      background: 'var(--bg-primary)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: 24,
-      fontFamily: "'Manrope', sans-serif",
+      fontFamily: "var(--md-font-body)",
     }}>
 
       <motion.div
@@ -56,7 +56,7 @@ export default function ProSuccess() {
 
         {/* Headline */}
         <div style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "var(--md-font-body)",
           fontSize: 26, fontWeight: 700,
           color: '#dfe2eb', marginBottom: 12, lineHeight: 1.3,
         }}>
@@ -81,7 +81,7 @@ export default function ProSuccess() {
           textAlign: 'left',
         }}>
           <div style={{
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "var(--md-font-body)",
             fontSize: 11, fontWeight: 700,
             color: '#4dff91', letterSpacing: '0.1em',
             marginBottom: 14,
@@ -107,7 +107,7 @@ export default function ProSuccess() {
               padding: '13px 28px', borderRadius: 6,
               background: '#c44dff',
               color: '#fff', textDecoration: 'none',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "var(--md-font-body)",
               fontSize: 13, fontWeight: 700, letterSpacing: '0.04em',
             }}
           >
@@ -121,7 +121,7 @@ export default function ProSuccess() {
               border: '1px solid #222a3a',
               background: 'transparent',
               color: '#8c90a0', textDecoration: 'none',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "var(--md-font-body)",
               fontSize: 13, fontWeight: 600,
             }}
           >

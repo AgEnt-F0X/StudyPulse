@@ -134,9 +134,23 @@ export const useAuthStore = create(
 
       restoreSession: async () => {
         if (!isSupabaseConfigured() || !supabase) return null
-        set({ isLoading: true })
+        // Instant render: a persisted user (localStorage-hydrated) is shown
+        // immediately — isLoading is NEVER held hostage to the network. The
+        // Supabase round-trip runs in the background with a 2s deadline.
+        const hadPersistedUser = !!get().user
+        if (!hadPersistedUser) set({ isLoading: true })
+        const deadline = new Promise((resolve) => setTimeout(() => resolve({ data: { session: null }, timedOut: true }), 2000))
         try {
-          const { data: { session } } = await supabase.auth.getSession()
+          const { data: { session }, timedOut } = await Promise.race([
+            supabase.auth.getSession(),
+            deadline,
+          ])
+          if (timedOut) {
+            // Network is slow/unreachable — keep the persisted session alive
+            // and let onAuthStateChange reconcile whenever Supabase answers.
+            if (!hadPersistedUser) set({ isLoading: false })
+            return null
+          }
           if (session?.user) {
             const user = supabaseUserToStudyPulse(session.user)
             const patch = { user, token: session.access_token, isAuthenticated: true, isLoading: false, isDemo: false }

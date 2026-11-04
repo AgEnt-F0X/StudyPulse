@@ -2,140 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== StudyPulse — Spatial Editorial Workspace =====
-   Deep botanical obsidian/pine canvas (#0B0F0D → #121D18) with floating
-   glass panels (#16231E/92, blur 24px) and emerald/champagne specular rims.
-   Tactile 3D books, extruded badges, warm ivory paper surfaces. */
+/* ===== StudyPulse — Material You (MD3) engine =====
+   Tonal tokens live on :root as --md-*, written at runtime by
+   utils/theme.js (6 palettes × dark/light/amoled × custom seed).
+   The values below are the IRIS-INDIGO DARK fallback before JS runs.
+   Legacy token names bridge to --md-* so every page re-themes live. */
 
-:root, [data-theme="dark"] {
-  /* Obsidian/pine canvas */
-  --bg-primary: #0B0F0D;
-  --bg-canvas-hi: #121D18;
+:root {
+  /* MD3 fallbacks (iris-indigo dark) */
+  --md-bg: #0B0C14;
+  --md-surface-low: #121422;
+  --md-surface: #181B2E;
+  --md-surface-high: #21253E;
+  --md-primary: #818CF8;
+  --md-on-primary: #1E1B4B;
+  --md-primary-container: #2E2B73;
+  --md-on-primary-container: #E0E7FF;
+  --md-secondary: #C084FC;
+  --md-outline: rgba(129, 140, 248, 0.18);
+  --md-text: #ECECF6;
+  --md-text-muted: #A6A8C4;
+  --md-text-faint: #6F7294;
+  --md-error: #EF4444;
+  --md-warning: #F59E0B;
+  --md-radius: 28px;
+  --md-radius-sm: 18px;
+  --md-shadow-card: 0 2px 14px rgba(0, 0, 0, 0.28);
+  --md-shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.32);
+  --md-glow-primary: 0 0 25px color-mix(in srgb, var(--md-primary) 40%, transparent);
 
-  /* Botanical panels — solid, GPU-cheap */
-  --bg-card: #131C18;
-  --bg-card-glass: #131C18;
-  --surface-low: rgba(19, 28, 24, 0.85);
-  --surface-card-soft: rgba(52, 211, 153, 0.07);
-  --surface-card-hover: rgba(52, 211, 153, 0.13);
-  --surface-active: #1E352B;
+  /* Fonts */
+  --md-font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --md-font-serif: 'Instrument Serif', Georgia, serif;
+  --md-font-mono: 'JetBrains Mono', Menlo, monospace;
+  --md-font-hand: 'Caveat', 'Segoe Print', cursive;
 
-  /* Ink on glass — warm paper highlights */
-  --text-primary: #FAF7F2;
-  --text-secondary: #BCC8BC;
-  --text-muted: #83907F;
-
-  /* Emerald + champagne specular rims */
-  --border-color: rgba(52, 211, 153, 0.2);
-  --border-soft: rgba(52, 211, 153, 0.1);
-  --border-subtle: rgba(52, 211, 153, 0.2);
-  --sidebar-bg: rgba(22, 35, 30, 0.92);
-
-  /* Action + status */
-  --primary: #10B981;
-  --primary-deep: #059669;
-  --primary-glow: #34D399;
-  --accent-blue: #6EE7B7;
-  --accent-blue-soft: rgba(16, 185, 129, 0.14);
-  --status-success: #34D399;
-  --status-warning: #F59E0B;
-  --status-error: #EF4444;
+  /* Legacy bridges — pages consume these names via utils/theme.js */
+  --bg-primary: var(--md-bg);
+  --bg-card: var(--md-surface);
+  --bg-card-glass: var(--md-surface);
+  --surface-low: var(--md-surface-low);
+  --surface-card-soft: color-mix(in srgb, var(--md-primary) 7%, transparent);
+  --surface-card-hover: var(--md-surface-high);
+  --text-primary: var(--md-text);
+  --text-secondary: var(--md-text-muted);
+  --text-muted: var(--md-text-faint);
+  --border-color: var(--md-outline);
+  --border-soft: color-mix(in srgb, var(--md-primary) 9%, transparent);
+  --border-subtle: var(--md-outline);
+  --primary: var(--md-primary);
+  --primary-deep: var(--md-secondary);
+  --primary-glow: var(--md-primary);
+  --accent-blue: var(--md-primary);
+  --accent-blue-soft: color-mix(in srgb, var(--md-primary) 14%, transparent);
   --accent-amber: #F59E0B;
   --accent-amber-deep: #D97706;
-
-  /* Gradients kept as vars for legacy consumers */
-  --grad-logo: #10B981;
-  --grad-primary: #10B981;
+  --status-success: var(--md-primary);
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --grad-logo: var(--md-primary);
+  --grad-primary: var(--md-primary);
   --grad-reward: #F59E0B;
   --grad-hero: none;
-  --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
-  --shadow-lift: 0 20px 50px rgba(0, 0, 0, 0.45);
-  --shadow-glow-emerald: none;
+  --shadow-card: var(--md-shadow-card);
+  --shadow-lift: var(--md-shadow-lift);
+  --shadow-glow-emerald: var(--md-glow-primary);
   --shadow-glow-amber: none;
   --sheen-top: none;
+  --sidebar-bg: var(--md-surface);
 }
 
-[data-theme="light"] {
-  /* Daylight glass — brighter pine, same dark botanical system */
-  --bg-primary: #121D18;
-  --bg-canvas-hi: #16231E;
-  --bg-card: rgba(30, 53, 43, 0.92);
-  --bg-card-glass: rgba(30, 53, 43, 0.92);
-  --surface-low: rgba(24, 40, 32, 0.75);
-  --surface-card-soft: rgba(52, 211, 153, 0.1);
-  --surface-card-hover: rgba(52, 211, 153, 0.16);
-  --surface-active: #1E352B;
+/* ===== Full-screen fluid viewport ===== */
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-[data-theme="light"] body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+html {
+  font-family: var(--md-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
-/* ===== Base ===== */
-
-@layer base {
-  *,
-  *::before,
-  *::after {
-    @apply box-border;
-    @apply border-0;
-    margin: 0;
-    padding: 0;
-  }
-
-  html {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 13px;
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    color: var(--text-primary);
-    background:
-      radial-gradient(1100px 460px at 50% -8%, rgba(52, 211, 153, 0.12), transparent 60%),
-      radial-gradient(900px 420px at 10% 6%, rgba(16, 185, 129, 0.08), transparent 55%),
-      radial-gradient(900px 420px at 90% 94%, rgba(245, 158, 11, 0.09), transparent 55%),
-      linear-gradient(180deg, var(--bg-canvas-hi) 0%, var(--bg-primary) 40%, #0B0F0D 100%);
-    background-attachment: fixed;
-  }
-
-  ::selection {
-    background: rgba(16, 185, 129, 0.28);
-  }
-
-  :focus-visible {
-    outline: 1.5px solid var(--status-warning);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(52, 211, 153, 0.25) transparent;
-  }
-  *::-webkit-scrollbar { width: 9px; height: 9px; }
-  *::-webkit-scrollbar-track { background: transparent; }
-  *::-webkit-scrollbar-thumb {
-    background: rgba(52, 211, 153, 0.22);
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-  *::-webkit-scrollbar-thumb:hover { background: rgba(52, 211, 153, 0.4); background-clip: content-box; }
+body {
+  font-family: var(--md-font-body);
+  font-size: 13px;
+  color: var(--md-text);
+  background-color: var(--md-bg);
+  background-image:
+    radial-gradient(1100px 460px at 50% -8%, color-mix(in srgb, var(--md-primary) 12%, transparent), transparent 60%),
+    radial-gradient(900px 420px at 90% 94%, rgba(245, 158, 11, 0.07), transparent 55%);
+  background-attachment: fixed;
 }
 
-/* ===== Motion & layout ===== */
+::selection {
+  background: color-mix(in srgb, var(--md-primary) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--md-primary) 25%, transparent) transparent;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--md-primary) 22%, transparent);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--md-primary) 40%, transparent); background-clip: content-box; }
+
+/* ===== Motion ===== */
 
 @keyframes studypulseFadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes studypulsePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes studypulseSpin { to { transform: rotate(360deg); } }
@@ -144,26 +137,33 @@
   to   { stroke-dashoffset: 0; }
 }
 @keyframes ledPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes bucketRise {
+  from { transform: scaleY(0.05); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+@keyframes beamFlow {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}
 
 .page-enter {
-  animation: studypulseFadeUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: studypulseFadeUp 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform, opacity;
   transform: translate3d(0, 0, 0);
 }
 
 .hover-lift {
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.18s ease;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
 }
-.hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lift);
-}
+.hover-lift:hover { transform: translate3d(0, -3px, 0); }
 
 .hover-row {
-  transition: background 0.12s ease;
-  border-radius: 10px;
+  transition: background 0.15s ease;
+  border-radius: 12px;
 }
-.hover-row:hover { background: var(--surface-card-soft); }
+.hover-row:hover { background: var(--md-surface-high); }
 
 .spin { animation: studypulseSpin 0.9s linear infinite; }
 .pulse { animation: studypulsePulse 1.6s ease-in-out infinite; }
@@ -175,7 +175,7 @@
   75% { transform: translateX(-2px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .quiz-shake, .pulse, .spin, .ecg-trace { animation: none !important; }
+  .quiz-shake, .pulse, .spin, .ecg-trace, .led.live { animation: none !important; }
 }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -194,28 +194,64 @@
 }
 
 @layer components {
-  /* ---- Solid GPU panel — zero backdrop-blur on scrolling surfaces ----
-     backdrop-filter is reserved exclusively for the fixed top dock.
-     Crisp solid surfaces + 1px rim keep scrolling on the compositor. */
-  .glass {
-    background: #131C18;
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-    contain: layout style paint;
-    transform: translateZ(0);
+  /* ---- Material You surfaces ---- */
+  .md-canvas {
+    background: var(--md-bg);
+    color: var(--md-text);
   }
-
-  /* Dock-only blur — fixed element, never scrolls */
-  .glass-dock {
-    background: rgba(18, 29, 24, 0.88);
-    backdrop-filter: blur(24px) saturate(1.2);
-    -webkit-backdrop-filter: blur(24px) saturate(1.2);
-    border: 1px solid var(--border-color);
+  .md-card {
+    background: var(--md-surface);
+    border-radius: var(--md-radius);
+    border: 1px solid var(--md-outline);
+    box-shadow: var(--md-shadow-card);
+    contain: layout style paint;
+    transform: translate3d(0, 0, 0);
+  }
+  .md-card-elevated {
+    background: var(--md-surface);
+    border-radius: var(--md-radius);
+    box-shadow: var(--md-shadow-lift);
+    contain: layout style paint;
+    transform: translate3d(0, 0, 0);
+  }
+  .md-tonal-pill {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
     border-radius: 999px;
   }
+  .md-btn-primary {
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border: none;
+    border-radius: 999px;
+    font-family: var(--md-font-body);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--md-shadow-card);
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .md-btn-primary:hover { transform: translateY(-1px); }
 
-  /* Warm ivory paper — open textbook page */
+  /* Legacy solid panel (compat) */
+  .glass {
+    background: var(--md-surface);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-radius);
+    box-shadow: var(--md-shadow-card);
+    contain: layout style paint;
+    transform: translateZ(0);
+  }
+
+  /* THE ONLY blur in the app — fixed top navigation bar */
+  .md-navbar {
+    background: color-mix(in srgb, var(--md-surface) 88%, transparent);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border-bottom: 1px solid var(--md-outline);
+  }
+  .glass-dock { background: var(--md-surface); border: 1px solid var(--md-outline); border-radius: 999px; }
+
+  /* Warm ivory paper — open textbook page (content surface) */
   .paper {
     background:
       linear-gradient(90deg, rgba(20, 18, 14, 0.10), transparent 28px, transparent calc(100% - 28px), rgba(20, 18, 14, 0.10)),
@@ -223,14 +259,6 @@
     color: #26241E;
     contain: layout style paint;
     transform: translateZ(0);
-  }
-
-  /* Warm ivory paper — open textbook page */
-  .paper {
-    background:
-      linear-gradient(90deg, rgba(20, 18, 14, 0.10), transparent 28px, transparent calc(100% - 28px), rgba(20, 18, 14, 0.10)),
-      linear-gradient(180deg, #FBF8F3, #FAF7F2);
-    color: #26241E;
   }
   .paper-spine {
     box-shadow: inset 28px 0 40px -12px rgba(20, 18, 14, 0.14), inset -28px 0 40px -12px rgba(20, 18, 14, 0.14);
@@ -242,63 +270,63 @@
       linear-gradient(180deg, #FBF8F3, #FAF7F2);
   }
 
-  /* ---- Extruded 3D tactile status badges ---- */
+  /* ---- Extruded tactile status badges (spatial-3d flavour) ---- */
   .badge3d {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 4px 12px;
     border-radius: 8px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--md-font-body);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.02em;
-    color: #F4F0EA;
+    color: #FAF7F2;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 8px 16px rgba(0, 0, 0, 0.15);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
     cursor: default;
     white-space: nowrap;
   }
-  .badge3d:hover {
-    transform: translateY(1px);
-    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35), 0 6px 10px rgba(0, 0, 0, 0.15);
+  html[data-ui-style='material-you'] .badge3d {
+    border-radius: 999px;
+    box-shadow: none;
   }
+  .badge3d:hover { transform: translateY(1px); }
   .badge3d.needs_attention { background: linear-gradient(180deg, #EF4444, #C53030); }
   .badge3d.developing { background: linear-gradient(180deg, #F59E0B, #C05621); }
-  .badge3d.mastered { background: linear-gradient(180deg, #34D399, #059669); }
-  .badge3d.not_checked { background: linear-gradient(180deg, #4A4536, #322E24); }
+  .badge3d.mastered { background: var(--md-primary); color: var(--md-on-primary); }
+  .badge3d.not_checked { background: var(--md-surface-high); color: var(--md-text-muted); }
 
-  /* ---- LED telemetry matrix cells ---- */
+  /* ---- LED telemetry (primary-tinted, zero green) ---- */
   .led {
     width: 7px; height: 18px;
     border-radius: 2px;
-    background: var(--status-warning);
-    box-shadow: 0 0 6px rgba(245, 158, 11, 0.7);
+    background: var(--md-warning);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--md-warning) 70%, transparent);
     transition: background 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
   }
-  .led.green { background: var(--status-success); box-shadow: 0 0 6px rgba(52, 211, 153, 0.8); }
-  .led.off { background: rgba(18, 29, 24, 0.35); box-shadow: none; }
+  .led.green { background: var(--md-primary); box-shadow: 0 0 6px var(--md-glow-primary); }
+  .led.off { background: color-mix(in srgb, var(--md-text) 12%, transparent); box-shadow: none; }
   .led.live { animation: ledPulse 2s ease-in-out infinite; }
 
-  /* ECG trace */
   .ecg-trace {
     stroke-dasharray: 140;
     animation: ecgTrace 2.4s linear infinite;
   }
 
-  /* ---- Editorial type helpers ---- */
+  /* ---- Typography helpers ---- */
   .editorial {
-    font-family: 'Instrument Serif', Georgia, serif;
+    font-family: var(--md-font-serif);
     font-weight: 400;
     letter-spacing: -0.01em;
   }
   .metric-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--md-font-mono);
     font-size: 10px;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--md-text-faint);
     font-variant-numeric: tabular-nums;
   }
 
@@ -308,67 +336,64 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .dot-success { background: var(--status-success); }
-  .dot-warning { background: var(--status-warning); }
-  .dot-error   { background: var(--status-error); }
-  .dot-neutral { background: var(--text-muted); }
+  .dot-success { background: var(--md-primary); }
+  .dot-warning { background: var(--md-warning); }
+  .dot-error   { background: var(--md-error); }
+  .dot-neutral { background: var(--md-text-faint); }
 
   .kbd {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 18px; padding: 1px 5px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    background: var(--surface-card-soft);
-    color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
+    border-radius: 6px;
+    border: 1px solid var(--md-outline);
+    background: var(--md-surface-high);
+    color: var(--md-text-muted);
+    font-family: var(--md-font-mono);
     font-size: 10px; font-weight: 500;
     line-height: 1.4;
   }
 
   .input-sa {
-    background-color: var(--surface-low);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    color: var(--text-primary);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--md-surface-low);
+    border: 1px solid var(--md-outline);
+    border-radius: 14px;
+    color: var(--md-text);
+    font-family: var(--md-font-body);
     font-weight: 400;
     padding: 0.55rem 0.85rem;
-    min-height: 36px;
-    transition: border-color 0.15s, background 0.15s;
+    min-height: 38px;
+    transition: border-color 0.18s cubic-bezier(0.22,1,0.36,1), background 0.18s ease;
     outline: none;
   }
-  .input-sa::placeholder { color: var(--text-muted); }
-  .input-sa:focus { border-color: rgba(16, 185, 129, 0.55); background: var(--surface-card-hover); }
+  .input-sa::placeholder { color: var(--md-text-faint); }
+  .input-sa:focus { border-color: var(--md-primary); background: var(--md-surface-high); }
   .input-sa:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .transition-sa {
     transition-property: background-color, border-color, color, box-shadow;
-    transition-duration: 160ms;
-    transition-timing-function: ease-out;
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
 @layer utilities {
-  .focus-ring { outline: 1.5px solid var(--status-warning); outline-offset: 2px; }
+  .focus-ring { outline: 2px solid var(--md-primary); outline-offset: 2px; }
   .tnum { font-variant-numeric: tabular-nums; }
   .perspective-1200 { perspective: 1200px; }
   .preserve-3d { transform-style: preserve-3d; }
-  /* Hardware-acceleration helpers — compositor-only animations */
   .hw { transform: translate3d(0, 0, 0); will-change: transform, opacity; backface-visibility: hidden; }
   .gpu-tilt {
     transform: translate3d(0, 0, 0);
     will-change: transform;
     transform-style: preserve-3d;
   }
-  /* The single allowed motion transition — transform + opacity only */
   .motion-spring {
     transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
     transform: translate3d(0, 0, 0);
     will-change: transform, opacity;
   }
-  /* Scroll containment for heavy card containers */
   .scroll-contain {
-    contain: layout style paint;
+    contain: layout style;
     transform: translateZ(0);
   }
 }

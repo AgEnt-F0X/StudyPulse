@@ -37,16 +37,16 @@ const TimeTrackerBars = () => {
             style={{
               background: 'rgba(24, 28, 34, 0.60)',
               border: '1px solid rgba(66, 71, 84, 0.25)',
-              fontFamily: "'Manrope', sans-serif"
+              fontFamily: "var(--md-font-body)"
             }}
           >
             <div className="flex items-center justify-between mb-2">
               <h4
-                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.7rem', color: tracker.color, textTransform: 'none', letterSpacing: '0.01em' }}
+                style={{ fontFamily: "var(--md-font-body)", fontWeight: 600, fontSize: '0.7rem', color: tracker.color, textTransform: 'none', letterSpacing: '0.01em' }}
               >
                 {tracker.label}
               </h4>
-              <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: '0.7rem', color: '#606080' }}>
+              <span style={{ fontFamily: "var(--md-font-body)", fontSize: '0.7rem', color: '#606080' }}>
                 {tracker.unit}
               </span>
             </div>
@@ -78,7 +78,7 @@ const TimeTrackerBars = () => {
               style={{
                 marginTop: '6px',
                 textAlign: 'right',
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "var(--md-font-body)",
                 fontWeight: 600,
                 fontSize: '0.75rem',
                 color: tracker.color

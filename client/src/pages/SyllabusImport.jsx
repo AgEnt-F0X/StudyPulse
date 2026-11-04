@@ -142,10 +142,10 @@ export default function SyllabusImport() {
         onDrop={e => { e.preventDefault(); setDrag(false); handleFile(e.dataTransfer.files[0]) }}
         onClick={() => fileRef.current.click()}
         style={{
-          border: `2px dashed ${drag ? 'var(--accent-blue, #10b981)' : C.border}`,
+          border: `2px dashed ${drag ? 'var(--accent-blue)' : C.border}`,
           borderRadius: 12, padding: '36px 24px', textAlign: 'center',
           cursor: 'pointer', marginBottom: 16, transition: 'border-color 0.15s ease, background 0.15s ease',
-          background: drag ? 'rgba(59, 130, 246, 0.06)' : 'var(--bg-card, #101c17)',
+          background: drag ? 'rgba(59, 130, 246, 0.06)' : 'var(--bg-card)',
         }}
       >
         <FileText size={30} color={drag ? C.blue : C.textMuted} style={{ marginBottom: 10 }} />
@@ -164,12 +164,12 @@ export default function SyllabusImport() {
         rows={6}
         style={{
           width: '100%', padding: '12px 14px', borderRadius: 8,
-          background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}`,
+          background: 'var(--bg-card)', border: `1px solid ${C.border}`,
           color: C.text, fontSize: 13, fontFamily: fonts.body,
           resize: 'vertical', boxSizing: 'border-box', marginBottom: 16, outline: 'none',
           transition: 'border-color 0.15s ease',
         }}
-        onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+        onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
         onBlur={e => { e.target.style.borderColor = C.border }}
       />
 
@@ -190,14 +190,14 @@ export default function SyllabusImport() {
             <button onClick={importAll} style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '7px 14px', borderRadius: 6, border: 'none',
-              background: imported ? '#22c55e' : 'var(--accent-blue, #10b981)',
+              background: imported ? '#22c55e' : 'var(--accent-blue)',
               color: '#ffffff', cursor: 'pointer',
               fontFamily: fonts.heading, fontSize: 12, fontWeight: 700,
             }}>{imported ? <><Check size={13} /> Imported!</> : 'Add All to Assignments'}</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {extracted.map((a, i) => (
-              <Card key={i} className="hover-lift" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg-card, #101c17)' }}>
+              <Card key={i} className="hover-lift" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg-card)' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13.5, fontWeight: 600, color: C.text }}>{a.title}</div>
                   <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>{a.course} · Due {a.dueDate}</div>

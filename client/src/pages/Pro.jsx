@@ -117,7 +117,7 @@ export default function Pro() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 30, height: 30, borderRadius: 8,
-              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+              background: 'var(--grad-logo)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 2px 8px rgba(59, 130, 246, 0.35)',
             }}>
@@ -128,7 +128,7 @@ export default function Pro() {
           </div>
           <Link to="/login" style={{
             padding: '7px 16px', borderRadius: 8,
-            background: 'var(--accent-blue, #10b981)',
+            background: 'var(--accent-blue)',
             color: '#ffffff', textDecoration: 'none',
             fontFamily: fonts.heading,
             fontSize: 12, fontWeight: 700,
@@ -182,7 +182,7 @@ export default function Pro() {
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
                 <div style={{
                   display: 'flex', gap: 4, padding: 4, borderRadius: 10,
-                  background: 'var(--bg-card, #101c17)',
+                  background: 'var(--bg-card)',
                   border: `1px solid ${C.border}`,
                 }}>
                   {[
@@ -213,14 +213,14 @@ export default function Pro() {
                 borderRadius: 14, padding: '40px 36px',
                 border: '1px solid rgba(168,85,247,0.35)',
                 borderTop: '3px solid var(--accent-purple, #a855f7)',
-                background: 'var(--bg-card, #101c17)',
+                background: 'var(--bg-card)',
                 boxShadow: '0 12px 32px -8px rgba(0,0,0,0.35)',
                 position: 'relative', overflow: 'hidden',
                 textAlign: 'center',
               }}>
 
                 <div style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "var(--md-font-body)",
                   fontSize: 13, fontWeight: 700, letterSpacing: '0.01em',
                   color: 'var(--accent-purple, #c084fc)', marginBottom: 16,
                   textTransform: 'none',
@@ -228,23 +228,23 @@ export default function Pro() {
 
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6, marginBottom: 8 }}>
                   <span style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: 48, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)',
+                    fontFamily: "var(--md-font-body)",
+                    fontSize: 48, fontWeight: 700, color: 'var(--text-primary)',
                     letterSpacing: '-0.03em',
                   }}>฿{billingAnnual ? annualMonthly : monthlyPrice}</span>
-                  <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-muted, #64748b)' }}>/ month</span>
+                  <span style={{ fontFamily: "var(--md-font-body)", fontSize: 14, color: 'var(--text-muted)' }}>/ month</span>
                 </div>
 
                 {billingAnnual && (
                   <div style={{
-                    fontFamily: "'Manrope', sans-serif", fontSize: 13, color: '#4ade80',
+                    fontFamily: "var(--md-font-body)", fontSize: 13, color: '#4ade80',
                     fontWeight: 600, marginBottom: 8,
                   }}>
                     Billed ฿{annualPrice}/year · Save ฿{monthlyPrice * 12 - annualPrice}
                   </div>
                 )}
 
-                <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: 'var(--text-muted, #64748b)', marginBottom: 28 }}>
+                <div style={{ fontFamily: "var(--md-font-body)", fontSize: 13, color: 'var(--text-muted)', marginBottom: 28 }}>
                   7-day free trial · Cancel anytime
                 </div>
 
@@ -257,7 +257,7 @@ export default function Pro() {
                     width: '100%', padding: '14px 24px', borderRadius: 10,
                     background: 'var(--accent-purple, #a855f7)',
                     color: '#fff', border: 'none', cursor: 'pointer',
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "var(--md-font-body)",
                     fontSize: 14, fontWeight: 700, letterSpacing: '0.02em',
                     boxShadow: '0 4px 14px rgba(168,85,247,0.3)',
                     marginBottom: 16,
@@ -267,14 +267,14 @@ export default function Pro() {
                 </motion.button>
 
                 {checkoutError && (
-                  <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: '#f87171', marginTop: 8, textAlign: 'center' }}>
+                  <p style={{ fontFamily: "var(--md-font-body)", fontSize: 12, color: '#f87171', marginTop: 8, textAlign: 'center' }}>
                     {checkoutError}
                   </p>
                 )}
 
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)',
+                  fontFamily: "var(--md-font-body)", fontSize: 12, color: 'var(--text-muted)',
                 }}>
                   <Shield size={13} />
                   No credit card required for trial
@@ -289,10 +289,10 @@ export default function Pro() {
           <div style={{ maxWidth: 880, margin: '0 auto' }}>
             <FadeIn style={{ textAlign: 'center', marginBottom: 48 }}>
               <div style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "var(--md-font-body)",
                 fontSize: 'clamp(20px, 2.5vw, 26px)',
                 fontWeight: 700,
-                color: 'var(--text-primary, #f0f4fc)',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.02em',
               }}>What You Get</div>
             </FadeIn>
@@ -301,8 +301,8 @@ export default function Pro() {
                 <FadeIn key={f.title} delay={i * 0.06}>
                   <div style={{
                     display: 'flex', gap: 14, padding: 20, borderRadius: 12,
-                    border: '1px solid var(--border-color, #232d42)',
-                    background: 'var(--bg-card, #101c17)',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
                     boxShadow: '0 4px 16px -4px rgba(0,0,0,0.25)',
                   }}>
                     <div style={{
@@ -314,8 +314,8 @@ export default function Pro() {
                       <f.icon size={18} style={{ color: 'var(--accent-purple, #c084fc)' }} />
                     </div>
                     <div>
-                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--text-primary, #f0f4fc)', marginBottom: 4 }}>{f.title}</div>
-                      <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.5 }}>{f.desc}</div>
+                      <div style={{ fontFamily: "var(--md-font-body)", fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 4 }}>{f.title}</div>
+                      <div style={{ fontFamily: "var(--md-font-body)", fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{f.desc}</div>
                     </div>
                   </div>
                 </FadeIn>
@@ -329,29 +329,29 @@ export default function Pro() {
           <div style={{ maxWidth: 680, margin: '0 auto' }}>
             <FadeIn style={{ textAlign: 'center', marginBottom: 36 }}>
               <div style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "var(--md-font-body)",
                 fontSize: 'clamp(20px, 2.5vw, 26px)',
                 fontWeight: 700,
-                color: 'var(--text-primary, #f0f4fc)',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.02em',
               }}>Free vs Pro</div>
             </FadeIn>
             <FadeIn>
               <div style={{
                 borderRadius: 14, overflow: 'hidden',
-                border: '1px solid var(--border-color, #232d42)',
-                background: 'var(--bg-card, #101c17)',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-card)',
                 boxShadow: '0 8px 24px -6px rgba(0,0,0,0.3)',
               }}>
                 <div style={{
                   display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
                   padding: '14px 20px',
                   background: 'var(--bg-secondary, #0e131f)',
-                  borderBottom: '1px solid var(--border-color, #232d42)',
+                  borderBottom: '1px solid var(--border-color)',
                 }}>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: 'var(--text-muted, #64748b)' }}>FEATURE</div>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: 'var(--text-secondary, #94a3b8)', textAlign: 'center' }}>FREE</div>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: 'var(--accent-purple, #c084fc)', textAlign: 'center' }}>PRO</div>
+                  <div style={{ fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: 'var(--text-muted)' }}>FEATURE</div>
+                  <div style={{ fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: 'var(--text-secondary)', textAlign: 'center' }}>FREE</div>
+                  <div style={{ fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: 'var(--accent-purple, #c084fc)', textAlign: 'center' }}>PRO</div>
                 </div>
                 {[
                   ['Google Classroom Sync', '✓', '✓'],
@@ -373,13 +373,13 @@ export default function Pro() {
                     borderBottom: idx < 11 ? '1px solid var(--border-color, #1e2638)' : 'none',
                     background: idx % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent',
                   }}>
-                    <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: 'var(--text-secondary, #94a3b8)' }}>{feat}</div>
+                    <div style={{ fontFamily: "var(--md-font-body)", fontSize: 13, color: 'var(--text-secondary)' }}>{feat}</div>
                     <div style={{
-                      textAlign: 'center', fontFamily: "'Space Grotesk', sans-serif",
-                      fontSize: 12, color: free === '✓' ? '#4ade80' : free === '—' ? 'var(--text-muted, #475569)' : 'var(--accent-blue, #10b981)',
+                      textAlign: 'center', fontFamily: "var(--md-font-body)",
+                      fontSize: 12, color: free === '✓' ? '#4ade80' : free === '—' ? 'var(--text-muted, #475569)' : 'var(--accent-blue)',
                     }}>{free}</div>
                     <div style={{
-                      textAlign: 'center', fontFamily: "'Space Grotesk', sans-serif",
+                      textAlign: 'center', fontFamily: "var(--md-font-body)",
                       fontSize: 12, fontWeight: pro !== '—' ? 600 : 400,
                       color: pro === '✓' || pro === 'Unlimited' ? 'var(--accent-purple, #c084fc)' : pro === '—' ? 'var(--text-muted, #475569)' : 'var(--accent-purple, #c084fc)',
                     }}>{pro}</div>
@@ -395,10 +395,10 @@ export default function Pro() {
           <div style={{ maxWidth: 680, margin: '0 auto' }}>
             <FadeIn style={{ textAlign: 'center', marginBottom: 40 }}>
               <div style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "var(--md-font-body)",
                 fontSize: 'clamp(20px, 2.5vw, 26px)',
                 fontWeight: 700,
-                color: 'var(--text-primary, #f0f4fc)',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.02em',
               }}>Frequently Asked Questions</div>
             </FadeIn>
@@ -407,8 +407,8 @@ export default function Pro() {
                 <FadeIn key={i} delay={i * 0.06}>
                   <div style={{
                     borderRadius: 12,
-                    border: '1px solid var(--border-color, #232d42)',
-                    background: 'var(--bg-card, #101c17)',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                     overflow: 'hidden',
                   }}>
@@ -421,16 +421,16 @@ export default function Pro() {
                         textAlign: 'left',
                       }}
                     >
-                      <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 600, color: 'var(--text-primary, #f0f4fc)' }}>
+                      <span style={{ fontFamily: "var(--md-font-body)", fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
                         {item.q}
                       </span>
-                      <span style={{ color: 'var(--text-muted, #64748b)', fontSize: 18, lineHeight: 1, flexShrink: 0, marginLeft: 12 }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 18, lineHeight: 1, flexShrink: 0, marginLeft: 12 }}>
                         {openFaq === i ? '−' : '+'}
                       </span>
                     </button>
                     {openFaq === i && (
                       <div style={{ padding: '0 20px 16px' }}>
-                        <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.6 }}>
+                        <div style={{ fontFamily: "var(--md-font-body)", fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                           {item.a}
                         </div>
                       </div>
@@ -445,7 +445,7 @@ export default function Pro() {
         {/* Bottom CTA */}
         <section style={{ padding: '0 24px 80px', textAlign: 'center' }}>
           <FadeIn>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-muted, #64748b)', marginBottom: 16 }}>
+            <p style={{ fontFamily: "var(--md-font-body)", fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
               Not ready to commit? Try the free demo first.
             </p>
             <Link to="/login" style={{
@@ -453,8 +453,8 @@ export default function Pro() {
               padding: '12px 28px', borderRadius: 10,
               border: '1px solid rgba(59,130,246,0.25)',
               background: 'rgba(59,130,246,0.08)',
-              color: 'var(--accent-blue, #10b981)', textDecoration: 'none',
-              fontFamily: "'Space Grotesk', sans-serif",
+              color: 'var(--accent-blue)', textDecoration: 'none',
+              fontFamily: "var(--md-font-body)",
               fontSize: 13, fontWeight: 600,
             }}>
               <Sparkles size={14} /> Try Demo — No Login Needed
@@ -466,15 +466,15 @@ export default function Pro() {
 
       {/* Footer */}
       <footer style={{
-        borderTop: '1px solid var(--border-color, #232d42)',
+        borderTop: '1px solid var(--border-color)',
         padding: '24px',
         textAlign: 'center',
       }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          fontFamily: "'Manrope', sans-serif", fontSize: 13, color: 'var(--text-muted, #64748b)'
+          fontFamily: "var(--md-font-body)", fontSize: 13, color: 'var(--text-muted)'
         }}>
-          <Zap size={14} style={{ color: 'var(--accent-blue, #10b981)' }} /> StudyPulse · Made with care for students
+          <Zap size={14} style={{ color: 'var(--accent-blue)' }} /> StudyPulse · Made with care for students
         </div>
       </footer>
     </div>

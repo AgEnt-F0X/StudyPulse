@@ -344,7 +344,7 @@ export default function Quiz() {
           {q.options.map((opt, i) => {
             let bg = C.card, border = C.border, color = C.text
             if (attemptInfo) {
-              if (i === q.correctIndex) { bg = 'rgba(16,185,129,0.10)'; border = 'rgba(16,185,129,0.45)'; color = C.success }
+              if (i === q.correctIndex) { bg = 'color-mix(in srgb, var(--md-primary) 10%, transparent)'; border = 'color-mix(in srgb, var(--md-primary) 45%, transparent)'; color = C.success }
               else if (i === selected && selected !== q.correctIndex) { bg = 'rgba(239,68,68,0.10)'; border = 'rgba(239,68,68,0.45)'; color = C.error }
             } else if (i === selected) {
               bg = C.cardHover; border = C.borderStrong
@@ -421,8 +421,8 @@ export default function Quiz() {
           /* Immediate state-update banner */
           <div style={{
             padding: '12px 14px', borderRadius: 4, marginBottom: 12,
-            background: attemptInfo.correct ? 'rgba(16,185,129,0.07)' : 'rgba(239,68,68,0.06)',
-            border: `1px solid ${attemptInfo.correct ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'}`,
+            background: attemptInfo.correct ? 'color-mix(in srgb, var(--md-primary) 7%, transparent)' : 'rgba(239,68,68,0.06)',
+            border: `1px solid ${attemptInfo.correct ? 'color-mix(in srgb, var(--md-primary) 35%, transparent)' : 'rgba(239,68,68,0.35)'}`,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <span className={`dot dot-${attemptInfo.correct ? 'success' : 'error'}`} />

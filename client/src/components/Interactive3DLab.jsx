@@ -57,7 +57,7 @@ function drawArrow3D(ctx, from, to, rx, ry, cx, cy, scale, color, width = 2.2, l
 }
 
 function drawGridFloor(ctx, rx, ry, cx, cy, scale, half = 2.4) {
-  ctx.strokeStyle = 'rgba(52,211,153,0.12)'
+  ctx.strokeStyle = 'color-mix(in srgb, var(--md-primary) 12%, transparent)'
   ctx.lineWidth = 1
   for (let i = -Math.round(half); i <= Math.round(half); i++) {
     const a = projectPoint([i, -1.2, -half], rx, ry, cx, cy, scale)
@@ -86,7 +86,7 @@ function useDPRCanvas(canvasRef, width, height) {
 const CANVAS_W = 520
 const CANVAS_H = 360
 
-function Slider({ label, value, min, max, step = 0.1, unit = '', onChange, accent = '#10B981' }) {
+function Slider({ label, value, min, max, step = 0.1, unit = '', onChange, accent = 'var(--md-primary)' }) {
   return (
     <label style={{ display: 'block', marginBottom: 8 }}>
       <span className="metric-label" style={{ padding: 0, display: 'flex', justifyContent: 'space-between' }}>
@@ -161,7 +161,7 @@ function InclineLab() {
     const pB = projectPoint([1.3, -1.2, 1.3], rx, ry, cx, cy, scale)
     const pTop = projectPoint([-1.3 + rampLen * Math.cos(thR), -1.2 + rampLen * Math.sin(thR), 1.3], rx, ry, cx, cy, scale)
     ctx.fillStyle = 'rgba(30,53,43,0.85)'
-    ctx.strokeStyle = 'rgba(52,211,153,0.35)'
+    ctx.strokeStyle = 'color-mix(in srgb, var(--md-primary) 35%, transparent)'
     ctx.lineWidth = 1.2
     ctx.beginPath()
     ctx.moveTo(pA[0], pA[1]); ctx.lineTo(pB[0], pB[1]); ctx.lineTo(pTop[0], pTop[1]); ctx.closePath()
@@ -197,7 +197,7 @@ function InclineLab() {
     const gEnd = [center[0], center[1] - (m * g) / 24, center[2]]
     drawArrow3D(ctx, center, gEnd, rx, ry, cx, cy, scale, '#EF4444', 2.4, `mg`)
     const nEnd = [center[0] + nX * (N / 24) * 0.35 + Math.cos(thR) * 0.001, center[1] + nY * (N / 24) * 0.35, center[2]]
-    drawArrow3D(ctx, center, [center[0] + nX * (N / 26), center[1] + nY * (N / 26), center[2]], rx, ry, cx, cy, scale, '#10B981', 2.4, `N`)
+    drawArrow3D(ctx, center, [center[0] + nX * (N / 26), center[1] + nY * (N / 26), center[2]], rx, ry, cx, cy, scale, 'var(--md-primary)', 2.4, `N`)
     // driving force along slope (down-slope direction)
     const uDown = [Math.cos(thR), -Math.sin(thR)]
     drawArrow3D(ctx, center, [center[0] + uDown[0] * (drive / 30), center[1] + uDown[1] * (drive / 30), center[2]], rx, ry, cx, cy, scale, '#F59E0B', 2.2, `mg·sinθ`)
@@ -240,7 +240,7 @@ function InclineLab() {
           if (!playing) render()
         }}
         onPointerUp={() => { drag.current = null }}
-        style={{ borderRadius: 12, background: '#0A1410', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
+        style={{ borderRadius: 12, background: '#101014', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
       />
       <div style={{ flex: 1, minWidth: 220 }}>
         <Slider label="Ramp angle θ" value={theta} min={0} max={60} step={1} unit="°" onChange={(v) => { setTheta(v); stateRef.current = { s: 0, t: 0 } }} accent="#F59E0B" />
@@ -268,10 +268,10 @@ function InclineLab() {
           </button>
         </div>
         <Readout items={[
-          { l: 'N = mg·cosθ', v: `${N.toFixed(1)} N`, color: '#10B981' },
+          { l: 'N = mg·cosθ', v: `${N.toFixed(1)} N`, color: 'var(--md-primary)' },
           { l: 'mg·sinθ', v: `${drive.toFixed(1)} N`, color: '#F59E0B' },
           { l: 'f = μN', v: `${f.toFixed(1)} N`, color: '#38BDF8' },
-          { l: 'a = g(sinθ−μcosθ)', v: `${a.toFixed(2)} m/s²`, color: a > 0 ? '#34D399' : '#83907F' },
+          { l: 'a = g(sinθ−μcosθ)', v: `${a.toFixed(2)} m/s²`, color: a > 0 ? 'var(--md-primary)' : '#83907F' },
         ]} />
         <p style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, marginTop: 8, lineHeight: 1.6 }}>
           {a > 0 ? 'Net force down the ramp — the block accelerates.' : 'Friction holds the block — static equilibrium.'}
@@ -314,7 +314,7 @@ function PendulumLab() {
     drawGridFloor(ctx, rx, ry, 250, 268, 90)
     // ceiling mount
     const mount = projectPoint([0, 1.15, 0], rx, ry, cx, cy, scale)
-    ctx.fillStyle = '#263830'
+    ctx.fillStyle = 'var(--md-outline)'
     ctx.fillRect(mount[0] - 34, mount[1] - 6, 68, 8)
     // rod + bob
     const bob = [Math.sin(ang) * Lv, 1.15 - Math.cos(ang) * Lv, 0]
@@ -326,14 +326,14 @@ function PendulumLab() {
     ctx.lineTo(pBob[0], pBob[1])
     ctx.stroke()
     const grd = ctx.createRadialGradient(pBob[0] - 4, pBob[1] - 4, 2, pBob[0], pBob[1], 16)
-    grd.addColorStop(0, '#6EE7B7')
-    grd.addColorStop(1, '#059669')
+    grd.addColorStop(0, 'var(--md-primary)')
+    grd.addColorStop(1, 'var(--md-secondary)')
     ctx.fillStyle = grd
     ctx.beginPath()
     ctx.arc(pBob[0], pBob[1], 15, 0, Math.PI * 2)
     ctx.fill()
     // arc guide
-    ctx.strokeStyle = 'rgba(52,211,153,0.3)'
+    ctx.strokeStyle = 'color-mix(in srgb, var(--md-primary) 30%, transparent)'
     ctx.setLineDash([4, 4])
     ctx.beginPath()
     ctx.arc(mount[0], mount[1], Lv * scale, Math.PI / 2 - 0.5, Math.PI / 2 + 0.5)
@@ -342,9 +342,9 @@ function PendulumLab() {
 
     // live sine trace of angle
     const traceX0 = 320, traceY = 190
-    ctx.strokeStyle = 'rgba(52,211,153,0.25)'
+    ctx.strokeStyle = 'color-mix(in srgb, var(--md-primary) 25%, transparent)'
     ctx.beginPath(); ctx.moveTo(traceX0, traceY); ctx.lineTo(traceX0 + 180, traceY); ctx.stroke()
-    ctx.strokeStyle = '#34D399'
+    ctx.strokeStyle = 'var(--md-primary)'
     ctx.lineWidth = 1.8
     ctx.beginPath()
     for (let i = 0; i <= 180; i++) {
@@ -382,15 +382,15 @@ function PendulumLab() {
           drag.current = { x: e.clientX, y: e.clientY }
         }}
         onPointerUp={() => { drag.current = null }}
-        style={{ borderRadius: 12, background: '#0A1410', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
+        style={{ borderRadius: 12, background: '#101014', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
       />
       <div style={{ flex: 1, minWidth: 220 }}>
-        <Slider label="Length L" value={L} min={0.2} max={3} step={0.05} unit=" m" onChange={setL} accent="#34D399" />
+        <Slider label="Length L" value={L} min={0.2} max={3} step={0.05} unit=" m" onChange={setL} accent="var(--md-primary)" />
         <Slider label="Gravity g" value={g} min={1.6} max={24.8} step={0.2} unit=" m/s²" onChange={setG} accent="#F59E0B" />
         <Readout items={[
-          { l: 'T = 2π√(L/g)', v: `${T.toFixed(2)} s`, color: '#34D399' },
+          { l: 'T = 2π√(L/g)', v: `${T.toFixed(2)} s`, color: 'var(--md-primary)' },
           { l: 'ω = √(g/L)', v: `${Math.sqrt(g / L).toFixed(2)} rad/s`, color: '#F59E0B' },
-          { l: 'f', v: `${(1 / T).toFixed(2)} Hz`, color: '#6EE7B7' },
+          { l: 'f', v: `${(1 / T).toFixed(2)} Hz`, color: 'var(--md-primary)' },
         ]} />
         <p style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, marginTop: 8, lineHeight: 1.6 }}>
           Small-angle SHM: quadruple L → T doubles. Moon gravity (1.6) makes it swing in slow motion. Drag to orbit.
@@ -504,7 +504,7 @@ function MoleculeLab() {
     }
     // aromatic inner ring
     if (mol.aromaticRing) {
-      ctx.strokeStyle = 'rgba(110,231,183,0.7)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--md-primary) 70%, transparent)'
       ctx.lineWidth = 2
       ctx.beginPath()
       const ring = projected.slice(1, 7)
@@ -571,7 +571,7 @@ function MoleculeLab() {
           drag.current = { x: e.clientX, y: e.clientY }
         }}
         onPointerUp={() => { drag.current = null }}
-        style={{ borderRadius: 12, background: '#0A1410', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
+        style={{ borderRadius: 12, background: '#101014', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
       />
       <div style={{ flex: 1, minWidth: 220 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
@@ -579,7 +579,7 @@ function MoleculeLab() {
             <button key={k} onClick={() => { setMolKey(k); autoSpin.current = true }} className="motion-spring" style={{
               padding: '4px 11px', borderRadius: 999,
               background: molKey === k ? C.active : 'transparent',
-              border: `1px solid ${molKey === k ? 'rgba(52,211,153,0.4)' : C.borderSoft}`,
+              border: `1px solid ${molKey === k ? 'color-mix(in srgb, var(--md-primary) 40%, transparent)' : C.borderSoft}`,
               color: molKey === k ? C.primaryBright : C.textMuted,
               fontFamily: fonts.mono, fontSize: 11, cursor: 'pointer',
             }}>
@@ -591,9 +591,9 @@ function MoleculeLab() {
           {mol.name}
         </h3>
         <Readout items={[
-          { l: 'SHAPE', v: mol.shape, color: '#34D399' },
+          { l: 'SHAPE', v: mol.shape, color: 'var(--md-primary)' },
           { l: 'BOND ANGLE', v: mol.angle, color: '#F59E0B' },
-          { l: 'HYBRID', v: mol.hybrid, color: '#6EE7B7' },
+          { l: 'HYBRID', v: mol.hybrid, color: 'var(--md-primary)' },
           { l: 'DIPOLE', v: mol.dipole, color: '#EF4444' },
         ]} />
         <p style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, marginTop: 10, lineHeight: 1.6 }}>
@@ -646,7 +646,7 @@ function VectorLab() {
     drawArrow3D(ctx, [0, -1.2, 0], [0, 2.2, 0], rx, ry, cx, cy, scale, 'rgba(131,144,127,0.8)', 1.2, 'y')
     drawArrow3D(ctx, [0, -1.2, 0], [0, -1.2, 3.4], rx, ry, cx, cy, scale, 'rgba(131,144,127,0.8)', 1.2, 'z')
     // vectors
-    drawArrow3D(ctx, [0, -1.2, 0], va, rx, ry, cx, cy, scale, '#10B981', 2.6, 'a')
+    drawArrow3D(ctx, [0, -1.2, 0], va, rx, ry, cx, cy, scale, 'var(--md-primary)', 2.6, 'a')
     drawArrow3D(ctx, [0, -1.2, 0], vb, rx, ry, cx, cy, scale, '#F59E0B', 2.6, 'b')
     drawArrow3D(ctx, [0, -1.2, 0], sum, rx, ry, cx, cy, scale, '#FAF7F2', 2.6, 'a+b')
     if (magCross > 0.05) {
@@ -679,13 +679,13 @@ function VectorLab() {
           render()
         }}
         onPointerUp={() => { drag.current = null }}
-        style={{ borderRadius: 12, background: '#0A1410', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
+        style={{ borderRadius: 12, background: '#101014', border: `1px solid ${C.border}`, cursor: 'grab', flexShrink: 0 }}
       />
       <div style={{ flex: 1, minWidth: 220 }}>
         <div className="metric-label" style={{ padding: 0, marginBottom: 6 }}>Vector a</div>
         {[0, 1, 2].map((i) => (
           <Slider key={i} label={`a${['x', 'y', 'z'][i]}`} value={a[i]} min={-4} max={4} step={0.5}
-            onChange={(v) => { const n = [...a]; n[i] = v; setA(n) }} accent="#10B981" />
+            onChange={(v) => { const n = [...a]; n[i] = v; setA(n) }} accent="var(--md-primary)" />
         ))}
         <div className="metric-label" style={{ padding: 0, marginBottom: 6, marginTop: 10 }}>Vector b</div>
         {[0, 1, 2].map((i) => (
@@ -696,7 +696,7 @@ function VectorLab() {
           { l: 'a+b', v: `(${sum.map((v) => v.toFixed(1)).join(', ')})`, color: '#FAF7F2' },
           { l: 'a×b', v: `(${cross.map((v) => v.toFixed(1)).join(', ')})`, color: '#EF4444' },
           { l: '|a×b|', v: magCross.toFixed(2), color: '#EF4444' },
-          { l: 'a·b', v: dot.toFixed(2), color: '#34D399' },
+          { l: 'a·b', v: dot.toFixed(2), color: 'var(--md-primary)' },
         ]} />
         <p style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, marginTop: 8, lineHeight: 1.6 }}>
           a×b always points along the normal of the shaded plane spanned by a and b — its magnitude is the parallelogram area. a·b = 0 means the vectors are perpendicular.
@@ -735,7 +735,7 @@ function VennLab() {
     ctx.transform(1, skew, 0, 0.86, 0, 0)
     const RA = 92, RB = 86, off = 52
     // U rectangle
-    ctx.fillStyle = info.fill.includes('U') ? 'rgba(245,158,11,0.25)' : 'rgba(52,211,153,0.06)'
+    ctx.fillStyle = info.fill.includes('U') ? 'rgba(245,158,11,0.25)' : 'color-mix(in srgb, var(--md-primary) 6%, transparent)'
     ctx.strokeStyle = 'rgba(212,195,163,0.35)'
     ctx.lineWidth = 1.4
     ctx.beginPath()
@@ -743,9 +743,9 @@ function VennLab() {
     ctx.fill(); ctx.stroke()
     // circle A
     const fillA = info.fill.includes('A') && !info.fill.includes('AB')
-    ctx.fillStyle = fillA ? 'rgba(16,185,129,0.5)' : 'rgba(16,185,129,0.16)'
+    ctx.fillStyle = fillA ? 'color-mix(in srgb, var(--md-primary) 50%, transparent)' : 'color-mix(in srgb, var(--md-primary) 16%, transparent)'
     ctx.beginPath(); ctx.arc(-off, 0, RA, 0, Math.PI * 2); ctx.fill()
-    ctx.strokeStyle = '#10B981'; ctx.stroke()
+    ctx.strokeStyle = 'var(--md-primary)'; ctx.stroke()
     // circle B
     const fillB = info.fill.includes('B') && !info.fill.includes('AB')
     ctx.fillStyle = fillB ? 'rgba(245,158,11,0.5)' : 'rgba(245,158,11,0.14)'
@@ -781,14 +781,14 @@ function VennLab() {
 
   return (
     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-      <canvas ref={canvasRef} style={{ borderRadius: 12, background: '#0A1410', border: `1px solid ${C.border}`, flexShrink: 0 }} />
+      <canvas ref={canvasRef} style={{ borderRadius: 12, background: '#101014', border: `1px solid ${C.border}`, flexShrink: 0 }} />
       <div style={{ flex: 1, minWidth: 220 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
           {[['union', 'A ∪ B'], ['inter', 'A ∩ B'], ['aOnly', 'A − B'], ['complement', "(A ∪ B)′"]].map(([id, label]) => (
             <button key={id} onClick={() => setRegion(id)} className="motion-spring" style={{
               padding: '5px 12px', borderRadius: 999,
               background: region === id ? C.active : 'transparent',
-              border: `1px solid ${region === id ? 'rgba(52,211,153,0.4)' : C.borderSoft}`,
+              border: `1px solid ${region === id ? 'color-mix(in srgb, var(--md-primary) 40%, transparent)' : C.borderSoft}`,
               color: region === id ? C.primaryBright : C.textMuted,
               fontFamily: fonts.mono, fontSize: 11.5, cursor: 'pointer',
             }}>
@@ -799,7 +799,7 @@ function VennLab() {
         <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 19, margin: '0 0 8px', color: C.text }}>
           {info.label}
         </h3>
-        <p style={{ fontFamily: fonts.mono, fontSize: 11.5, color: '#34D399', background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}`, borderRadius: 8, padding: '8px 12px', fontVariantNumeric: 'tabular-nums' }}>
+        <p style={{ fontFamily: fonts.mono, fontSize: 11.5, color: 'var(--md-primary)', background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}`, borderRadius: 8, padding: '8px 12px', fontVariantNumeric: 'tabular-nums' }}>
           {info.formula}
         </p>
         <p style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, marginTop: 10, lineHeight: 1.6 }}>
@@ -856,7 +856,7 @@ export default function Interactive3DLab({ subject = 'Physics' }) {
             <button key={lab.id} onClick={() => setActive(i)} className="motion-spring" style={{
               padding: '6px 14px', borderRadius: 999,
               background: idx === i ? C.active : 'transparent',
-              border: `1px solid ${idx === i ? 'rgba(52,211,153,0.4)' : C.borderSoft}`,
+              border: `1px solid ${idx === i ? 'color-mix(in srgb, var(--md-primary) 40%, transparent)' : C.borderSoft}`,
               color: idx === i ? C.primaryBright : C.textMuted,
               fontFamily: fonts.body, fontSize: 12, fontWeight: idx === i ? 700 : 500,
               cursor: 'pointer',
@@ -868,7 +868,7 @@ export default function Interactive3DLab({ subject = 'Physics' }) {
       )}
       <div style={{
         borderRadius: 16, padding: '16px 18px',
-        background: '#131C18', border: `1px solid ${C.border}`,
+        background: 'var(--md-surface)', border: `1px solid ${C.border}`,
         contain: 'layout style paint',
       }}>
         {labs[idx].el}

@@ -197,7 +197,7 @@ export default function StudyPlans() {
                       <div key={tk} style={{
                         display: 'flex', alignItems: 'center', gap: 10,
                         padding: '10px 12px', borderRadius: 4,
-                        background: state === 'done' ? 'rgba(16,185,129,0.06)' : state === 'skipped' ? C.bgSoft : C.card,
+                        background: state === 'done' ? 'color-mix(in srgb, var(--md-primary) 6%, transparent)' : state === 'skipped' ? C.bgSoft : C.card,
                         border: `1px solid ${state ? C.borderSoft : C.border}`,
                         opacity: state ? 0.75 : 1,
                       }}>
@@ -228,7 +228,7 @@ export default function StudyPlans() {
                             title="Mark done"
                             style={{
                               padding: '4px 8px', borderRadius: 3, display: 'flex',
-                              background: state === 'done' ? 'rgba(16,185,129,0.15)' : 'transparent',
+                              background: state === 'done' ? 'color-mix(in srgb, var(--md-primary) 15%, transparent)' : 'transparent',
                               border: `1px solid ${C.borderSoft}`,
                               color: state === 'done' ? C.success : C.textMuted, cursor: 'pointer',
                             }}

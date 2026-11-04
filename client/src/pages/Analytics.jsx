@@ -85,7 +85,7 @@ export default function Analytics() {
 
       <div className="grid-2" style={{ marginBottom: 20 }}>
         {/* Weekly study time bar chart */}
-        <Card style={{ background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ background: 'var(--bg-card)' }}>
           <SectionTitle icon={Timer} color={C.primary}>Weekly study time</SectionTitle>
           {hasAnyHours ? (
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 130, paddingTop: 10 }}>
@@ -95,7 +95,7 @@ export default function Analytics() {
                   <div style={{
                     width: '100%',
                     height: maxH > 0 ? `${Math.max((h / maxH) * 85, h > 0 ? 6 : 0)}px` : '4px',
-                    background: 'var(--grad-primary, linear-gradient(180deg, #34d399, #059669))',
+                    background: 'var(--grad-primary)',
                     borderRadius: '4px 4px 0 0',
                     transition: 'height 0.3s ease',
                     opacity: h > 0 ? 1 : 0.15,
@@ -113,7 +113,7 @@ export default function Analytics() {
         </Card>
 
         {/* Assignment completion */}
-        <Card style={{ background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ background: 'var(--bg-card)' }}>
           <SectionTitle icon={ChartBar} color="#4ade80">Assignment Completion</SectionTitle>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, height: 130 }}>
             <div style={{
@@ -125,7 +125,7 @@ export default function Analytics() {
             <div style={{ height: 6, width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
               <div style={{
                 height: '100%', width: `${completionRate}%`,
-                background: completionRate >= 75 ? '#4ade80' : completionRate >= 50 ? '#fb923c' : 'var(--accent-blue, #10b981)',
+                background: completionRate >= 75 ? '#4ade80' : completionRate >= 50 ? '#fb923c' : 'var(--accent-blue)',
                 borderRadius: 3, transition: 'width 0.4s ease',
               }} />
             </div>
@@ -136,7 +136,7 @@ export default function Analytics() {
 
       {/* Course grades */}
       {courseGradeData.length > 0 && (
-        <Card style={{ background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ background: 'var(--bg-card)' }}>
           <SectionTitle icon={TrendUp} color={C.purple}>Grade Trends by Course</SectionTitle>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {courseGradeData.map((c, i) => {

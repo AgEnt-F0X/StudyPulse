@@ -68,13 +68,13 @@ const CountrySelect = forwardRef(({
           ${error ? 'border-accent-danger' : ''}
         `}
         style={{
-          fontFamily: "'Manrope', sans-serif",
+          fontFamily: "var(--md-font-body)",
           fontSize: '14px',
           paddingRight: '2rem',
           background: 'var(--bg-secondary, #0e131f)',
-          color: 'var(--text-primary, #f0f4fc)',
+          color: 'var(--text-primary)',
           borderRadius: 8,
-          border: '1px solid var(--border-color, #232d42)',
+          border: '1px solid var(--border-color)',
           colorScheme: 'dark',
         }}
         {...props}

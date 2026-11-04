@@ -111,6 +111,7 @@ export default function ChapterReader() {
     return Number.isFinite(p) && p > 0 ? p - 1 : 0
   })
   const [readerMode, setReaderMode] = useState(false)
+  const [pageView, setPageView] = useState('page')
   const [tab, setTab] = useState(null) // explain | why | pyq | quiz | notes
 
   // Select-area
@@ -385,7 +386,6 @@ export default function ChapterReader() {
     { id: 'pyq', label: 'PYQ', icon: GraduationCap },
     { id: 'quiz', label: 'Quiz Me', icon: NotePencil },
     { id: 'notes', label: 'My Notes', icon: NotePencil },
-    { id: 'lab', label: '3D Lab', icon: Cube },
   ]
 
   return (
@@ -415,6 +415,27 @@ export default function ChapterReader() {
             border: `1px solid ${C.borderSoft}`, color: pageIndex >= chapter.pages.length - 1 ? C.textFaint : C.text,
             cursor: pageIndex >= chapter.pages.length - 1 ? 'default' : 'pointer', display: 'flex',
           }}><CaretRight size={12} /></button>
+          {/* Left-pane switcher: textbook page vs 3D lab */}
+          <div style={{
+            display: 'flex', gap: 2, padding: 2, borderRadius: 999, flexShrink: 0,
+            background: 'var(--md-surface-low)', border: '1px solid var(--md-outline)',
+          }}>
+            {[['page', 'Textbook Page'], ['lab', '3D Concept Lab']].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => { setPageView(id); if (id === 'page') setSelectMode(false) }}
+                className="motion-spring"
+                style={{
+                  padding: '5px 12px', borderRadius: 999, border: 'none',
+                  background: pageView === id ? 'var(--md-primary-container)' : 'transparent',
+                  color: pageView === id ? 'var(--md-on-primary-container)' : 'var(--md-text-muted)',
+                  cursor: 'pointer', fontFamily: fonts.body, fontSize: 11.5, fontWeight: pageView === id ? 700 : 500,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <button onClick={addToPlan} style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             padding: '5px 10px', borderRadius: 3,
@@ -423,7 +444,7 @@ export default function ChapterReader() {
           }}>
             <Plus size={12} weight="bold" /> Add to my plan
           </button>
-          <button onClick={() => setSelectMode((s) => !s)} style={{
+          <button onClick={() => { setSelectMode((v) => !v); if (!selectMode) setPageView('page') }} style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             padding: '5px 10px', borderRadius: 3,
             background: selectMode ? C.cardHover : 'transparent',
@@ -440,7 +461,7 @@ export default function ChapterReader() {
         </div>
       </div>
 
-      <div className="reader-grid" style={{ display: 'grid', gridTemplateColumns: readerMode ? '1fr' : '1.72fr 1fr', gap: 16, alignItems: 'start' }}>
+      <div className="reader-grid" style={{ display: 'grid', gridTemplateColumns: readerMode ? '1fr' : '1.5fr 1fr', gap: 16, alignItems: 'start' }}>
         {/* Page canvas */}
         <div style={{ position: 'relative' }}>
           <div
@@ -450,6 +471,7 @@ export default function ChapterReader() {
             onMouseUp={() => { if (selectMode) { endDrag() } else { onMouseUpPage() } }}
             className="paper paper-spine"
             style={{
+              display: pageView === 'page' ? 'block' : 'none',
               border: `1px solid ${C.border}`, borderRadius: 6,
               padding: '36px 44px', minHeight: 520,
               cursor: selectMode ? 'crosshair' : 'text',
@@ -511,9 +533,9 @@ export default function ChapterReader() {
                   top: Math.min(dragRect.y0, dragRect.y1),
                   width: Math.abs(dragRect.x1 - dragRect.x0),
                   height: Math.abs(dragRect.y1 - dragRect.y0),
-                  border: '2px solid #10B981',
-                  background: 'rgba(16,185,129,0.15)',
-                  boxShadow: '0 0 25px rgba(16,185,129,0.4)',
+                  border: '2px solid var(--md-primary)',
+                  background: 'color-mix(in srgb, var(--md-primary) 15%, transparent)',
+                  boxShadow: '0 0 25px color-mix(in srgb, var(--md-primary) 40%, transparent)',
                   pointerEvents: 'none',
                 }} />
                 {/* Corner handles */}
@@ -522,8 +544,8 @@ export default function ChapterReader() {
                     position: 'absolute', width: 9, height: 9,
                     left: dx !== null ? Math.min(dragRect.x0, dragRect.x1) + dx : Math.max(dragRect.x0, dragRect.x1) - 4,
                     top: dy !== null ? Math.min(dragRect.y0, dragRect.y1) + dy : Math.max(dragRect.y0, dragRect.y1) - 4,
-                    background: '#10B981', border: '1.5px solid #06251A',
-                    borderRadius: 2, boxShadow: '0 0 8px rgba(16,185,129,0.7)',
+                    background: 'var(--md-primary)', border: '1.5px solid var(--md-on-primary)',
+                    borderRadius: 2, boxShadow: '0 0 8px color-mix(in srgb, var(--md-primary) 70%, transparent)',
                     pointerEvents: 'none',
                   }} />
                 ))}
@@ -534,7 +556,7 @@ export default function ChapterReader() {
                   top: Math.min(dragRect.y0, dragRect.y1) - 30,
                   padding: '3px 12px', borderRadius: 999,
                   background: 'rgba(18,29,24,0.92)', border: '1px solid rgba(212,195,163,0.4)',
-                  color: '#6EE7B7', fontFamily: "'JetBrains Mono', monospace",
+                  color: 'var(--md-primary)', fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
                   pointerEvents: 'none', whiteSpace: 'nowrap',
@@ -544,6 +566,19 @@ export default function ChapterReader() {
               </>
             )}
           </div>
+
+          {/* 3D Concept Lab surface */}
+          {pageView === 'lab' && (
+            <div className="hw" style={{
+              background: 'var(--md-surface-low)',
+              border: `1px solid var(--md-outline)`,
+              borderRadius: 6,
+              padding: '20px 22px', minHeight: 520,
+              boxShadow: 'var(--md-shadow-card)',
+            }}>
+              <Interactive3DLab subject={chapter.subject} />
+            </div>
+          )}
 
           {/* Crop prompt box */}
           {crop && (
@@ -916,7 +951,7 @@ export default function ChapterReader() {
                           const q = quizState.questions[quizState.idx]
                           let bg = 'transparent', border = C.borderSoft, color = C.text
                           if (quizState.attempt) {
-                            if (i === q.correctIndex) { bg = 'rgba(16,185,129,0.10)'; border = 'rgba(16,185,129,0.45)'; color = C.success }
+                            if (i === q.correctIndex) { bg = 'color-mix(in srgb, var(--md-primary) 10%, transparent)'; border = 'color-mix(in srgb, var(--md-primary) 45%, transparent)'; color = C.success }
                             else if (i === quizState.selected) { bg = 'rgba(239,68,68,0.10)'; border = 'rgba(239,68,68,0.45)'; color = C.error }
                           } else if (i === quizState.selected) { bg = C.cardHover; border = C.borderStrong }
                           return (
@@ -948,8 +983,8 @@ export default function ChapterReader() {
                       ) : (
                         <div style={{
                           padding: '9px 11px', borderRadius: 4,
-                          background: quizState.attempt.correct ? 'rgba(16,185,129,0.07)' : 'rgba(239,68,68,0.06)',
-                          border: `1px solid ${quizState.attempt.correct ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'}`,
+                          background: quizState.attempt.correct ? 'color-mix(in srgb, var(--md-primary) 7%, transparent)' : 'rgba(239,68,68,0.06)',
+                          border: `1px solid ${quizState.attempt.correct ? 'color-mix(in srgb, var(--md-primary) 35%, transparent)' : 'rgba(239,68,68,0.35)'}`,
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
                             <span className={`dot dot-${quizState.attempt.correct ? 'success' : 'error'}`} />

@@ -103,14 +103,14 @@ export default function Leaderboard() {
 
       {/* My rank card */}
       <Card style={{
-        background: 'var(--bg-card, #101c17)',
+        background: 'var(--bg-card)',
         border: '1px solid var(--border-color, rgba(52,211,153,0.22))',
         boxShadow: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
         padding: '20px 24px', marginBottom: 20,
         display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
       }}>
         <div style={{
-          fontFamily: fonts.heading, fontSize: 36, fontWeight: 700, color: 'var(--accent-blue, #10b981)', letterSpacing: '-0.02em',
+          fontFamily: fonts.heading, fontSize: 36, fontWeight: 700, color: 'var(--accent-blue)', letterSpacing: '-0.02em',
         }}>#{myEntry?.rank}</div>
         <div style={{ flex: 1, minWidth: 120 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -118,7 +118,7 @@ export default function Leaderboard() {
             <span style={{
               fontSize: 10.5, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
               background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))',
-              color: 'var(--accent-blue, #10b981)',
+              color: 'var(--accent-blue)',
               letterSpacing: '0.04em',
             }}>YOU</span>
           </div>
@@ -142,7 +142,7 @@ export default function Leaderboard() {
         {board.slice(0, 3).map((entry, i) => (
           <Card key={entry.rank} style={{
             padding: '18px 14px', textAlign: 'center',
-            background: 'var(--bg-card, #101c17)',
+            background: 'var(--bg-card)',
             border: i === 0 ? '1px solid rgba(251,191,36,0.35)' : `1px solid ${C.border}`,
             boxShadow: i === 0 ? '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)' : undefined,
             order: i === 0 ? 2 : i === 1 ? 1 : 3,
@@ -151,7 +151,7 @@ export default function Leaderboard() {
             <div style={{ fontSize: 26, marginBottom: 6 }}>{RANK_EMOJI[entry.rank]}</div>
             <div style={{
               width: 38, height: 38, borderRadius: 10, margin: '0 auto 8px',
-              background: i === 0 ? 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))' : 'rgba(255,255,255,0.06)',
+              background: i === 0 ? 'var(--grad-reward)' : 'rgba(255,255,255,0.06)',
               border: `1px solid ${i === 0 ? 'transparent' : C.border}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: fonts.heading, fontWeight: 700, fontSize: 14,
@@ -167,7 +167,7 @@ export default function Leaderboard() {
       </div>
 
       {/* Board */}
-      <Card style={{ overflow: 'hidden', marginBottom: 20, padding: 0, background: 'var(--bg-card, #101c17)' }}>
+      <Card style={{ overflow: 'hidden', marginBottom: 20, padding: 0, background: 'var(--bg-card)' }}>
         {board.map((entry, i) => (
           <div key={entry.rank} style={{
             display: 'flex', alignItems: 'center', gap: 14,
@@ -179,7 +179,7 @@ export default function Leaderboard() {
             {entry.isMe && (
               <div style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-                background: 'var(--accent-blue, #10b981)', borderRadius: '0 2px 2px 0',
+                background: 'var(--accent-blue)', borderRadius: '0 2px 2px 0',
               }} />
             )}
             <div style={{
@@ -190,7 +190,7 @@ export default function Leaderboard() {
             </div>
             <div style={{
               width: 34, height: 34, borderRadius: 8,
-              background: entry.isMe ? 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))' : 'rgba(255,255,255,0.06)',
+              background: entry.isMe ? 'var(--grad-primary)' : 'rgba(255,255,255,0.06)',
               border: `1px solid ${entry.isMe ? 'transparent' : C.border}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: fonts.heading, fontWeight: 700, fontSize: 13,
@@ -210,7 +210,7 @@ export default function Leaderboard() {
       </Card>
 
       {/* Share code */}
-      <Card style={{ padding: '20px 24px', marginBottom: live ? 20 : 0, background: 'var(--bg-card, #101c17)' }}>
+      <Card style={{ padding: '20px 24px', marginBottom: live ? 20 : 0, background: 'var(--bg-card)' }}>
         <SectionTitle icon={Users} color={C.purple}>Study Circle & Invites</SectionTitle>
         <p style={{ fontSize: 12.5, color: C.textMuted, marginBottom: 14 }}>
           {live ? 'Share your invite code so friends can join your study leaderboard:' : 'Share your invite code to study and compete together:'}
@@ -231,7 +231,7 @@ export default function Leaderboard() {
 
       {/* Add friend by code */}
       {live && (
-        <Card style={{ padding: '20px 24px', background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ padding: '20px 24px', background: 'var(--bg-card)' }}>
           <SectionTitle icon={UserPlus} color={C.blue}>Add Study Partner</SectionTitle>
           <p style={{ fontSize: 12.5, color: C.textMuted, marginBottom: 14 }}>Enter your classmate's invite code to add them to your circle:</p>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>

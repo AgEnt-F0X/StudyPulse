@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Cards, Plus, ArrowLeft, ArrowRight, ArrowsClockwise, Trash, Sparkle, PencilSimple, Check, X as XIcon, Warning, SpinnerGap } from '@phosphor-icons/react'
+import { Cards, Plus, ArrowLeft, ArrowRight, ArrowsClockwise, ArrowCounterClockwise, Trash, Sparkle, PencilSimple, Check, X as XIcon, Warning, SpinnerGap } from '@phosphor-icons/react'
 import { useFlashcardsStore, useNotesStore, useXPStore } from '../stores'
 import { C, fonts, tint, inputStyle, btnPrimary, btnGhost, iconBox, chip } from '../utils/theme'
 import { PageHeader, Empty } from '../components/ui'
@@ -184,7 +184,7 @@ export default function Flashcards() {
             <svg width="34" height="34" style={{ transform: 'rotate(-90deg)' }}>
               <circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
               <circle
-                cx="17" cy="17" r="14" fill="none" stroke="var(--primary, #10b981)" strokeWidth="3"
+                cx="17" cy="17" r="14" fill="none" stroke="var(--primary)" strokeWidth="3"
                 strokeLinecap="round" strokeDasharray={2 * Math.PI * 14}
                 strokeDashoffset={2 * Math.PI * 14 * (1 - masteryPct / 100)}
                 style={{ transition: 'stroke-dashoffset 0.4s ease' }}
@@ -230,7 +230,7 @@ export default function Flashcards() {
             <div style={{ height: 5, background: 'rgba(16,185,129,0.12)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
               <div style={{
                 height: '100%', width: `${((cardIndex + 1) / cards.length) * 100}%`,
-                background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+                background: 'var(--grad-primary)',
                 borderRadius: 3, transition: 'width 0.3s ease',
               }} />
             </div>
@@ -258,7 +258,7 @@ export default function Flashcards() {
                 {/* Card — 3D spring flip */}
                 <div style={{ perspective: 1200, marginBottom: 16 }}>
                 <div onClick={() => setFlipped(f => !f)} style={{
-                  background: 'var(--bg-card, #101c17)',
+                  background: 'var(--bg-card)',
                   border: `1px solid ${flipped ? 'rgba(52,211,153,0.45)' : C.border}`,
                   borderRadius: 16, padding: '48px 32px', textAlign: 'center', cursor: 'pointer',
                   minHeight: 230, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -307,7 +307,7 @@ export default function Flashcards() {
                     style={{ ...btnGhost, color: cardIndex === 0 ? C.textFaint : C.text, cursor: cardIndex === 0 ? 'not-allowed' : 'pointer' }}
                   ><ArrowLeft size={14} /> Prev</button>
                   <button onClick={() => setFlipped(f => !f)} style={{ ...btnGhost, color: C.primary }}>
-                    <RotateCcw size={13} /> {flipped ? 'Show question' : 'Flip card'}
+                    <ArrowCounterClockwise size={13} /> {flipped ? 'Show question' : 'Flip card'}
                   </button>
                   <button onClick={nextCard} disabled={cardIndex === cards.length - 1}
                     style={{ ...btnGhost, color: cardIndex === cards.length - 1 ? C.textFaint : C.text, cursor: cardIndex === cards.length - 1 ? 'not-allowed' : 'pointer' }}

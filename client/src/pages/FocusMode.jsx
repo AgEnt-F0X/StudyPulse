@@ -65,7 +65,7 @@ export default function FocusMode() {
 
   const circumference = 2 * Math.PI * 96
   const dash = circumference * (1 - pct / 100)
-  const phaseColor = isBreak ? '#34d399' : 'var(--primary, #10b981)'
+  const phaseColor = isBreak ? 'var(--md-primary)' : 'var(--primary)'
   const phaseBg = isBreak ? 'rgba(52, 211, 153, 0.10)' : 'var(--accent-blue-soft, rgba(16,185,129,0.12))'
   const phaseBorder = isBreak ? 'rgba(52, 211, 153, 0.35)' : 'rgba(52,211,153,0.30)'
 
@@ -155,7 +155,7 @@ export default function FocusMode() {
         <button onClick={() => setRunning(r => !r)} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           padding: '12px 32px', borderRadius: 8,
-          background: running ? 'rgba(248, 113, 113, 0.15)' : 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+          background: running ? 'rgba(248, 113, 113, 0.15)' : 'var(--grad-primary)',
           border: running ? '1px solid rgba(248, 113, 113, 0.35)' : 'none',
           boxShadow: running ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(16,185,129,0.22)',
           color: running ? '#f87171' : '#04120c',
@@ -192,7 +192,7 @@ export default function FocusMode() {
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24,
         padding: '8px 10px', borderRadius: 12,
-        background: 'var(--bg-card, #101c17)', border: `1px solid ${C.borderSoft}`,
+        background: 'var(--bg-card)', border: `1px solid ${C.borderSoft}`,
       }}>
         <button
           onClick={() => setMuted(m => !m)}
@@ -227,12 +227,12 @@ export default function FocusMode() {
           placeholder="What are you focusing on?"
           style={{
             width: '100%', padding: '12px 16px', borderRadius: 8,
-            background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}`,
+            background: 'var(--bg-card)', border: `1px solid ${C.border}`,
             color: C.text, fontSize: 13.5, fontFamily: fonts.body,
             textAlign: 'center', boxSizing: 'border-box', outline: 'none',
             transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
           }}
-          onFocus={e => { e.target.style.borderColor = 'var(--primary, #10b981)'; e.target.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.15)' }}
+          onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.15)' }}
           onBlur={e => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none' }}
         />
       </div>

@@ -16,7 +16,7 @@ const KEYWORDS = {
 }
 
 const KEYWORD_COLOR = '#FAFAFA'
-const STRING_COLOR = '#34D399'
+const STRING_COLOR = 'var(--md-primary)'
 const NUMBER_COLOR = '#F59E0B'
 const COMMENT_COLOR = '#6B7280'
 const FUNCTION_COLOR = '#D4D4D8'

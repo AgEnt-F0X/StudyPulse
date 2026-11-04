@@ -42,7 +42,7 @@ export default function Signup() {
     }}>
       <div className="page-enter" style={{
         width: '100%', maxWidth: 410, position: 'relative',
-        background: 'var(--bg-card, #101c17)',
+        background: 'var(--bg-card)',
         border: `1px solid ${C.border}`,
         borderRadius: 16, padding: '36px 30px',
         boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
@@ -50,7 +50,7 @@ export default function Signup() {
         <div style={{ textAlign: 'center', marginBottom: 26 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 10, margin: '0 auto 14px',
-            background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+            background: 'var(--grad-logo)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35)',
           }}>

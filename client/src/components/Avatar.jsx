@@ -41,9 +41,9 @@ const Avatar = ({
           on-surface-primary
         `}
         style={{
-          background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+          background: 'var(--grad-logo)',
           color: '#04120c',
-          fontFamily: "'Space Grotesk', sans-serif"
+          fontFamily: "var(--md-font-body)"
         }}>
           {getInitials(name)}
         </div>

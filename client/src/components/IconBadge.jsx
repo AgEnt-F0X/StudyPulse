@@ -11,7 +11,7 @@ const IconBadge = ({
   style,
   ...props
 }) => {
-  const accent = color || 'var(--primary, #10b981)'
+  const accent = color || 'var(--primary)'
   const glyph = iconSize || (size <= 32 ? 16 : 18)
   return (
     <div
@@ -20,8 +20,8 @@ const IconBadge = ({
         height: size,
         borderRadius: 10,
         flexShrink: 0,
-        background: tint(typeof accent === 'string' && accent.startsWith('var(') ? '#10b981' : accent, 0.10),
-        border: `1px solid ${tint(typeof accent === 'string' && accent.startsWith('var(') ? '#10b981' : accent, 0.25)}`,
+        background: tint(typeof accent === 'string' && accent.startsWith('var(') ? accent : accent, 0.10),
+        border: `1px solid ${tint(typeof accent === 'string' && accent.startsWith('var(') ? accent : accent, 0.25)}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

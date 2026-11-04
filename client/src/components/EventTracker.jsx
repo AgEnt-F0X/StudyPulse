@@ -22,7 +22,7 @@ const EventTracker = () => {
 
   const onSurfaceSecondary = '#8c90a0'
   const onSurfaceTertiary = '#606080'
-  const surfaceContainer = 'var(--bg-card, #101c17)'
+  const surfaceContainer = 'var(--bg-card)'
 
   return (
     <div
@@ -30,13 +30,13 @@ const EventTracker = () => {
       style={{
         background: 'rgba(24, 28, 34, 0.60)',
         border: '1px solid rgba(66, 71, 84, 0.25)',
-        fontFamily: "'Manrope', sans-serif"
+        fontFamily: "var(--md-font-body)"
       }}
     >
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b" style={{ borderColor: 'rgba(66,71,84,0.20)' }}>
         <h3
-          style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '0.7rem', color: '#d7ffc5', textTransform: 'none', letterSpacing: '0.01em' }}
+          style={{ fontFamily: "var(--md-font-body)", fontWeight: 600, fontSize: '0.7rem', color: '#d7ffc5', textTransform: 'none', letterSpacing: '0.01em' }}
         >
           Events
         </h3>
@@ -68,14 +68,14 @@ const EventTracker = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="input-sa w-full"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                  style={{ fontFamily: "var(--md-font-body)" }}
                 />
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   className="input-sa w-full"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                  style={{ fontFamily: "var(--md-font-body)" }}
                 />
                 <div className="flex gap-2">
                   <Button type="submit" size="sm" className="flex-1">
@@ -112,14 +112,14 @@ const EventTracker = () => {
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(66,71,84,0.20)' }}
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full" style={{
-                  background: event.daysUntil === 0 ? '#ffb4ab' : event.daysUntil <= 7 ? '#ffb44d' : 'var(--primary, #10b981)',
-                  boxShadow: event.daysUntil === 0 ? '0 0 8px #ffb4ab' : event.daysUntil <= 7 ? '0 0 8px #ffb44d' : '0 0 8px rgba(16,185,129,0.5)'
+                  background: event.daysUntil === 0 ? '#ffb4ab' : event.daysUntil <= 7 ? '#ffb44d' : 'var(--primary)',
+                  boxShadow: event.daysUntil === 0 ? '0 0 8px #ffb4ab' : event.daysUntil <= 7 ? '0 0 8px #ffb44d' : '0 0 8px color-mix(in srgb, var(--md-primary) 50%, transparent)'
                 }} />
                 <div className="flex-1 pl-3">
-                  <p style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: '0.875rem', color: '#dfe2eb' }}>
+                  <p style={{ fontFamily: "var(--md-font-body)", fontWeight: 600, fontSize: '0.875rem', color: '#dfe2eb' }}>
                     {event.title}
                   </p>
-                  <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: '0.75rem', color: onSurfaceSecondary }}>
+                  <p style={{ fontFamily: "var(--md-font-body)", fontSize: '0.75rem', color: onSurfaceSecondary }}>
                     {event.daysUntil === 0 ? 'TODAY!' : `${event.daysUntil} DAYS`}
                   </p>
                 </div>
@@ -137,7 +137,7 @@ const EventTracker = () => {
         ) : (
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: '#e5b5ff', opacity: 0.4 }} />
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: '0.875rem', color: onSurfaceTertiary }}>
+            <p style={{ fontFamily: "var(--md-font-body)", fontSize: '0.875rem', color: onSurfaceTertiary }}>
               No upcoming events. Add one!
             </p>
           </div>

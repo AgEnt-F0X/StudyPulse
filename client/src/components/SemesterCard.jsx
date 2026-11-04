@@ -1,3 +1,5 @@
+const mdPrimary = () => (typeof document !== 'undefined' ? getComputedStyle(document.documentElement).getPropertyValue('--md-primary').trim() || '#818CF8' : '#818CF8')
+const mdSecondary = () => (typeof document !== 'undefined' ? getComputedStyle(document.documentElement).getPropertyValue('--md-secondary').trim() || '#C084FC' : '#C084FC')
 import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, X, DownloadSimple, ShareNetwork, Star } from '@phosphor-icons/react'
@@ -32,14 +34,14 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
 
   // Top border accent
   const topGrad = ctx.createLinearGradient(0, 0, 800, 0)
-  topGrad.addColorStop(0, '#10b981')
-  topGrad.addColorStop(0.5, '#34d399')
+  topGrad.addColorStop(0, mdPrimary())
+  topGrad.addColorStop(0.5, mdPrimary())
   topGrad.addColorStop(1, '#f59e0b')
   ctx.fillStyle = topGrad
   ctx.fillRect(0, 0, 800, 4)
 
   // Header
-  ctx.fillStyle = '#10b981'
+  ctx.fillStyle = mdPrimary()
   ctx.font = 'bold 15px "Space Grotesk", sans-serif'
   ctx.fillText('🌿 STUDYPULSE', 48, 52)
 
@@ -58,7 +60,7 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   ctx.fillText(user?.email || '', 48, 165)
 
   // Level badge
-  const lvlColor = level?.color || '#34d399'
+  const lvlColor = level?.color || mdPrimary()
   ctx.fillStyle = `${lvlColor}22`
   roundRect(ctx, 48, 185, 160, 36, 18)
   ctx.fill()
@@ -89,8 +91,8 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   // Big GPA
   ctx.font = 'bold 80px "Space Grotesk", sans-serif'
   const gpaGrad = ctx.createLinearGradient(48, 280, 48, 380)
-  gpaGrad.addColorStop(0, '#34d399')
-  gpaGrad.addColorStop(1, '#10b981')
+  gpaGrad.addColorStop(0, mdPrimary())
+  gpaGrad.addColorStop(1, mdPrimary())
   ctx.fillStyle = gpaGrad
   ctx.fillText(gpa ? `${gpa}%` : '—', 48, 360)
 
@@ -100,9 +102,9 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
 
   // Stats row
   const stats = [
-    { label: 'COMPLETED', value: `${completed}/${total}`, color: '#34d399' },
+    { label: 'COMPLETED', value: `${completed}/${total}`, color: mdPrimary() },
     { label: 'STREAK', value: `${streak}d`, color: '#f59e0b' },
-    { label: 'FOCUS', value: `${focusHours}h`, color: '#10b981' },
+    { label: 'FOCUS', value: `${focusHours}h`, color: mdPrimary() },
   ]
 
   stats.forEach((s, i) => {
@@ -129,7 +131,7 @@ function generateCard({ user, gpa, courses, streak, xp, level, completed, total,
   ctx.fillText('COURSE BREAKDOWN', 48, 530)
 
   if (courses?.length) {
-    const colors = ['#10b981', '#34d399', '#f59e0b', '#059669', '#fbbf24']
+    const colors = [mdPrimary(), mdPrimary(), '#f59e0b', mdSecondary(), '#fbbf24']
     courses.slice(0, 5).forEach((c, i) => {
       const y = 546 + i * 56
       const color = colors[i % colors.length]
@@ -263,8 +265,8 @@ export default function SemesterCard({ onClose }) {
         initial={{ scale: 0.92, y: 24 }}
         animate={{ scale: 1, y: 0 }}
         style={{
-          background: 'var(--bg-card, #101c17)',
-          border: '1px solid var(--border-color, #232d42)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
           borderRadius: 14, padding: 28,
           width: 'min(500px, 100%)',
           maxHeight: '90vh', overflowY: 'auto',
@@ -274,33 +276,33 @@ export default function SemesterCard({ onClose }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Trophy size={18} weight="duotone" style={{ color: 'var(--accent-amber, #f59e0b)' }} />
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', letterSpacing: '0.04em' }}>
+            <span style={{ fontFamily: "var(--md-font-body)", fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
               SEMESTER REPORT CARD
             </span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: 4 }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
             <X size={18} weight="bold" />
           </button>
         </div>
 
         {!preview ? (
           <>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.6, marginBottom: 20 }}>
+            <p style={{ fontFamily: "var(--md-font-body)", fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
               Generate a beautiful shareable image of your semester stats — GPA, courses, streak, focus hours.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               {[
-                { label: 'GPA', value: gpa ? `${gpa}%` : '—', color: '#34d399' },
+                { label: 'GPA', value: gpa ? `${gpa}%` : '—', color: mdPrimary() },
                 { label: 'Assignments', value: `${completed}/${assignments.length}`, color: '#f59e0b' },
-                { label: 'Streak', value: `${streak}d`, color: '#10b981' },
+                { label: 'Streak', value: `${streak}d`, color: mdPrimary() },
                 { label: 'Focus', value: `${focusHours}h`, color: '#d97706' },
               ].map(s => (
                 <div key={s.label} style={{
                   padding: '14px 16px', borderRadius: 10,
                   background: `${s.color}0f`, border: `1px solid ${s.color}33`,
                 }}>
-                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--text-muted, #64748b)', marginBottom: 6, letterSpacing: '0.04em' }}>{s.label}</p>
-                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 700, color: s.color, letterSpacing: '-0.02em', margin: 0 }}>{s.value}</p>
+                  <p style={{ fontFamily: "var(--md-font-body)", fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, letterSpacing: '0.04em' }}>{s.label}</p>
+                  <p style={{ fontFamily: "var(--md-font-body)", fontSize: 24, fontWeight: 700, color: s.color, letterSpacing: '-0.02em', margin: 0 }}>{s.value}</p>
                 </div>
               ))}
             </div>
@@ -308,9 +310,9 @@ export default function SemesterCard({ onClose }) {
               onClick={generate}
               style={{
                 width: '100%', padding: '13px', borderRadius: 10, cursor: 'pointer',
-                background: 'var(--accent-blue, #10b981)',
+                background: 'var(--accent-blue)',
                 border: 'none', color: '#04120c',
-                fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+                fontFamily: "var(--md-font-body)", fontSize: 13, fontWeight: 700,
                 boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
               }}
             >
@@ -327,7 +329,7 @@ export default function SemesterCard({ onClose }) {
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   padding: '11px', borderRadius: 8, cursor: 'pointer',
                   background: 'var(--accent-blue-soft, rgba(16,185,129,0.12))', border: '1px solid rgba(52,211,153,0.30)',
-                  color: 'var(--accent-blue, #10b981)', fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
+                  color: 'var(--accent-blue)', fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700,
                 }}
               >
                 <DownloadSimple size={15} weight="bold" /> Download
@@ -338,7 +340,7 @@ export default function SemesterCard({ onClose }) {
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   padding: '11px', borderRadius: 8, cursor: 'pointer',
                   background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)',
-                  color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
+                  color: '#fff', fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700,
                 }}
               >
                 <ShareNetwork size={14} weight="duotone" />
@@ -353,7 +355,7 @@ export default function SemesterCard({ onClose }) {
                   padding: '11px', borderRadius: 8, textDecoration: 'none',
                   background: 'rgba(245,158,11,0.14)',
                   border: '1px solid rgba(245,158,11,0.35)',
-                  color: '#f59e0b', fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
+                  color: '#f59e0b', fontFamily: "var(--md-font-body)", fontSize: 12, fontWeight: 700,
                 }}
               >
                 <Star size={14} weight="duotone" /> Star

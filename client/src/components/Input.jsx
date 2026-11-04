@@ -21,7 +21,7 @@ const Input = forwardRef(({
           htmlFor={name}
           className="block text-xs"
           style={{
-            fontFamily: "'Manrope', sans-serif",
+            fontFamily: "var(--md-font-body)",
             fontWeight: 600,
             fontSize: 12,
             letterSpacing: '0.01em',
@@ -63,7 +63,7 @@ const Input = forwardRef(({
       {error && (
         <p
           className="text-xs"
-          style={{ color: '#f87171', fontWeight: 500, fontFamily: "'Manrope', sans-serif", paddingLeft: IconComp ? '0.5rem' : '0' }}
+          style={{ color: '#f87171', fontWeight: 500, fontFamily: "var(--md-font-body)", paddingLeft: IconComp ? '0.5rem' : '0' }}
         >
           {error}
         </p>

@@ -76,7 +76,7 @@ const QuickCapture = () => {
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 120,
           width: 50, height: 50, borderRadius: '50%',
-          background: open ? '#ef4444' : 'var(--accent-blue, #10b981)',
+          background: open ? '#ef4444' : 'var(--accent-blue)',
           border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer',
           boxShadow: '0 8px 24px -4px rgba(59,130,246,0.45)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -99,18 +99,18 @@ const QuickCapture = () => {
             style={{
               position: 'fixed', bottom: 84, right: 24, zIndex: 120,
               width: 'min(360px, calc(100vw - 32px))',
-              background: 'var(--bg-card, #101c17)',
-              border: '1px solid var(--border-color, #232d42)',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
               borderRadius: 14, padding: '20px 20px 18px',
               boxShadow: '0 16px 40px -8px rgba(0,0,0,0.6)',
             }}
           >
             {/* Title */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', letterSpacing: '0.04em' }}>
+              <span style={{ fontFamily: "var(--md-font-body)", fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
                 QUICK CAPTURE
               </span>
-              <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, fontWeight: 600, color: 'var(--text-muted, #64748b)' }}>Ctrl+Shift+A</span>
+              <span style={{ fontFamily: "var(--md-font-mono)", fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Ctrl+Shift+A</span>
             </div>
 
             {/* Assignment title */}
@@ -123,8 +123,8 @@ const QuickCapture = () => {
               style={{
                 width: '100%', padding: '10px 12px', marginBottom: 10,
                 background: 'var(--bg-secondary, #0e131f)',
-                border: '1px solid var(--border-color, #232d42)', borderRadius: 8,
-                color: 'var(--text-primary, #f0f4fc)', fontFamily: "'Manrope', sans-serif", fontSize: 14,
+                border: '1px solid var(--border-color)', borderRadius: 8,
+                color: 'var(--text-primary)', fontFamily: "var(--md-font-body)", fontSize: 14,
                 outline: 'none', boxSizing: 'border-box',
               }}
             />
@@ -136,9 +136,9 @@ const QuickCapture = () => {
                 onChange={e => setCourseId(e.target.value)}
                 style={{
                   padding: '8px 10px', background: 'var(--bg-secondary, #0e131f)',
-                  border: '1px solid var(--border-color, #232d42)', borderRadius: 8,
-                  color: courseId ? 'var(--text-primary, #f0f4fc)' : 'var(--text-muted, #64748b)',
-                  fontFamily: "'Manrope', sans-serif", fontSize: 13, cursor: 'pointer'
+                  border: '1px solid var(--border-color)', borderRadius: 8,
+                  color: courseId ? 'var(--text-primary)' : 'var(--text-muted)',
+                  fontFamily: "var(--md-font-body)", fontSize: 13, cursor: 'pointer'
                 }}
               >
                 <option value="">Course…</option>
@@ -152,9 +152,9 @@ const QuickCapture = () => {
                 onChange={e => setDueDate(e.target.value)}
                 style={{
                   padding: '8px 10px', background: 'var(--bg-secondary, #0e131f)',
-                  border: '1px solid var(--border-color, #232d42)', borderRadius: 8,
-                  color: dueDate ? 'var(--text-primary, #f0f4fc)' : 'var(--text-muted, #64748b)',
-                  fontFamily: "'Manrope', sans-serif", fontSize: 13, cursor: 'pointer'
+                  border: '1px solid var(--border-color)', borderRadius: 8,
+                  color: dueDate ? 'var(--text-primary)' : 'var(--text-muted)',
+                  fontFamily: "var(--md-font-body)", fontSize: 13, cursor: 'pointer'
                 }}
               />
             </div>
@@ -168,9 +168,9 @@ const QuickCapture = () => {
                   style={{
                     flex: 1, padding: '7px 0', borderRadius: 6, cursor: 'pointer',
                     background: priority === p ? `${PRIORITY_COLORS[p]}20` : 'var(--bg-secondary, #0e131f)',
-                    border: `1px solid ${priority === p ? PRIORITY_COLORS[p] : 'var(--border-color, #232d42)'}`,
-                    color: priority === p ? PRIORITY_COLORS[p] : 'var(--text-muted, #64748b)',
-                    fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 600,
+                    border: `1px solid ${priority === p ? PRIORITY_COLORS[p] : 'var(--border-color)'}`,
+                    color: priority === p ? PRIORITY_COLORS[p] : 'var(--text-muted)',
+                    fontFamily: "var(--md-font-body)", fontSize: 11, fontWeight: 600,
                     textTransform: 'capitalize', transition: 'all 0.15s',
                   }}
                 >
@@ -188,11 +188,11 @@ const QuickCapture = () => {
                 background: saved
                   ? '#22c55e'
                   : title.trim()
-                  ? 'var(--accent-blue, #10b981)'
+                  ? 'var(--accent-blue)'
                   : 'var(--bg-secondary, #0e131f)',
                 border: 'none',
-                color: title.trim() ? '#fff' : 'var(--text-muted, #64748b)',
-                fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
+                color: title.trim() ? '#fff' : 'var(--text-muted)',
+                fontFamily: "var(--md-font-body)", fontSize: 13, fontWeight: 700,
                 letterSpacing: '0.02em',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 transition: 'all 0.2s',

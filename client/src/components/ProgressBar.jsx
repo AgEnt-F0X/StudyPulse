@@ -42,7 +42,7 @@ const ProgressBar = ({
         />
       </div>
       {showLabel && (
-        <div className="flex justify-between mt-1 text-xs" style={{ color: '#606080', fontFamily: "'Manrope', sans-serif" }}>
+        <div className="flex justify-between mt-1 text-xs" style={{ color: '#606080', fontFamily: "var(--md-font-body)" }}>
           <span>{value}</span>
           <span>{max}</span>
         </div>

@@ -13,7 +13,7 @@ function Modal({ open, onClose, children }) {
       zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
-        background: 'var(--bg-card, #101c17)',
+        background: 'var(--bg-card)',
         border: `1px solid ${C.border}`, borderRadius: 14, padding: 26, width: 'min(460px,92vw)',
         maxHeight: '90vh', overflowY: 'auto',
         boxShadow: '0 24px 64px rgba(0,0,0,0.7)',
@@ -134,7 +134,7 @@ export default function Grades() {
       <Card style={{
         padding: '24px 28px', marginBottom: 20,
         display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
-        background: 'var(--bg-card, #101c17)',
+        background: 'var(--bg-card)',
         border: `1px solid ${C.border}`,
         boxShadow: 'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45))',
       }}>
@@ -170,8 +170,8 @@ export default function Grades() {
           <svg viewBox="0 0 300 64" style={{ width: '100%', height: 64, display: 'block' }}>
             <defs>
               <linearGradient id="gradeTraj" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#34d399" />
-                <stop offset="100%" stopColor="#10b981" />
+                <stop offset="0%" stopColor='var(--md-primary)' />
+                <stop offset="100%" stopColor='var(--md-secondary)' />
               </linearGradient>
             </defs>
             <polyline
@@ -188,7 +188,7 @@ export default function Grades() {
 
       {/* Course cards */}
       {(courses || []).length === 0 ? (
-        <Card style={{ marginBottom: 20, padding: 0, background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ marginBottom: 20, padding: 0, background: 'var(--bg-card)' }}>
           <Empty
             icon={ChartBar}
             accent={C.green}
@@ -207,7 +207,7 @@ export default function Grades() {
             if (!result) {
               return (
                 <div key={course.id} className="hover-lift" style={{
-                  background: 'var(--bg-card, #101c17)',
+                  background: 'var(--bg-card)',
                   border: `1px dashed ${C.border}`, borderRadius: 10, padding: 18,
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 10,
                 }}>
@@ -224,7 +224,7 @@ export default function Grades() {
             const color = gradeColor(pct)
             return (
               <div key={course.id} className="hover-lift" style={{
-                background: 'var(--bg-card, #101c17)',
+                background: 'var(--bg-card)',
                 border: `1px solid ${C.border}`, borderRadius: 10, padding: 18,
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, gap: 10 }}>

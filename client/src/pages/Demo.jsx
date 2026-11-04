@@ -40,7 +40,7 @@ export default function Demo() {
       <div style={{ textAlign: 'center' }}>
         <div className="pulse" style={{
           width: 56, height: 56, borderRadius: 14, margin: '0 auto 18px',
-          background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+          background: 'var(--grad-logo)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
         }}>

@@ -14,7 +14,7 @@ const BentoCard = ({
   const variantStyle =
     variant === 'glow'
       ? {
-          background: 'var(--bg-card, #101c17)',
+          background: 'var(--bg-card)',
           boxShadow:
             'var(--shadow-lift, 0 8px 24px rgba(0,0,0,0.45)), inset 0 1px 0 rgba(255,255,255,0.08)',
         }
@@ -26,14 +26,14 @@ const BentoCard = ({
     <motion.div
       whileHover={
         variant === 'interactive'
-          ? { translateY: -2, borderColor: 'rgba(52,211,153,0.28)' }
+          ? { translateY: -2, borderColor: 'color-mix(in srgb, var(--md-primary) 28%, transparent)' }
           : {}
       }
       transition={{ duration: 0.18, ease: 'easeOut' }}
       className={`relative overflow-hidden transition-sa ${className}`}
       style={{
-        background: 'var(--bg-card, #101c17)',
-        border: '1px solid var(--border-color, rgba(52,211,153,0.14))',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-color, color-mix(in srgb, var(--md-primary) 14%, transparent))',
         borderRadius: 16,
         padding: '1.5rem',
         ...(!noShadow && variantStyle),

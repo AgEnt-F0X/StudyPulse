@@ -34,7 +34,7 @@ function Modal({ open, onClose, children }) {
       zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
-        background: 'var(--bg-card, #101c17)',
+        background: 'var(--bg-card)',
         border: `1px solid ${C.border}`, borderRadius: 14, padding: 26, width: 'min(440px,92vw)',
         boxShadow: '0 24px 64px rgba(0,0,0,0.7)',
       }}>
@@ -96,14 +96,14 @@ export default function Habits() {
       />
 
       {/* Week header */}
-      <Card style={{ padding: '12px 20px', marginBottom: 12, background: 'var(--bg-card, #101c17)' }}>
+      <Card style={{ padding: '12px 20px', marginBottom: 12, background: 'var(--bg-card)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: C.textMuted, fontFamily: fonts.heading }}>HABIT</div>
           {WEEK_DAYS.map((d, i) => (
             <div key={i} style={{
               width: 30, textAlign: 'center',
               fontSize: 11, fontWeight: 700, fontFamily: fonts.heading,
-              color: i === todayIdx ? 'var(--accent-blue, #10b981)' : C.textFaint,
+              color: i === todayIdx ? 'var(--accent-blue)' : C.textFaint,
             }}>{d}</div>
           ))}
           <div style={{ width: 44 }} />
@@ -111,7 +111,7 @@ export default function Habits() {
       </Card>
 
       {safeHabits.length === 0 ? (
-        <Card style={{ padding: 0, background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ padding: 0, background: 'var(--bg-card)' }}>
           <Empty
             icon={CheckCircle2}
             accent={C.green}
@@ -125,7 +125,7 @@ export default function Habits() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {safeHabits.map(h => (
             <div key={h.id} className="hover-lift" style={{
-              background: 'var(--bg-card, #101c17)',
+              background: 'var(--bg-card)',
               border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 20px',
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
@@ -172,7 +172,7 @@ export default function Habits() {
             placeholder="e.g. Solve 5 Chemistry numericals"
             onKeyDown={e => e.key === 'Enter' && addHabit()}
             style={inputStyle}
-            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
             onBlur={e => { e.target.style.borderColor = C.border }}
           />
         </div>

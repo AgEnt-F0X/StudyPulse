@@ -129,7 +129,7 @@ export default function Assignments() {
       {/* List — compact task rows */}
       {filtered.length === 0 ? (
         <div style={{
-          background: 'var(--bg-card, #101c17)',
+          background: 'var(--bg-card)',
           border: `1px solid ${C.border}`, borderRadius: 16,
         }}>
           <Empty
@@ -160,7 +160,7 @@ export default function Assignments() {
             const pColor = PRIORITY_COLOR[a.priority] || C.textMuted
             return (
               <div key={a.id} className="hover-lift" style={{
-                background: 'var(--bg-card, #101c17)',
+                background: 'var(--bg-card)',
                 border: `1px solid ${overdue ? 'rgba(248, 113, 113, 0.4)' : C.border}`,
                 borderRadius: 12,
                 padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14,
@@ -171,7 +171,7 @@ export default function Assignments() {
                   type="checkbox"
                   checked={!!a.completed}
                   onChange={() => updateAssignment(a.id, { completed: !a.completed })}
-                  style={{ width: 18, height: 18, cursor: 'pointer', flexShrink: 0, accentColor: 'var(--primary, #10b981)' }}
+                  style={{ width: 18, height: 18, cursor: 'pointer', flexShrink: 0, accentColor: 'var(--primary)' }}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
@@ -211,11 +211,11 @@ export default function Assignments() {
                       padding: '4px 10px', borderRadius: 6,
                       border: `1px solid ${C.border}`,
                       background: 'var(--surface-low, #0d1712)',
-                      color: 'var(--accent-blue, #10b981)',
+                      color: 'var(--accent-blue)',
                       cursor: 'pointer', fontSize: 11.5, fontFamily: fonts.heading, fontWeight: 700,
                       transition: 'all 0.12s ease', flexShrink: 0,
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-blue, #10b981)'; e.currentTarget.style.background = 'var(--accent-blue-soft, rgba(16,185,129,0.12))' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; e.currentTarget.style.background = 'var(--accent-blue-soft, rgba(16,185,129,0.12))' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = 'var(--surface-low, #0d1712)' }}
                   >
                     <Play size={11} /> Focus
@@ -253,7 +253,7 @@ export default function Assignments() {
               placeholder={f.placeholder}
               onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
               style={inputStyle}
-              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
               onBlur={e => { e.target.style.borderColor = C.border }}
             />
           </div>
@@ -267,7 +267,7 @@ export default function Assignments() {
             placeholder="Type or pick a subject…"
             onChange={e => setForm(p => ({ ...p, course: e.target.value }))}
             style={inputStyle}
-            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
             onBlur={e => { e.target.style.borderColor = C.border }}
           />
           <datalist id="cbse-subjects-list">
@@ -297,7 +297,7 @@ export default function Assignments() {
             onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
             rows={3}
             style={{ ...inputStyle, resize: 'vertical' }}
-            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
             onBlur={e => { e.target.style.borderColor = C.border }}
           />
         </div>

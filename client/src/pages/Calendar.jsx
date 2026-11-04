@@ -15,7 +15,7 @@ function Modal({ open, onClose, children }) {
       zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div onClick={e => e.stopPropagation()} className="page-enter" style={{
-        background: 'var(--bg-card, #101c17)',
+        background: 'var(--bg-card)',
         border: `1px solid ${C.border}`, borderRadius: 14, padding: 26, width: 'min(440px,92vw)',
         boxShadow: '0 24px 64px rgba(0,0,0,0.7)',
       }}>
@@ -97,7 +97,7 @@ export default function Calendar() {
 
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
         {/* Calendar grid */}
-        <Card style={{ flex: 1, minWidth: 320, background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ flex: 1, minWidth: 320, background: 'var(--bg-card)' }}>
           {/* Month nav */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <button onClick={prevMonth} aria-label="Previous month" style={navBtn}
@@ -127,7 +127,7 @@ export default function Calendar() {
                 <div key={i} style={{
                   minHeight: 62, padding: '6px 4px', borderRadius: 8,
                   background: isToday ? 'var(--accent-blue-soft, rgba(59, 130, 246, 0.12))' : 'rgba(255,255,255,0.015)',
-                  border: isToday ? '1px solid var(--accent-blue, #10b981)' : `1px solid ${C.borderSoft}`,
+                  border: isToday ? '1px solid var(--accent-blue)' : `1px solid ${C.borderSoft}`,
                   transition: 'background 0.12s ease',
                 }}>
                   {d && (
@@ -154,7 +154,7 @@ export default function Calendar() {
         </Card>
 
         {/* Upcoming sidebar */}
-        <Card style={{ width: 260, flexShrink: 0, alignSelf: 'flex-start', padding: 18, background: 'var(--bg-card, #101c17)' }}>
+        <Card style={{ width: 260, flexShrink: 0, alignSelf: 'flex-start', padding: 18, background: 'var(--bg-card)' }}>
           <SectionTitle icon={CalendarDays} color={C.orange}>Upcoming Events</SectionTitle>
           {upcoming.length === 0 ? (
             <p style={{ fontSize: 12.5, color: C.textMuted }}>No upcoming events scheduled. Add tests, lab submissions or study sessions.</p>
@@ -188,7 +188,7 @@ export default function Calendar() {
             <input type={f.type} value={form[f.key]} placeholder={f.placeholder}
               onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
               style={inputStyle}
-              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue, #10b981)' }}
+              onFocus={e => { e.target.style.borderColor = 'var(--accent-blue)' }}
               onBlur={e => { e.target.style.borderColor = C.border }}
             />
           </div>

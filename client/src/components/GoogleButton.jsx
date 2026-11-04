@@ -24,7 +24,7 @@ export default function GoogleButton({ onClick, disabled, label = 'Continue with
         width: '100%', padding: '12px 16px', borderRadius: 10,
         border: 'none', background: disabled || loading ? '#e6e6e6' : '#ffffff',
         color: '#1f1f1f', cursor: disabled || loading ? 'not-allowed' : 'pointer',
-        fontFamily: "'Space Grotesk', sans-serif", fontSize: 14.5, fontWeight: 600,
+        fontFamily: "var(--md-font-body)", fontSize: 14.5, fontWeight: 600,
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
         boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
         transition: 'filter 0.15s ease',

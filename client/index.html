@@ -5,10 +5,25 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#09090B" />
+    <meta name="theme-color" content="#0B0C14" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="StudyPulse" />
+    <script>
+      // Purge any zombie Service Worker + poisoned cache buckets BEFORE the
+      // app bundle executes, so no stale React chunks can ever mix with new
+      // ones (fixes "Cannot read properties of null (reading 'useMemo')").
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) registration.unregister();
+        }).catch(function () {});
+      }
+      if ('caches' in window) {
+        caches.keys().then(function (names) {
+          for (let name of names) caches.delete(name);
+        }).catch(function () {});
+      }
+    </script>
     <title>AI Study Planner for Students — StudyPulse | Google Classroom Sync, Flashcards, GPA Tracker</title>
     <meta name="description" content="Free AI study companion that syncs Google Classroom, predicts your final exam score, generates flashcards from notes, and builds a daily study plan. Open source, no signup needed." />
     <link rel="canonical" href="https://studypulse.app" />

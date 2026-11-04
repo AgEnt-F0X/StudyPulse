@@ -74,7 +74,7 @@ export default function Profile() {
             }}>Level {level}</span>
             {streak > 0 && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: C.orange, fontWeight: 700 }}>
-                <Flame size={13} /> {streak}d streak
+                <Fire size={13} weight="fill" /> {streak}d streak
               </span>
             )}
           </div>

@@ -73,13 +73,13 @@ const ProfileDropdown = () => {
         <div className="hidden md:block text-left">
           <p
             className="text-sm font-medium"
-            style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, color: onSurfacePrimaryColor }}
+            style={{ fontFamily: "var(--md-font-body)", fontWeight: 600, color: onSurfacePrimaryColor }}
           >
             {getDisplayName()}
           </p>
           <p
             className="text-xs"
-            style={{ fontFamily: "'Manrope', sans-serif", color: onSurfaceSecondaryColor }}
+            style={{ fontFamily: "var(--md-font-body)", color: onSurfaceSecondaryColor }}
           >
             {user?.email || 'Student'}
           </p>
@@ -117,20 +117,20 @@ const ProfileDropdown = () => {
                   <div>
                     <p
                       className="font-semibold"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: onSurfacePrimaryColor }}
+                      style={{ fontFamily: "var(--md-font-body)", fontWeight: 600, color: onSurfacePrimaryColor }}
                     >
                       {getDisplayName()}
                     </p>
                     <p
                       className="text-xs truncate"
-                      style={{ fontFamily: "'Manrope', sans-serif", color: onSurfaceSecondaryColor }}
+                      style={{ fontFamily: "var(--md-font-body)", color: onSurfaceSecondaryColor }}
                     >
                       {user?.email || 'No email set'}
                     </p>
                     {user?.country && (
                       <p
                         className="text-xs on-surface-tertiary mt-0.5"
-                        style={{ fontFamily: "'Manrope', sans-serif", display: 'flex', alignItems: 'center', gap: 4 }}
+                        style={{ fontFamily: "var(--md-font-body)", display: 'flex', alignItems: 'center', gap: 4 }}
                       >
                         <MapPin size={10} /> {user.country}
                       </p>
@@ -159,13 +159,13 @@ const ProfileDropdown = () => {
                     <div className="flex-1">
                       <p
                         className="text-sm font-medium"
-                        style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 500 }}
+                        style={{ fontFamily: "var(--md-font-body)", fontWeight: 500 }}
                       >
                         {item.label}
                       </p>
                       <p
                         className="text-xs"
-                        style={{ fontFamily: "'Manrope', sans-serif", color: onSurfaceSecondaryColor }}
+                        style={{ fontFamily: "var(--md-font-body)", color: onSurfaceSecondaryColor }}
                       >
                         {item.description}
                       </p>
@@ -200,13 +200,13 @@ const ProfileDropdown = () => {
                   <div>
                     <p
                       className="text-sm font-medium"
-                      style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600 }}
+                      style={{ fontFamily: "var(--md-font-body)", fontWeight: 600 }}
                     >
                       Log Out
                     </p>
                     <p
                       className="text-xs"
-                      style={{ fontFamily: "'Manrope', sans-serif", color: onSurfaceSecondaryColor }}
+                      style={{ fontFamily: "var(--md-font-body)", color: onSurfaceSecondaryColor }}
                     >
                       Sign out of your account
                     </p>

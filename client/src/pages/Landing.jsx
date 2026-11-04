@@ -127,7 +127,7 @@ export default function Landing() {
             transition={{ type: 'spring', stiffness: 300 }}
             style={{
               width: 34, height: 34, borderRadius: 8,
-              background: 'var(--grad-logo, linear-gradient(135deg, #10b981, #059669))',
+              background: 'var(--grad-logo)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 2px 8px rgba(59, 130, 246, 0.35)',
             }}>

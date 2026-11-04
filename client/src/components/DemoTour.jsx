@@ -13,7 +13,7 @@ const STEPS = [
   {
     tag: 'Step 1 · Today',
     title: 'Your adaptive Home decides for you',
-    accent: '#10B981',
+    accent: 'var(--md-primary)',
     vignette: 'hero',
     body: 'The Home card reads your learner memory — what you last read, what is due for a refresh, and where you slipped — and lines up the single best next action. You never waste time deciding what to study.',
     bullets: [
@@ -26,7 +26,7 @@ const STEPS = [
   {
     tag: 'Step 2 · Study & 3D Labs',
     title: 'Read NCERT like a real book — then ask it anything',
-    accent: '#34D399',
+    accent: 'var(--md-primary)',
     vignette: 'reader',
     body: 'The Library shelves every chapter as a physical 3D book. Inside the reader, select any sentence to save it, or press [Select area] and drag a box around a diagram, graph or equation — StudyPulse crops that exact region and explains it in English, Hindi or Hinglish. Every chapter also has a hands-on 3D Concept Lab.',
     bullets: [
@@ -52,7 +52,7 @@ const STEPS = [
   {
     tag: 'Step 4 · SQL 3D Arena',
     title: 'See your query hit the tables',
-    accent: '#6EE7B7',
+    accent: 'var(--md-primary)',
     vignette: 'sql',
     body: 'CBSE MySQL missions run on a real in-browser engine. The 3D relational stage shows the actual tables as physical trays: rows satisfying your WHERE clause elevate and glow, JOIN beams connect the matched key pairs, and GROUP BY stacks aggregate buckets in real time.',
     bullets: [
@@ -101,11 +101,11 @@ function Vignette({ kind }) {
           <div style={{ height: 4, width: '70%', background: '#C9C2B4', borderRadius: 2, marginBottom: 5 }} />
           <div style={{ height: 4, width: '85%', background: '#DDD6C8', borderRadius: 2, marginBottom: 5 }} />
           <div style={{ height: 4, width: '55%', background: 'rgba(245,158,11,0.5)', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', right: 10, top: 14, width: 34, height: 26, border: '2px solid #10B981', background: 'rgba(16,185,129,0.15)', boxShadow: '0 0 10px rgba(16,185,129,0.5)', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', right: 10, top: 14, width: 34, height: 26, border: '2px solid var(--md-primary)', background: 'color-mix(in srgb, var(--md-primary) 15%, transparent)', boxShadow: '0 0 10px color-mix(in srgb, var(--md-primary) 50%, transparent)', borderRadius: 2 }} />
         </div>
-        <div style={{ flex: 1, borderRadius: 6, background: '#131C18', border: `1px solid ${C.border}`, padding: 8 }}>
+        <div style={{ flex: 1, borderRadius: 6, background: 'var(--md-surface)', border: `1px solid ${C.border}`, padding: 8 }}>
           {['Explain', 'Why this?', '3D Lab'].map((t) => (
-            <div key={t} style={{ fontFamily: fonts.mono, fontSize: 8.5, color: '#6EE7B7', padding: '3px 0' }}>▸ {t}</div>
+            <div key={t} style={{ fontFamily: fonts.mono, fontSize: 8.5, color: 'var(--md-primary)', padding: '3px 0' }}>▸ {t}</div>
           ))}
         </div>
       </div>
@@ -127,26 +127,26 @@ function Vignette({ kind }) {
     return (
       <div style={{ display: 'flex', gap: 8, height: 74 }}>
         <div style={{
-          flex: 1, borderRadius: 6, background: '#101A15', border: '1px solid rgba(52,211,153,0.3)',
+          flex: 1, borderRadius: 6, background: '#121218', border: '1px solid color-mix(in srgb, var(--md-primary) 30%, transparent)',
           transform: 'perspective(600px) rotateX(24deg) rotateZ(-8deg)', padding: 6,
         }}>
           {[0, 1, 2].map((i) => (
             <div key={i} style={{
               height: 9, margin: '2px 0', borderRadius: 2,
-              background: i === 1 ? 'rgba(16,185,129,0.5)' : 'rgba(52,211,153,0.1)',
-              boxShadow: i === 1 ? '0 0 8px rgba(16,185,129,0.6)' : 'none',
+              background: i === 1 ? 'color-mix(in srgb, var(--md-primary) 50%, transparent)' : 'color-mix(in srgb, var(--md-primary) 10%, transparent)',
+              boxShadow: i === 1 ? '0 0 8px color-mix(in srgb, var(--md-primary) 60%, transparent)' : 'none',
             }} />
           ))}
         </div>
-        <div style={{ alignSelf: 'center', width: 34, height: 2, background: '#10B981', boxShadow: '0 0 6px rgba(16,185,129,0.8)', borderRadius: 2 }} />
+        <div style={{ alignSelf: 'center', width: 34, height: 2, background: 'var(--md-primary)', boxShadow: '0 0 6px color-mix(in srgb, var(--md-primary) 80%, transparent)', borderRadius: 2 }} />
         <div style={{
-          flex: 1, borderRadius: 6, background: '#101A15', border: '1px solid rgba(52,211,153,0.3)',
+          flex: 1, borderRadius: 6, background: '#121218', border: '1px solid color-mix(in srgb, var(--md-primary) 30%, transparent)',
           transform: 'perspective(600px) rotateX(24deg) rotateZ(-8deg)', padding: 6,
         }}>
           {[0, 1, 2].map((i) => (
             <div key={i} style={{
               height: 9, margin: '2px 0', borderRadius: 2,
-              background: i === 1 ? 'rgba(16,185,129,0.5)' : 'rgba(52,211,153,0.1)',
+              background: i === 1 ? 'color-mix(in srgb, var(--md-primary) 50%, transparent)' : 'color-mix(in srgb, var(--md-primary) 10%, transparent)',
             }} />
           ))}
         </div>
@@ -162,9 +162,9 @@ function Vignette({ kind }) {
       </div>
       {['READ · 20 MIN', 'QUIZ · 15 MIN', 'PYQ · 20 MIN'].map((t, i) => (
         <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: fonts.mono, fontSize: 8.5, color: i === 0 ? '#F59E0B' : '#34D399', width: 84 }}>{t}</span>
-          <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'rgba(52,211,153,0.15)' }}>
-            <div style={{ width: `${[70, 45, 55][i]}%`, height: '100%', borderRadius: 3, background: i === 0 ? '#F59E0B' : '#34D399' }} />
+          <span style={{ fontFamily: fonts.mono, fontSize: 8.5, color: i === 0 ? '#F59E0B' : 'var(--md-primary)', width: 84 }}>{t}</span>
+          <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'color-mix(in srgb, var(--md-primary) 15%, transparent)' }}>
+            <div style={{ width: `${[70, 45, 55][i]}%`, height: '100%', borderRadius: 3, background: i === 0 ? '#F59E0B' : 'var(--md-primary)' }} />
           </div>
         </div>
       ))}
@@ -224,8 +224,8 @@ export default function DemoTour() {
         left: '50%', top: '50%',
         transform: 'translate(-50%, -50%) translate3d(0,0,0)',
         width: 'min(520px, calc(100vw - 24px))',
-        background: '#131C18',
-        border: '1px solid rgba(52,211,153,0.3)',
+        background: 'var(--md-surface)',
+        border: '1px solid color-mix(in srgb, var(--md-primary) 30%, transparent)',
         borderRadius: 20,
         boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
         padding: '22px 24px 18px',
@@ -236,7 +236,7 @@ export default function DemoTour() {
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <span style={{
               width: 18, height: 18, borderRadius: 999,
-              background: 'rgba(52,211,153,0.18)', border: '1px solid rgba(52,211,153,0.4)',
+              background: 'color-mix(in srgb, var(--md-primary) 18%, transparent)', border: '1px solid color-mix(in srgb, var(--md-primary) 40%, transparent)',
               color: C.primaryBright, fontSize: 11, fontWeight: 800,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             }}>?</span>
@@ -257,7 +257,7 @@ export default function DemoTour() {
         {/* Vignette */}
         <div style={{
           borderRadius: 12, padding: '12px 14px', marginBottom: 14,
-          background: '#0A1410', border: `1px solid ${C.borderSoft}`,
+          background: '#101014', border: `1px solid ${C.borderSoft}`,
         }}>
           <Vignette kind={s.vignette} />
         </div>
@@ -320,7 +320,7 @@ export default function DemoTour() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '7px 15px', borderRadius: 999,
-                  background: s.accent, color: '#06251A',
+                  background: s.accent, color: 'var(--md-on-primary)',
                   border: 'none', cursor: 'pointer',
                   fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700,
                   boxShadow: '0 4px 0 rgba(0,0,0,0.3)',
@@ -336,7 +336,7 @@ export default function DemoTour() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 5,
                   padding: '7px 15px', borderRadius: 999,
-                  background: 'rgba(52,211,153,0.14)', border: '1px solid rgba(52,211,153,0.4)',
+                  background: 'color-mix(in srgb, var(--md-primary) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--md-primary) 40%, transparent)',
                   color: C.primaryBright, cursor: 'pointer',
                   fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700,
                 }}

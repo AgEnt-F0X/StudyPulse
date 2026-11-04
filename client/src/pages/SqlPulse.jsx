@@ -65,7 +65,7 @@ function tokenizeSql(text) {
 
 const TOKEN_STYLE = {
   comment: { color: C.textFaint, fontStyle: 'italic' },
-  string: { color: '#34D399' },
+  string: { color: 'var(--md-primary)' },
   number: { color: '#F59E0B' },
   keyword: { color: C.text, fontWeight: 500 },
   function: { color: '#A1A1AA' },
@@ -123,9 +123,9 @@ function SqlEditor({ value, onChange, onExecute }) {
 
   return (
     <div style={{
-      display: 'flex', height: 190, background: '#0A1410', overflow: 'hidden',
-      borderRadius: 12, border: '1px solid rgba(16,185,129,0.28)',
-      boxShadow: '0 0 0 1px rgba(16,185,129,0.12), 0 0 32px rgba(16,185,129,0.18), inset 0 1px 0 rgba(110,231,183,0.08)',
+      display: 'flex', height: 190, background: '#101014', overflow: 'hidden',
+      borderRadius: 12, border: '1px solid color-mix(in srgb, var(--md-primary) 28%, transparent)',
+      boxShadow: '0 0 0 1px color-mix(in srgb, var(--md-primary) 12%, transparent), 0 0 32px color-mix(in srgb, var(--md-primary) 18%, transparent), inset 0 1px 0 color-mix(in srgb, var(--md-primary) 8%, transparent)',
     }}>
       {/* Line-number gutter */}
       <div
@@ -133,10 +133,10 @@ function SqlEditor({ value, onChange, onExecute }) {
         style={{
           width: 40, flexShrink: 0, overflow: 'hidden',
           padding: '10px 6px 10px 0', textAlign: 'right',
-          borderRight: '1px solid rgba(16,185,129,0.18)',
+          borderRight: '1px solid color-mix(in srgb, var(--md-primary) 18%, transparent)',
           background: 'rgba(8, 16, 12, 0.9)',
           fontFamily: fonts.mono, fontSize: 11, lineHeight: 1.65,
-          color: 'rgba(110,231,183,0.45)', fontVariantNumeric: 'tabular-nums',
+          color: 'color-mix(in srgb, var(--md-primary) 45%, transparent)', fontVariantNumeric: 'tabular-nums',
           userSelect: 'none',
         }}
       >
@@ -845,8 +845,8 @@ export default function SqlPulse() {
                               style={{
                                 textAlign: 'left', padding: '7px 10px', borderRadius: 3,
                                 fontFamily: fonts.body, fontSize: 12,
-                                background: correct ? 'rgba(16,185,129,0.10)' : wrong ? 'rgba(239,68,68,0.10)' : chosen ? C.cardHover : 'transparent',
-                                border: `1px solid ${correct ? 'rgba(16,185,129,0.4)' : wrong ? 'rgba(239,68,68,0.4)' : chosen ? C.borderStrong : C.borderSoft}`,
+                                background: correct ? 'color-mix(in srgb, var(--md-primary) 10%, transparent)' : wrong ? 'rgba(239,68,68,0.10)' : chosen ? C.cardHover : 'transparent',
+                                border: `1px solid ${correct ? 'color-mix(in srgb, var(--md-primary) 40%, transparent)' : wrong ? 'rgba(239,68,68,0.4)' : chosen ? C.borderStrong : C.borderSoft}`,
                                 color: correct ? C.success : wrong ? C.error : C.text,
                                 cursor: quizChecked ? 'default' : 'pointer',
                               }}
@@ -934,7 +934,7 @@ export default function SqlPulse() {
                     {CLAUSE_CHIPS.map(([label, tpl]) => (
                       <button key={label} onClick={() => insertClause(tpl)} className="motion-spring" style={{
                         padding: '3px 10px', borderRadius: 999,
-                        background: 'rgba(52,211,153,0.08)', border: `1px solid ${C.borderSoft}`,
+                        background: 'color-mix(in srgb, var(--md-primary) 8%, transparent)', border: `1px solid ${C.borderSoft}`,
                         color: C.primaryBright, cursor: 'pointer',
                         fontFamily: fonts.mono, fontSize: 10, fontWeight: 600, letterSpacing: '0.04em',
                       }}>
@@ -1026,8 +1026,8 @@ export default function SqlPulse() {
                   <div style={{
                     display: 'flex', alignItems: 'flex-start', gap: 10,
                     padding: '10px 12px', borderRadius: 4,
-                    background: grade.passed ? 'rgba(16,185,129,0.07)' : C.bgSoft,
-                    border: `1px solid ${grade.passed ? 'rgba(16,185,129,0.35)' : C.border}`,
+                    background: grade.passed ? 'color-mix(in srgb, var(--md-primary) 7%, transparent)' : C.bgSoft,
+                    border: `1px solid ${grade.passed ? 'color-mix(in srgb, var(--md-primary) 35%, transparent)' : C.border}`,
                     borderLeft: `2px solid ${grade.passed ? C.success : grade.level === 'trap' ? C.warning : C.error}`,
                   }}>
                     <span className={`dot ${grade.passed ? 'dot-success' : grade.level === 'trap' ? 'dot-warning' : 'dot-error'}`} style={{ marginTop: 5 }} />

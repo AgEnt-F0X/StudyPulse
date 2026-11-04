@@ -22,26 +22,24 @@ const Button = ({
 
   const variantStyles = {
     primary: {
-      background: 'var(--grad-primary, linear-gradient(135deg, #34d399, #10b981))',
+      background: 'var(--grad-primary)',
       color: '#04120c',
       border: 'none',
       boxShadow:
-        'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(16,185,129,0.22)',
+        'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px color-mix(in srgb, var(--md-primary) 22%, transparent)',
     },
     amber: {
-      background: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
+      background: 'var(--grad-reward)',
       color: '#1a1005',
       border: 'none',
       boxShadow:
         'inset 0 1px 0 rgba(255,255,255,0.25), 0 8px 32px rgba(245,158,11,0.22)',
     },
     secondary: {
-      background: 'var(--bg-card-glass, rgba(16,28,22,0.75))',
-      color: 'var(--text-primary, #f0fdf4)',
-      border: '1px solid var(--border-color, rgba(52,211,153,0.14))',
+      background: 'var(--md-surface)',
+      color: 'var(--md-text)',
+      border: '1px solid var(--md-outline)',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
     },
     ghost: {
       background: 'transparent',
@@ -77,7 +75,7 @@ const Button = ({
       style={{
         ...resolved,
         borderRadius: 8,
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "var(--md-font-body)",
         fontWeight: 700,
         letterSpacing: '0.01em',
         padding: '0.625rem 1.25rem',

@@ -8,6 +8,7 @@ import { C, fonts, btnPrimary, btnAmber } from '../utils/theme'
 import Book3D, { SUBJECT_ART } from '../components/Book3D'
 import { getLastRead } from './Library'
 import { getLearnerChapters } from '../utils/cbseSubjects'
+import { useExamStore, examReadiness, buildDailyQueue } from '../stores/examStore'
 
 // ── LED focus telemetry (lives in the collapsible drawer) ─────
 
@@ -34,6 +35,51 @@ function LedMatrix({ dailyFocusLog, days = 14 }) {
           <span style={{ fontFamily: fonts.mono, fontSize: 7.5, color: C.textFaint }}>{c.label[0]}</span>
         </div>
       ))}
+    </div>
+  )
+}
+
+function ReadinessCard() {
+  const exams = useExamStore((s) => s.exams)
+  const learnerChapters = useLearnerStore((s) => s.chapters)
+  const navigate = useNavigate()
+  const exam = exams[0]
+  if (!exam) return null
+  const readiness = examReadiness(exam, learnerChapters)
+  const { tasks } = buildDailyQueue(exam, learnerChapters)
+  const bandColor = readiness.band.label === 'At Risk' ? 'var(--md-error)' : readiness.band.label === 'On track' ? 'var(--md-primary)' : '#F59E0B'
+  return (
+    <div style={{
+      borderRadius: 'var(--md-radius-sm)', padding: '15px 17px',
+      background: 'var(--md-surface)', border: '1px solid var(--md-outline)',
+      boxShadow: 'var(--md-shadow-card)',
+      contain: 'layout style paint',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span className="metric-label" style={{ padding: 0 }}>Exam readiness · {readiness.band.label}</span>
+        <button onClick={() => navigate('/study-plans')} style={{ fontFamily: fonts.mono, fontSize: 9.5, color: 'var(--md-text-faint)', background: 'none', border: 'none', cursor: 'pointer' }}>Plan →</button>
+      </div>
+      <div style={{ fontFamily: fonts.mono, fontSize: 26, fontWeight: 700, lineHeight: 1, color: bandColor, fontVariantNumeric: 'tabular-nums' }}>
+        {readiness.pct}%
+      </div>
+      <div style={{ height: 4, background: 'var(--md-surface-high)', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: Math.min(100, readiness.pct) + '%', background: bandColor, borderRadius: 2 }} />
+      </div>
+      <div className="metric-label" style={{ padding: 0, margin: '10px 0 6px' }}>Today · {tasks.slice(0, 3).length} micro-tasks</div>
+      {tasks.slice(0, 3).map((t) => (
+        <div key={t.type + t.chapterId} style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0' }}>
+          <span style={{ fontFamily: fonts.mono, fontSize: 8.5, color: '#F59E0B', width: 74, flexShrink: 0 }}>{t.type} · {t.minutes}M</span>
+          <span style={{ flex: 1, fontSize: 11.5, color: 'var(--md-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.label.replace(/^(Read|Quiz Me|Refresh|PYQ drill): /, '')}</span>
+          <button onClick={() => navigate(t.path)} className="motion-spring" style={{
+            padding: '2px 9px', borderRadius: 999, flexShrink: 0,
+            background: 'var(--md-primary)', color: 'var(--md-on-primary)', border: 'none',
+            fontFamily: fonts.body, fontSize: 10.5, fontWeight: 700, cursor: 'pointer',
+          }}>Start</button>
+        </div>
+      ))}
+      <p style={{ fontFamily: fonts.mono, fontSize: 9, color: 'var(--md-text-faint)', margin: '8px 0 0', lineHeight: 1.5 }}>
+        From verified concept states — not a mark prediction.
+      </p>
     </div>
   )
 }
@@ -168,6 +214,8 @@ export default function Home() {
 
   return (
     <div style={{ fontFamily: fonts.body, color: C.text }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16, alignItems: 'start' }}>
+      <div style={{ gridColumn: 'span 8', minWidth: 0 }}>
       {/* ═══ 1. Primary Hero — What should you do next? ═══ */}
       <div style={{
         position: 'relative',
@@ -183,7 +231,7 @@ export default function Home() {
       }}>
         <div style={{
           position: 'absolute', left: 0, right: 0, bottom: -60, height: 140,
-          background: 'radial-gradient(600px 130px at 30% 100%, rgba(245,158,11,0.18), transparent 70%), radial-gradient(600px 130px at 75% 100%, rgba(16,185,129,0.18), transparent 70%)',
+          background: 'radial-gradient(600px 130px at 30% 100%, rgba(245,158,11,0.18), transparent 70%), radial-gradient(600px 130px at 75% 100%, color-mix(in srgb, var(--md-primary) 18%, transparent), transparent 70%)',
           pointerEvents: 'none',
         }} />
         <div style={{ display: 'flex', gap: 34, alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
@@ -260,7 +308,7 @@ export default function Home() {
           {noticedCards.map((card) => (
             <div key={card.id} style={{
               borderRadius: 16, padding: '15px 17px',
-              background: '#131C18', border: `1px solid ${C.border}`,
+              background: 'var(--md-surface)', border: `1px solid ${C.border}`,
               boxShadow: '0 10px 26px rgba(0,0,0,0.32)',
               contain: 'layout style paint',
             }}>
@@ -322,7 +370,7 @@ export default function Home() {
       ) : (
         <div style={{
           borderRadius: 16, padding: '16px 20px', marginBottom: 18,
-          background: '#131C18', border: `1px solid ${C.border}`,
+          background: 'var(--md-surface)', border: `1px solid ${C.border}`,
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <span className="dot dot-success" />
@@ -332,6 +380,10 @@ export default function Home() {
         </div>
       )}
 
+      </div>
+
+      {/* Right rail — subjects shelf + exam readiness */}
+      <div style={{ gridColumn: 'span 4', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* ═══ 3. Your Subjects Shelf — jump straight in ═══ */}
       <div style={{
         borderRadius: 20, padding: '20px 24px 8px',
@@ -365,6 +417,10 @@ export default function Home() {
             />
           ))}
         </div>
+      </div>
+
+      <ReadinessCard />
+      </div>
       </div>
 
       {/* ═══ Collapsible secondary drawer — stats & telemetry ═══ */}
@@ -415,7 +471,7 @@ export default function Home() {
                   </span>
                 </div>
                 <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, xpPct)}%`, background: 'linear-gradient(90deg, #10B981, #6EE7B7)', borderRadius: 2 }} />
+                  <div style={{ height: '100%', width: `${Math.min(100, xpPct)}%`, background: 'linear-gradient(90deg, var(--md-primary), var(--md-primary))', borderRadius: 2 }} />
                 </div>
               </div>
             </div>

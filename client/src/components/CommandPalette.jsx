@@ -115,7 +115,7 @@ const CommandPalette = () => {
             style={{
               width: 'min(560px, 100%)', height: 'fit-content', maxHeight: '60vh',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
-              background: 'var(--bg-card, #101c17)',
+              background: 'var(--bg-card)',
               border: '1px solid var(--border-color, rgba(52,211,153,0.14))',
               borderRadius: 16,
               boxShadow: '0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',

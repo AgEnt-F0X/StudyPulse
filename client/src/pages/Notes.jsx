@@ -42,7 +42,7 @@ function renderInlineTokens(text) {
     }
     if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
       return <code key={i} style={{
-        background: 'rgba(52,211,153,0.12)',
+        background: 'color-mix(in srgb, var(--md-primary) 12%, transparent)',
         color: C.primary,
         padding: '2px 6px',
         borderRadius: 4,
@@ -102,8 +102,8 @@ function renderFormattedNotes(content) {
     if (line.startsWith('> ')) {
       return (
         <blockquote key={idx} style={{
-          borderLeft: `3px solid var(--primary, #10b981)`,
-          background: 'rgba(16,185,129,0.06)',
+          borderLeft: `3px solid var(--primary)`,
+          background: 'color-mix(in srgb, var(--md-primary) 6%, transparent)',
           padding: '8px 14px',
           margin: '8px 0',
           borderRadius: '0 8px 8px 0',
@@ -119,7 +119,7 @@ function renderFormattedNotes(content) {
       const checked = line.startsWith('- [x] ')
       return (
         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0', paddingLeft: 6 }}>
-          <input type="checkbox" readOnly checked={checked} style={{ accentColor: 'var(--primary, #10b981)' }} />
+          <input type="checkbox" readOnly checked={checked} style={{ accentColor: 'var(--primary)' }} />
           <span style={{ textDecoration: checked ? 'line-through' : 'none', color: checked ? C.textFaint : C.text }}>
             {renderInlineTokens(line.slice(6))}
           </span>
@@ -455,7 +455,7 @@ Notes:\n${active.content}`
   }
 
   const panel = {
-    background: 'var(--bg-card, #101c17)',
+    background: 'var(--bg-card)',
     borderRadius: 16, border: `1px solid ${C.border}`,
     display: 'flex', flexDirection: 'column', overflow: 'hidden',
   }
@@ -476,7 +476,7 @@ Notes:\n${active.content}`
           {/* Revision notes generator */}
           <div style={{
             marginBottom: 10, borderRadius: 4,
-            border: `1px solid ${C.borderSoft}`, background: 'var(--surface-low, #0C0C0E)',
+            border: `1px solid ${C.borderSoft}`, background: 'var(--surface-low, #101014)',
           }}>
             <button onClick={() => setGenOpen((o) => !o)} style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -594,8 +594,8 @@ Notes:\n${active.content}`
               const selectedTab = subject === s
               return (
                 <button key={s} onClick={() => setSubject(s)} style={{
-                  padding: '4px 10px', borderRadius: 999, border: `1px solid ${selectedTab ? 'rgba(52,211,153,0.45)' : C.borderSoft}`,
-                  background: selectedTab ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+                  padding: '4px 10px', borderRadius: 999, border: `1px solid ${selectedTab ? 'color-mix(in srgb, var(--md-primary) 45%, transparent)' : C.borderSoft}`,
+                  background: selectedTab ? 'var(--accent-blue-soft, color-mix(in srgb, var(--md-primary) 12%, transparent))' : 'transparent',
                   color: selectedTab ? C.primary : C.textMuted, cursor: 'pointer',
                   fontFamily: fonts.body, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
                 }}>{s}</button>
@@ -614,7 +614,7 @@ Notes:\n${active.content}`
                 color: C.text, fontSize: 12.5, fontFamily: fonts.body,
                 boxSizing: 'border-box', outline: 'none',
               }}
-              onFocus={e => { e.target.style.borderColor = 'var(--primary, #10b981)'; e.target.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.15)' }}
+              onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px color-mix(in srgb, var(--md-primary) 15%, transparent)' }}
               onBlur={e => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none' }}
             />
           </div>
@@ -628,12 +628,12 @@ Notes:\n${active.content}`
             <div key={n.id} onClick={() => setSelected(n.id)} style={{
               padding: '12px 14px', cursor: 'pointer',
               borderBottom: `1px solid ${C.borderSoft}`,
-              background: selected === n.id ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
-              border: selected === n.id ? `1px solid rgba(52,211,153,0.30)` : '1px solid transparent',
+              background: selected === n.id ? 'var(--accent-blue-soft, color-mix(in srgb, var(--md-primary) 12%, transparent))' : 'transparent',
+              border: selected === n.id ? `1px solid color-mix(in srgb, var(--md-primary) 30%, transparent)` : '1px solid transparent',
               borderRadius: selected === n.id ? 10 : 0,
               transition: 'background 0.12s ease',
             }}
-              onMouseEnter={e => { if (selected !== n.id) e.currentTarget.style.background = 'rgba(16,185,129,0.05)' }}
+              onMouseEnter={e => { if (selected !== n.id) e.currentTarget.style.background = 'color-mix(in srgb, var(--md-primary) 5%, transparent)' }}
               onMouseLeave={e => { if (selected !== n.id) e.currentTarget.style.background = 'transparent' }}
             >
               <div style={{ fontSize: 13, fontWeight: 600, color: selected === n.id ? C.primary : C.text, marginBottom: 3 }}>
@@ -656,7 +656,7 @@ Notes:\n${active.content}`
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 14 }}>
             <div style={{
               width: 54, height: 54, borderRadius: 14,
-              background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(52,211,153,0.25)',
+              background: 'color-mix(in srgb, var(--md-primary) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--md-primary) 25%, transparent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.primary,
             }}>
               <Notebook size={24} weight="duotone" />
@@ -672,7 +672,7 @@ Notes:\n${active.content}`
             <div style={{
               padding: '12px 18px', borderBottom: `1px solid ${C.borderSoft}`,
               display: 'flex', alignItems: 'center', gap: 10,
-              background: 'var(--bg-primary, #0a120e)',
+              background: 'var(--bg-primary)',
             }}>
               <input
                 value={active.title || ''}
@@ -691,14 +691,14 @@ Notes:\n${active.content}`
                 fontSize: 11, fontWeight: 700, fontFamily: fonts.body, color: C.primary,
                 whiteSpace: 'nowrap',
               }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary, #10b981)' }} />
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary)' }} />
                 {savedAt ? `Saved ${new Date(savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Saved'}
               </span>
               <button onClick={() => setPreview(p => !p)} style={{
                 display: 'flex', alignItems: 'center', gap: 5,
                 padding: '5px 12px', borderRadius: 999,
-                border: `1px solid ${preview ? 'rgba(52,211,153,0.40)' : C.border}`,
-                background: preview ? 'var(--accent-blue-soft, rgba(16,185,129,0.12))' : 'transparent',
+                border: `1px solid ${preview ? 'color-mix(in srgb, var(--md-primary) 40%, transparent)' : C.border}`,
+                background: preview ? 'var(--accent-blue-soft, color-mix(in srgb, var(--md-primary) 12%, transparent))' : 'transparent',
                 color: preview ? C.primary : C.textMuted,
                 cursor: 'pointer', fontSize: 11.5, fontFamily: fonts.body, fontWeight: 700,
               }}>
@@ -718,10 +718,10 @@ Notes:\n${active.content}`
                   cursor: 'pointer', fontSize: 11.5, fontFamily: fonts.body, fontWeight: 600,
                   transition: 'border-color 0.12s ease, background 0.12s ease',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-blue, #10b981)'; e.currentTarget.style.background = 'var(--accent-blue-soft, rgba(16,185,129,0.12))' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; e.currentTarget.style.background = 'var(--accent-blue-soft, color-mix(in srgb, var(--md-primary) 12%, transparent))' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = 'transparent' }}
               >
-                <Brain size={13} weight="duotone" color="var(--accent-blue, #10b981)" />
+                <Brain size={13} weight="duotone" color="var(--accent-blue)" />
                 <span>Quiz Me</span>
               </button>
 
@@ -754,7 +754,7 @@ Notes:\n${active.content}`
                     display: 'flex', alignItems: 'center', gap: 5,
                     padding: '5px 12px', borderRadius: 999,
                     border: 'none',
-                    background: 'var(--grad-reward, linear-gradient(135deg, #fbbf24, #d97706))',
+                    background: 'var(--grad-reward)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                     color: '#1a1005',
                     cursor: aiLoading ? 'wait' : 'pointer',
@@ -766,7 +766,7 @@ Notes:\n${active.content}`
                 {aiMenu && (
                   <div style={{
                     position: 'absolute', top: '100%', right: 0, marginTop: 6,
-                    background: 'var(--bg-card, #101c17)', border: `1px solid ${C.border}`, borderRadius: 12,
+                    background: 'var(--bg-card)', border: `1px solid ${C.border}`, borderRadius: 12,
                     padding: 6, zIndex: 50, minWidth: 230,
                     boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
                   }}>
@@ -785,7 +785,7 @@ Notes:\n${active.content}`
                           color: C.text, fontSize: 12.5, textAlign: 'left',
                           transition: 'background 0.12s ease',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.08)'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'color-mix(in srgb, var(--md-primary) 8%, transparent)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <opt.icon size={16} weight="duotone" color={opt.color} />
