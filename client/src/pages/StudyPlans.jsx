@@ -99,7 +99,7 @@ export default function StudyPlans() {
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 860, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, width: '100%' }}>
       <PageHeader
         title="Exam Mode"
         subtitle="Plan from verified learner states — honest readiness, micro-tasks every day"

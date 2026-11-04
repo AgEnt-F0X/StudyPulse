@@ -461,7 +461,7 @@ Notes:\n${active.content}`
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, display: 'flex', height: 'calc(100vh - 140px)', minHeight: 450 }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, display: 'flex', height: 'calc(100vh - 175px)', minHeight: 450 }}>
       {/* Left panel */}
       <div style={{ ...panel, width: 310, flexShrink: 0, marginRight: 16 }}>
         <div style={{ padding: '14px 14px 12px', borderBottom: `1px solid ${C.borderSoft}` }}>

@@ -66,7 +66,7 @@ export default function PYQ() {
   const selectStyle = { ...inputStyle, minWidth: 150, cursor: 'pointer' }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, width: '100%' }}>
       <PageHeader
         title="Board PYQ Vault"
         subtitle="Official CBSE board questions 2022–2026 with step-wise marking-scheme walkthroughs"

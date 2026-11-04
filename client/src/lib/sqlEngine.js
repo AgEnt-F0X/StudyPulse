@@ -406,6 +406,22 @@ export function inspectTable(db, table) {
   }
 }
 
+/**
+ * Dump a table's rows ordered by rowid — index i in the result is exactly
+ * rowid i+1, which is what the 3D stage uses to map WHERE/join hits back
+ * to physical tile positions.
+ */
+export function getTableRows(db, table, limit = 60) {
+  try {
+    const res = db.exec(`SELECT * FROM "${table}" ORDER BY rowid LIMIT ${limit}`)
+    return res.length
+      ? { columns: res[0].columns, values: res[0].values }
+      : { columns: [], values: [] }
+  } catch {
+    return { columns: [], values: [] }
+  }
+}
+
 // ── Value normalisation (shared by the grader) ────────────────
 
 export function normalizeCell(v) {

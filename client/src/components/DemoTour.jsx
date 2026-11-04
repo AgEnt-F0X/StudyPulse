@@ -1,241 +1,352 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight, ChevronLeft, Sparkles, BookOpen, BarChart3, Brain, Zap, Github } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, ArrowRight, ArrowLeft, Play } from '@phosphor-icons/react'
+import { C, fonts } from '../utils/theme'
+
+// "How to Use StudyPulse" — interactive 5-step guide with deep links.
+// Triggered from the dock's [? Guide] button (studypulse-open-guide event)
+// and auto-offered once on a student's very first visit.
+
+const GUIDE_SEEN_KEY = 'studypulse-guide-seen'
 
 const STEPS = [
   {
-    icon: Sparkles,
-    color: '#c44dff',
-    title: 'Welcome to StudyPulse',
-    subtitle: 'AI Study Companion',
-    body: 'You\'re exploring a fully-loaded demo with sample courses, assignments, grades, and flashcards. Everything here is pre-filled — no account or setup needed.',
-    hint: 'All your real data stays 100% local. No tracking.',
+    tag: 'Step 1 · Today',
+    title: 'Your adaptive Home decides for you',
+    accent: '#10B981',
+    vignette: 'hero',
+    body: 'The Home card reads your learner memory — what you last read, what is due for a refresh, and where you slipped — and lines up the single best next action. You never waste time deciding what to study.',
+    bullets: [
+      '"What should you do next?" always points at your current chapter',
+      'Due concepts come back automatically before you forget them',
+      'The Ask bar answers any homework question in English, Hindi or Hinglish',
+    ],
+    link: { label: 'Open Today', path: '/home' },
   },
   {
-    icon: Brain,
-    color: '#afc6ff',
-    title: 'AI Study Plans',
-    subtitle: 'Gemini AI inside',
-    body: 'Add your Gemini API key (free at aistudio.google.com) in Settings → and StudyPulse will build a personalized day-by-day study schedule from your deadlines.',
-    hint: 'Or use Google Classroom sync to auto-import assignments.',
+    tag: 'Step 2 · Study & 3D Labs',
+    title: 'Read NCERT like a real book — then ask it anything',
+    accent: '#34D399',
+    vignette: 'reader',
+    body: 'The Library shelves every chapter as a physical 3D book. Inside the reader, select any sentence to save it, or press [Select area] and drag a box around a diagram, graph or equation — StudyPulse crops that exact region and explains it in English, Hindi or Hinglish. Every chapter also has a hands-on 3D Concept Lab.',
+    bullets: [
+      '[Select area] → glowing green box → crop → Ask StudyPulse',
+      'Explain · Why this? · PYQs · Quiz Me · Notes dock beside the page',
+      'Physics ramps, spinning molecules and 3D vectors live in the [3D Lab] tab',
+    ],
+    link: { label: 'Open the Library', path: '/library' },
   },
   {
-    icon: BookOpen,
-    color: '#4dff91',
-    title: 'SRS Flashcards',
-    subtitle: 'Spaced repetition',
-    body: 'The flashcard system uses Anki-style spaced repetition. Import from Quizlet CSV, generate AI cards from your notes, or create them manually.',
-    hint: 'Cards you know well appear less often. You\'ll retain 80%+ long-term.',
+    tag: 'Step 3 · Quiz Me',
+    title: 'Lucky guesses never count',
+    accent: '#F59E0B',
+    vignette: 'quiz',
+    body: 'Every question asks HOW SURE you are before you submit. Correct + Certain upgrades the concept; correct but Guessed only marks it Developing with a 24-hour review; wrong marks it Needs attention immediately — and "What StudyPulse Noticed" remembers your exact mistake until you fix it.',
+    bullets: [
+      'Guessed | Unsure | Fairly sure | Certain — required before submit',
+      'The live banner shows the state transition after every answer',
+      'SQL traps (like = NULL vs IS NULL) land in the same memory',
+    ],
+    link: { label: 'Try a Quiz Me', path: '/quiz' },
   },
   {
-    icon: BarChart3,
-    color: '#ffd6a0',
-    title: 'GPA Predictor',
-    subtitle: 'Real-time calculation',
-    body: 'Enter grades with weighted categories and StudyPulse calculates your GPA in real time. Ask "what score do I need on the final to keep a B+" and get an exact answer.',
-    hint: 'Supports 4.0 scale, percentage grades, and letter grades.',
+    tag: 'Step 4 · SQL 3D Arena',
+    title: 'See your query hit the tables',
+    accent: '#6EE7B7',
+    vignette: 'sql',
+    body: 'CBSE MySQL missions run on a real in-browser engine. The 3D relational stage shows the actual tables as physical trays: rows satisfying your WHERE clause elevate and glow, JOIN beams connect the matched key pairs, and GROUP BY stacks aggregate buckets in real time.',
+    bullets: [
+      'Scaffold queries with the clause builder chips — or type raw SQL',
+      'Declare certainty per mission; traps feed the learner memory',
+      'Reset DB restores the seed data anytime',
+    ],
+    link: { label: 'Enter the Arena', path: '/sql' },
   },
   {
-    icon: Zap,
-    color: '#ff6b9d',
-    title: 'Claude Code MCP',
-    subtitle: 'AI-native integration',
-    body: 'StudyPulse has a built-in MCP server — add it to Claude Code and ask things like "what\'s due this week?" or "summarize my Calculus notes" without leaving your editor.',
-    hint: 'See mcp/ folder for setup instructions.',
-  },
-  {
-    icon: Github,
-    color: '#e5b5ff',
-    title: 'Open Source',
-    subtitle: 'MIT licensed',
-    body: 'StudyPulse is fully open-source on GitHub. Self-host it, contribute features, or fork it for your school. 100% free forever for personal use.',
-    hint: '⭐ Star the repo if you find it useful — it helps others discover it!',
-    cta: {
-      label: 'Star on GitHub',
-      href: 'https://github.com/kaorii-ako/StudyPulse',
-    },
+    tag: 'Step 5 · Exam Plan',
+    title: 'Honest readiness, 20-minute days',
+    accent: '#F59E0B',
+    vignette: 'exam',
+    body: 'Create an exam, tick your syllabus chapters, and StudyPulse computes a readiness % strictly from verified Quiz Me and SQL states — never a mark prediction. Your daily queue builds 20-minute micro-tasks (READ · QUIZ · REFRESH · PYQ) with weak topics first.',
+    bullets: [
+      '[Start] deep-links straight into the right chapter or quiz',
+      'Mark done / Skip — the queue reshapes around your real states',
+      'Notes generator: mind maps, timelines, formula sheets, handwritten mode',
+    ],
+    links: [
+      { label: 'Open Exam Plan', path: '/study-plans' },
+      { label: 'Notes', path: '/notes' },
+    ],
   },
 ]
 
-const TOUR_KEY = 'studypulse-demo-tour-seen'
-
-const DemoTour = () => {
-  const [open, setOpen] = useState(false)
-  const [step, setStep] = useState(0)
-
-  useEffect(() => {
-    if (sessionStorage.getItem(TOUR_KEY)) return
-    const t = setTimeout(() => setOpen(true), 800)
-    return () => clearTimeout(t)
-  }, [])
-
-  const close = () => {
-    sessionStorage.setItem(TOUR_KEY, '1')
-    setOpen(false)
+// Small CSS vignettes per step — no screenshots needed
+function Vignette({ kind }) {
+  if (kind === 'hero') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, height: 74 }}>
+        <div style={{ width: 46, height: 62, borderRadius: '3px 6px 6px 3px', background: 'linear-gradient(160deg, #2FB489, #0F7A5C)', boxShadow: '6px 8px 16px rgba(0,0,0,0.45)' }} />
+        <div style={{ flex: 1 }}>
+          <div className="editorial" style={{ fontSize: 16, color: C.text, lineHeight: 1.1 }}>What should<br />you do next?</div>
+          <div style={{ marginTop: 6, height: 20, borderRadius: 999, background: 'rgba(12,20,16,0.8)', border: `1px solid ${C.borderSoft}`, width: '88%' }} />
+        </div>
+        <span className="badge3d mastered" style={{ fontSize: 9 }}>GO</span>
+      </div>
+    )
   }
-
-  const next = () => step < STEPS.length - 1 ? setStep(s => s + 1) : close()
-  const prev = () => setStep(s => Math.max(0, s - 1))
-
-  const current = STEPS[step]
-  const Icon = current.icon
-
+  if (kind === 'reader') {
+    return (
+      <div style={{ display: 'flex', gap: 8, height: 74 }}>
+        <div style={{ flex: 1.5, borderRadius: 6, background: '#FAF7F2', position: 'relative', padding: 8 }}>
+          <div style={{ height: 4, width: '70%', background: '#C9C2B4', borderRadius: 2, marginBottom: 5 }} />
+          <div style={{ height: 4, width: '85%', background: '#DDD6C8', borderRadius: 2, marginBottom: 5 }} />
+          <div style={{ height: 4, width: '55%', background: 'rgba(245,158,11,0.5)', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', right: 10, top: 14, width: 34, height: 26, border: '2px solid #10B981', background: 'rgba(16,185,129,0.15)', boxShadow: '0 0 10px rgba(16,185,129,0.5)', borderRadius: 2 }} />
+        </div>
+        <div style={{ flex: 1, borderRadius: 6, background: '#131C18', border: `1px solid ${C.border}`, padding: 8 }}>
+          {['Explain', 'Why this?', '3D Lab'].map((t) => (
+            <div key={t} style={{ fontFamily: fonts.mono, fontSize: 8.5, color: '#6EE7B7', padding: '3px 0' }}>▸ {t}</div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  if (kind === 'quiz') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, height: 74, flexWrap: 'wrap' }}>
+        {['Guessed', 'Unsure', 'Fairly sure', 'Certain'].map((t, i) => (
+          <span key={t} className={`badge3d ${i === 3 ? 'mastered' : i === 2 ? 'developing' : 'needs_attention'}`} style={{ fontSize: 9 }}>{t}</span>
+        ))}
+        <span style={{ fontFamily: fonts.mono, fontSize: 9, color: C.textFaint, width: '100%' }}>
+          → state updated: 0% Needs attention → 50% Developing
+        </span>
+      </div>
+    )
+  }
+  if (kind === 'sql') {
+    return (
+      <div style={{ display: 'flex', gap: 8, height: 74 }}>
+        <div style={{
+          flex: 1, borderRadius: 6, background: '#101A15', border: '1px solid rgba(52,211,153,0.3)',
+          transform: 'perspective(600px) rotateX(24deg) rotateZ(-8deg)', padding: 6,
+        }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{
+              height: 9, margin: '2px 0', borderRadius: 2,
+              background: i === 1 ? 'rgba(16,185,129,0.5)' : 'rgba(52,211,153,0.1)',
+              boxShadow: i === 1 ? '0 0 8px rgba(16,185,129,0.6)' : 'none',
+            }} />
+          ))}
+        </div>
+        <div style={{ alignSelf: 'center', width: 34, height: 2, background: '#10B981', boxShadow: '0 0 6px rgba(16,185,129,0.8)', borderRadius: 2 }} />
+        <div style={{
+          flex: 1, borderRadius: 6, background: '#101A15', border: '1px solid rgba(52,211,153,0.3)',
+          transform: 'perspective(600px) rotateX(24deg) rotateZ(-8deg)', padding: 6,
+        }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{
+              height: 9, margin: '2px 0', borderRadius: 2,
+              background: i === 1 ? 'rgba(16,185,129,0.5)' : 'rgba(52,211,153,0.1)',
+            }} />
+          ))}
+        </div>
+      </div>
+    )
+  }
+  // exam
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={close}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 300,
-              background: 'rgba(0,0,0,0.7)',
-            }}
-          />
-
-          {/* Centering wrapper — flex centering avoids the framer-motion
-              transform overriding a manual translate(-50%,-50%). */}
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 301,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 16, pointerEvents: 'none',
-          }}>
-          {/* Modal */}
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-            style={{
-              width: 'min(440px, 100%)',
-              maxHeight: 'calc(100dvh - 32px)',
-              overflowY: 'auto',
-              pointerEvents: 'auto',
-              background: 'var(--bg-card, #101c17)',
-              border: `1px solid ${current.color}40`,
-              borderRadius: 14,
-              padding: '32px 28px 24px',
-              boxShadow: `0 0 60px ${current.color}20, 0 24px 64px rgba(0,0,0,0.6)`,
-            }}
-          >
-            {/* Close */}
-            <button
-              onClick={close}
-              style={{
-                position: 'absolute', top: 16, right: 16,
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-muted, #64748b)', padding: 4,
-              }}
-            >
-              <X size={16} />
-            </button>
-
-            {/* Step indicator */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
-              {STEPS.map((s, i) => (
-                <div
-                  key={i}
-                  onClick={() => setStep(i)}
-                  style={{
-                    flex: 1, height: 3, borderRadius: 2,
-                    background: i === step ? current.color : i < step ? `${current.color}60` : 'rgba(255,255,255,0.1)',
-                    cursor: 'pointer', transition: 'background 0.2s',
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Icon */}
-            <div style={{
-              width: 56, height: 56, borderRadius: 14, marginBottom: 20,
-              background: `${current.color}18`,
-              border: `1px solid ${current.color}30`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Icon size={26} style={{ color: current.color }} />
-            </div>
-
-            {/* Content */}
-            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: current.color, letterSpacing: '0.01em', marginBottom: 6, textTransform: 'none' }}>
-              {current.subtitle}
-            </p>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #f0f4fc)', marginBottom: 12, lineHeight: 1.3, letterSpacing: '-0.01em' }}>
-              {current.title}
-            </h2>
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 14, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.7, marginBottom: 16 }}>
-              {current.body}
-            </p>
-            <div style={{
-              padding: '10px 14px', borderRadius: 8,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              marginBottom: 24,
-            }}>
-              <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: 12, color: 'var(--text-muted, #64748b)' }}>
-                {current.hint}
-              </p>
-            </div>
-
-            {/* CTA if last step */}
-            {current.cta && (
-              <a
-                href={current.cta.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  padding: '11px 18px', borderRadius: 8,
-                  background: current.color,
-                  color: '#0b0e14', textDecoration: 'none',
-                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
-                  marginBottom: 14,
-                }}
-              >
-                <Github size={15} />
-                {current.cta.label}
-              </a>
-            )}
-
-            {/* Navigation */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <button
-                onClick={prev}
-                disabled={step === 0}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'none', border: 'none', cursor: step === 0 ? 'not-allowed' : 'pointer',
-                  color: step === 0 ? 'rgba(255,255,255,0.15)' : 'var(--text-muted, #64748b)',
-                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600,
-                  padding: '8px 0',
-                }}
-              >
-                <ChevronLeft size={16} /> Back
-              </button>
-              <button
-                onClick={next}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                  background: current.color,
-                  color: '#0b0e14',
-                  fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700,
-                  boxShadow: `0 4px 14px ${current.color}40`,
-                }}
-              >
-                {step === STEPS.length - 1 ? 'Start Exploring' : 'Next'}
-                {step < STEPS.length - 1 && <ChevronRight size={14} />}
-              </button>
-            </div>
-          </motion.div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: 74, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <span className="editorial" style={{ fontSize: 26, color: C.warning }}>25%</span>
+        <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>READINESS · AT RISK — honest, not a mark prediction</span>
+      </div>
+      {['READ · 20 MIN', 'QUIZ · 15 MIN', 'PYQ · 20 MIN'].map((t, i) => (
+        <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: fonts.mono, fontSize: 8.5, color: i === 0 ? '#F59E0B' : '#34D399', width: 84 }}>{t}</span>
+          <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'rgba(52,211,153,0.15)' }}>
+            <div style={{ width: `${[70, 45, 55][i]}%`, height: '100%', borderRadius: 3, background: i === 0 ? '#F59E0B' : '#34D399' }} />
           </div>
-        </>
-      )}
-    </AnimatePresence>
+        </div>
+      ))}
+    </div>
   )
 }
 
-export default DemoTour
+export default function DemoTour() {
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const [step, setStep] = useState(0)
+
+  // Auto-offer once on first visit (real accounts and demo alike)
+  useEffect(() => {
+    const onOpen = () => { setOpen(true); setStep(0) }
+    window.addEventListener('studypulse-open-guide', onOpen)
+    let timer = null
+    try {
+      if (!localStorage.getItem(GUIDE_SEEN_KEY)) {
+        timer = setTimeout(() => {
+          setOpen(true)
+          localStorage.setItem(GUIDE_SEEN_KEY, String(Date.now()))
+        }, 2200)
+      }
+    } catch {}
+    return () => {
+      window.removeEventListener('studypulse-open-guide', onOpen)
+      if (timer) clearTimeout(timer)
+    }
+  }, [])
+
+  const close = () => setOpen(false)
+  const s = STEPS[step]
+
+  const jump = (path) => {
+    try { localStorage.setItem(GUIDE_SEEN_KEY, String(Date.now())) } catch {}
+    setOpen(false)
+    navigate(path)
+  }
+
+  if (!open) return null
+
+  return (
+    <>
+      {/* Dim overlay — click outside to dismiss */}
+      <div
+        onClick={close}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(0,0,0,0.6)',
+          animation: 'studypulseFadeUp 0.2s ease both',
+        }}
+      />
+      {/* Guide card */}
+      <div style={{
+        position: 'fixed', zIndex: 201,
+        left: '50%', top: '50%',
+        transform: 'translate(-50%, -50%) translate3d(0,0,0)',
+        width: 'min(520px, calc(100vw - 24px))',
+        background: '#131C18',
+        border: '1px solid rgba(52,211,153,0.3)',
+        borderRadius: 20,
+        boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
+        padding: '22px 24px 18px',
+        animation: 'studypulseFadeUp 0.25s cubic-bezier(0.16,1,0.3,1) both',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              width: 18, height: 18, borderRadius: 999,
+              background: 'rgba(52,211,153,0.18)', border: '1px solid rgba(52,211,153,0.4)',
+              color: C.primaryBright, fontSize: 11, fontWeight: 800,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            }}>?</span>
+            <span className="metric-label" style={{ padding: 0, color: C.primaryBright }}>
+              How to use StudyPulse · {s.tag}
+            </span>
+          </span>
+          <button onClick={close} aria-label="Skip guide" style={{
+            width: 26, height: 26, borderRadius: 999, display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            background: 'transparent', border: `1px solid ${C.borderSoft}`,
+            color: C.textFaint, cursor: 'pointer',
+          }}>
+            <X size={13} />
+          </button>
+        </div>
+
+        {/* Vignette */}
+        <div style={{
+          borderRadius: 12, padding: '12px 14px', marginBottom: 14,
+          background: '#0A1410', border: `1px solid ${C.borderSoft}`,
+        }}>
+          <Vignette kind={s.vignette} />
+        </div>
+
+        {/* Copy */}
+        <h2 className="editorial" style={{ fontSize: 21, lineHeight: 1.15, margin: '0 0 8px', color: s.accent }}>
+          {s.title}
+        </h2>
+        <p style={{ fontSize: 12.5, lineHeight: 1.6, color: C.textMuted, margin: '0 0 10px' }}>
+          {s.body}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 16 }}>
+          {s.bullets.map((b, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: C.text }}>
+              <span className="dot" style={{ background: s.accent, marginTop: 6 }} />
+              <span style={{ lineHeight: 1.5 }}>{b}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Progress dots */}
+        <div style={{ display: 'flex', gap: 5, marginBottom: 14 }}>
+          {STEPS.map((_, i) => (
+            <span key={i} style={{
+              flex: 1, height: 3, borderRadius: 2,
+              background: i <= step ? s.accent : 'rgba(255,255,255,0.1)',
+              transition: 'background 0.2s ease',
+            }} />
+          ))}
+        </div>
+
+        {/* Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={close} style={{
+            padding: '6px 12px', borderRadius: 999,
+            background: 'transparent', border: `1px solid ${C.borderSoft}`,
+            color: C.textFaint, cursor: 'pointer', fontFamily: fonts.body, fontSize: 12,
+          }}>
+            Skip guide
+          </button>
+          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexWrap: 'wrap' }}>
+            {step > 0 && (
+              <button
+                onClick={() => setStep((v) => v - 1)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '7px 13px', borderRadius: 999,
+                  background: 'transparent', border: `1px solid ${C.border}`,
+                  color: C.textMuted, cursor: 'pointer', fontFamily: fonts.body, fontSize: 12.5, fontWeight: 600,
+                }}
+              >
+                <ArrowLeft size={12} /> Back
+              </button>
+            )}
+            {(s.links || [s.link]).filter(Boolean).map((l) => (
+              <button
+                key={l.path + l.label}
+                onClick={() => jump(l.path)}
+                className="motion-spring"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '7px 15px', borderRadius: 999,
+                  background: s.accent, color: '#06251A',
+                  border: 'none', cursor: 'pointer',
+                  fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700,
+                  boxShadow: '0 4px 0 rgba(0,0,0,0.3)',
+                }}
+              >
+                <Play size={11} weight="fill" /> {l.label}
+              </button>
+            ))}
+            {step < STEPS.length - 1 && (
+              <button
+                onClick={() => setStep((v) => v + 1)}
+                className="motion-spring"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '7px 15px', borderRadius: 999,
+                  background: 'rgba(52,211,153,0.14)', border: '1px solid rgba(52,211,153,0.4)',
+                  color: C.primaryBright, cursor: 'pointer',
+                  fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700,
+                }}
+              >
+                Next step <ArrowRight size={12} weight="bold" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}

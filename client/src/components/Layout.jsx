@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { SunDim, MoonStars, CaretDown } from '@phosphor-icons/react'
+import { Notebook, Sparkle } from '@phosphor-icons/react'
 import CommandPalette from './CommandPalette'
 import ToastContainer from './ToastContainer'
 import DemoTour from './DemoTour'
@@ -25,14 +25,10 @@ const EcgMark = () => (
 )
 
 const NAV_ITEMS = [
-  { label: 'Home', path: '/home' },
-  { label: 'Ask AI', path: '/assistant' },
-  { label: 'Library', path: '/library' },
-  { label: 'Notes', path: '/notes' },
-  { label: 'PYQs', path: '/pyq' },
-  { label: 'Quiz', path: '/quiz' },
-  { label: 'Plan', path: '/study-plans' },
-  { label: 'SQL Pulse 3D', path: '/sql' },
+  { label: 'Today', path: '/home' },
+  { label: 'Study & 3D Labs', path: '/library' },
+  { label: 'SQL 3D Arena', path: '/sql' },
+  { label: 'Exam Plan', path: '/study-plans' },
 ]
 
 const CLASSES = ['Class 10', 'Class 11', 'Class 12']
@@ -44,12 +40,7 @@ const Layout = () => {
   const location = useLocation()
   const { isRunning, isBreak, secondsLeft } = usePomodoroStore()
 
-  const [classLevel, setClassLevel] = useState(() => localStorage.getItem('studypulse-class') || 'All')
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme || 'dark')
-  }, [theme])
-
+  
   // Ctrl+Enter — execute AI query globally
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -67,41 +58,46 @@ const Layout = () => {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [aiChatOpen, toggleAIChat])
 
-  const pickClass = (c) => {
-    setClassLevel(c)
-    localStorage.setItem('studypulse-class', c)
-    window.dispatchEvent(new CustomEvent('studypulse-class-change', { detail: c }))
-  }
-
-  const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+    const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
   const timerStatus = !isRunning ? 'neutral' : isBreak ? 'warning' : 'success'
   const userName = user?.name?.split(' ')[0] || 'Student'
   const userInitial = userName[0]?.toUpperCase() || 'S'
 
-  const isSql = location.pathname.startsWith('/sql')
-
   return (
-    <div style={{ minHeight: '100vh', position: 'relative' }}>
-      {/* ── Floating spatial pill dock ── */}
+    <div
+      className="w-screen"
+      style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        background: 'transparent',
+      }}
+    >
+      {/* ── Floating spatial pill dock — full-width stretch ── */}
       <header
-        className="spatial-dock"
+        className="spatial-dock hw"
         style={{
-          position: 'sticky', top: 12, zIndex: 100,
-          maxWidth: 1152, margin: '12px auto 0',
-          padding: '0 16px',
+          flexShrink: 0,
+          width: '100%',
+          padding: '10px 14px 4px',
+          position: 'relative',
+          zIndex: 100,
         }}
       >
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          height: 64, padding: '0 18px', borderRadius: 999,
-          background: 'rgba(18, 29, 24, 0.92)',
-          backdropFilter: 'blur(24px) saturate(1.2)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.2)',
-          border: '1px solid rgba(212, 195, 163, 0.25)',
-          boxShadow: '0 20px 50px rgba(10,14,10,0.45), inset 0 1px 0 rgba(244,240,234,0.07)',
-          color: C.text,
-          overflowX: 'auto', scrollbarWidth: 'none',
-        }}>
+        <div
+          className="glass-dock"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            height: 64, padding: '0 20px',
+            border: '1px solid rgba(52, 211, 153, 0.2)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.55), inset 0 1px 0 rgba(52,211,153,0.12)',
+            color: C.text,
+            overflowX: 'auto', scrollbarWidth: 'none',
+            transform: 'translate3d(0,0,0)',
+          }}
+        >
           {/* Brand */}
           <button
             onClick={() => navigate('/home')}
@@ -118,9 +114,9 @@ const Layout = () => {
 
           <span style={{ width: 1, height: 26, background: C.borderSoft, flexShrink: 0, margin: '0 2px' }} />
 
-          {/* Center navigation pills */}
+          {/* Center navigation — 5 calm destinations */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: 3, minWidth: 0 }}>
-            {NAV_ITEMS.map((item) => (
+            {NAV_ITEMS.slice(0, 2).map((item) => (
               <NavLink key={item.path} to={item.path} style={({ isActive }) => ({
                 display: 'inline-flex', alignItems: 'center',
                 padding: '7px 13px', borderRadius: 999,
@@ -131,15 +127,121 @@ const Layout = () => {
                 border: isActive ? '1px solid rgba(52,211,153,0.4)' : '1px solid transparent',
                 color: isActive ? C.primaryBright : C.textMuted,
                 cursor: 'pointer',
-                transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease',
+                transition: 'background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out',
               })}>
                 {item.label}
               </NavLink>
             ))}
+            <NavLink to="/sql" style={({ isActive }) => ({
+              display: 'inline-flex', alignItems: 'center',
+              padding: '7px 13px', borderRadius: 999,
+              fontFamily: fonts.body, fontSize: 12.5,
+              fontWeight: isActive ? 700 : 500,
+              whiteSpace: 'nowrap', flexShrink: 0,
+              background: isActive ? C.active : 'transparent',
+              border: isActive ? '1px solid rgba(52,211,153,0.4)' : '1px solid transparent',
+              color: isActive ? C.primaryBright : C.textMuted,
+              cursor: 'pointer',
+              transition: 'background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out',
+            })}>
+              SQL 3D Arena
+            </NavLink>
+            {/* Practice — Quiz & PYQs as one tactile split pill */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', flexShrink: 0,
+              borderRadius: 999, padding: 2,
+              background: 'rgba(20,32,27,0.6)', border: `1px solid ${C.borderSoft}`,
+            }}>
+              <NavLink to="/quiz" style={({ isActive }) => ({
+                padding: '5px 11px', borderRadius: 999,
+                fontFamily: fonts.body, fontSize: 12,
+                fontWeight: isActive ? 700 : 500,
+                background: isActive ? C.active : 'transparent',
+                color: isActive ? C.primaryBright : C.textMuted,
+                textDecoration: 'none', cursor: 'pointer',
+                transition: 'background 0.2s ease-out, color 0.2s ease-out',
+              })}>Quiz</NavLink>
+              <NavLink to="/pyq" style={({ isActive }) => ({
+                padding: '5px 11px', borderRadius: 999,
+                fontFamily: fonts.body, fontSize: 12,
+                fontWeight: isActive ? 700 : 500,
+                background: isActive ? C.active : 'transparent',
+                color: isActive ? C.primaryBright : C.textMuted,
+                textDecoration: 'none', cursor: 'pointer',
+                transition: 'background 0.2s ease-out, color 0.2s ease-out',
+              })}>PYQs</NavLink>
+            </div>
+            <NavLink to="/study-plans" style={({ isActive }) => ({
+              display: 'inline-flex', alignItems: 'center',
+              padding: '7px 13px', borderRadius: 999,
+              fontFamily: fonts.body, fontSize: 12.5,
+              fontWeight: isActive ? 700 : 500,
+              whiteSpace: 'nowrap', flexShrink: 0,
+              background: isActive ? C.active : 'transparent',
+              border: isActive ? '1px solid rgba(52,211,153,0.4)' : '1px solid transparent',
+              color: isActive ? C.primaryBright : C.textMuted,
+              cursor: 'pointer',
+              transition: 'background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out',
+            })}>
+              Exam Plan
+            </NavLink>
           </nav>
 
           {/* Right cluster */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginLeft: 'auto', flexShrink: 0 }}>
+            {/* Interactive guide */}
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('studypulse-open-guide'))}
+              title="How to use StudyPulse"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', borderRadius: 999,
+                background: 'rgba(20,32,27,0.6)', border: `1px solid ${C.borderSoft}`,
+                color: C.text, cursor: 'pointer',
+                fontFamily: fonts.body, fontSize: 12, fontWeight: 600,
+                flexShrink: 0,
+                transition: 'transform 0.18s cubic-bezier(0.22,1,0.36,1), border-color 0.18s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.borderColor = 'rgba(52,211,153,0.4)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = C.borderSoft }}
+            >
+              <span style={{
+                width: 16, height: 16, borderRadius: 999,
+                background: 'rgba(52,211,153,0.18)', border: '1px solid rgba(52,211,153,0.4)',
+                color: C.primaryBright, fontSize: 10, fontWeight: 800,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}>?</span>
+              Guide
+            </button>
+
+            {/* Notes quick access */}
+            <button
+              onClick={() => navigate('/notes')}
+              title="Notes"
+              style={{
+                width: 32, height: 32, borderRadius: 999, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(20,32,27,0.6)', border: `1px solid ${C.borderSoft}`,
+                color: C.textMuted, cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              <Notebook size={13} />
+            </button>
+
+            {/* Ask AI quick access */}
+            <button
+              onClick={() => navigate('/assistant')}
+              title="Ask AI"
+              style={{
+                width: 32, height: 32, borderRadius: 999, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(20,32,27,0.6)', border: `1px solid ${C.borderSoft}`,
+                color: C.textMuted, cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              <Sparkle size={13} />
+            </button>
+
             {/* Exam Mode amber pill */}
             <button
               onClick={() => navigate('/study-plans')}
@@ -151,34 +253,13 @@ const Layout = () => {
                 boxShadow: '0 4px 0 rgba(0,0,0,0.3), 0 8px 20px rgba(217,119,6,0.4)',
                 fontFamily: fonts.body, fontSize: 12, fontWeight: 700,
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                transition: 'transform 0.15s ease',
+                transition: 'transform 0.2s cubic-bezier(0.16,1,0.3,1)',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}
             >
               Exam Mode
             </button>
-
-            {/* Class selector */}
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <select
-                value={classLevel}
-                onChange={(e) => pickClass(e.target.value)}
-                style={{
-                  appearance: 'none', WebkitAppearance: 'none',
-                  padding: '7px 26px 7px 12px', borderRadius: 999,
-                  background: 'rgba(20,32,27,0.6)', border: `1px solid ${C.borderSoft}`,
-                  color: C.textMuted, fontFamily: fonts.mono, fontSize: 11,
-                  cursor: 'pointer', outline: 'none',
-                }}
-              >
-                {['All', ...CLASSES].map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <CaretDown size={9} weight="bold" style={{
-                position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                color: C.textFaint, pointerEvents: 'none',
-              }} />
-            </div>
 
             {/* Mini focus timer */}
             <button
@@ -197,20 +278,6 @@ const Layout = () => {
               {fmt(secondsLeft)}
             </button>
 
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} canvas`}
-              style={{
-                width: 32, height: 32, borderRadius: 999, display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-                background: 'rgba(20,32,27,0.6)', border: `1px solid ${C.borderSoft}`,
-                color: C.textMuted, cursor: 'pointer', flexShrink: 0,
-              }}
-            >
-              {theme === 'dark' ? <SunDim size={13} /> : <MoonStars size={13} />}
-            </button>
-
             {/* Profile avatar */}
             <button
               onClick={() => navigate('/profile')}
@@ -218,7 +285,7 @@ const Layout = () => {
               style={{
                 width: 32, height: 32, borderRadius: 999, flexShrink: 0,
                 background: 'linear-gradient(160deg, #2FB489, #0F7A5C)',
-                border: '1px solid rgba(212,195,163,0.4)',
+                border: '1px solid rgba(52,211,153,0.4)',
                 color: '#06251A', fontWeight: 800, fontSize: 13,
                 fontFamily: fonts.body, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -231,9 +298,7 @@ const Layout = () => {
 
         {/* Demo chip */}
         {isDemo && (
-          <div style={{
-            display: 'flex', justifyContent: 'center', marginTop: 8,
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
             <button
               onClick={() => { exitDemoMode(); navigate('/home') }}
               style={{
@@ -242,7 +307,7 @@ const Layout = () => {
                 background: 'rgba(18,29,24,0.92)', border: `1px solid ${C.borderSoft}`,
                 color: C.textMuted, cursor: 'pointer',
                 fontFamily: fonts.mono, fontSize: 10.5, letterSpacing: '0.06em',
-                textTransform: 'uppercase', backdropFilter: 'blur(16px)',
+                textTransform: 'uppercase', 
               }}
             >
               <span className="dot dot-warning" /> Demo mode — local only · Sign in
@@ -251,22 +316,32 @@ const Layout = () => {
         )}
       </header>
 
-      {/* ── Floating glass workspace sheet ── */}
-      <main style={{ position: 'relative', zIndex: 1 }}>
+      {/* ── Full-bleed glass workspace — every pixel of the viewport ── */}
+      <main
+        className="hw"
+        style={{
+          flex: 1,
+          width: '100%',
+          minHeight: 0,
+          position: 'relative',
+          zIndex: 1,
+          padding: '14px 20px 22px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
+      >
         <div
           key={location.pathname}
-          className="page-enter workspace-sheet"
+          className="page-enter"
           style={{
-            maxWidth: isSql ? 1360 : 1152,
-            margin: '18px auto 40px',
-            background: 'rgba(18, 29, 24, 0.92)',
-            backdropFilter: 'blur(24px) saturate(1.15)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.15)',
-            border: '1px solid rgba(212, 195, 163, 0.28)',
-            borderRadius: 26,
-            boxShadow: '0 30px 80px rgba(30, 25, 15, 0.35), inset 0 1px 0 rgba(244,240,234,0.06)',
-            padding: '24px 26px 28px',
-            minHeight: 560,
+            width: '100%',
+            minHeight: '100%',
+            background: '#131C18',
+            border: '1px solid rgba(52, 211, 153, 0.2)',
+            borderRadius: 22,
+            boxShadow: '0 18px 50px rgba(0,0,0,0.45)',
+            padding: '24px 28px 30px',
+            transform: 'translate3d(0,0,0)',
           }}
         >
           <Outlet />
@@ -280,21 +355,20 @@ const Layout = () => {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={toggleAIChat}
-              style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(30, 25, 15, 0.35)', backdropFilter: 'blur(3px)' }}
+              style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(0, 0, 0, 0.55)' }}
             />
             <motion.div
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 340, damping: 36 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 38 }}
               style={{
-                position: 'fixed', top: 12, right: 12, bottom: 12, zIndex: 121,
-                width: 'min(440px, 100vw - 24px)',
-                background: 'rgba(18, 29, 24, 0.94)',
-                backdropFilter: 'blur(28px) saturate(1.2)',
-                WebkitBackdropFilter: 'blur(28px) saturate(1.2)',
-                border: '1px solid rgba(212, 195, 163, 0.3)',
+                position: 'fixed', top: 10, right: 10, bottom: 10, zIndex: 121,
+                width: 'min(440px, 100vw - 20px)',
+                background: 'rgba(19, 28, 24, 0.985)',
+                border: '1px solid rgba(52, 211, 153, 0.24)',
                 borderRadius: 24,
-                boxShadow: '0 30px 80px rgba(10,14,10,0.5)',
+                boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
                 display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                willChange: 'transform',
               }}
             >
               <AIChat onClose={toggleAIChat} />
@@ -309,10 +383,8 @@ const Layout = () => {
       <style>{`
         .spatial-dock::-webkit-scrollbar { display: none; }
         .spatial-dock nav::-webkit-scrollbar { display: none; }
-        .workspace-sheet::-webkit-scrollbar { display: none; }
         @media (max-width: 900px) {
-          .spatial-dock > div { border-radius: 26px; height: auto; flex-wrap: nowrap; }
-          .workspace-sheet { margin: 14px 10px 28px !important; padding: 16px 14px 22px !important; }
+          .spatial-dock > div { border-radius: 26px; height: auto; }
         }
       `}</style>
     </div>

@@ -175,7 +175,7 @@ export default function AIAssistant() {
   const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 1240, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, width: '100%' }}>
       <PageHeader
         title="AI Tutor"
         subtitle="Diagnostic hints · CBSE scheme grading · deep concept traces — over your live session data"
@@ -300,7 +300,7 @@ export default function AIAssistant() {
         <div style={{
           display: 'flex', flexDirection: 'column',
           borderRadius: 4, background: C.card, border: `1px solid ${C.border}`,
-          overflow: 'hidden', minHeight: 520, height: 'calc(100vh - 220px)',
+          overflow: 'hidden', minHeight: 520, height: 'calc(100vh - 250px)',
         }}>
           {/* Messages */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>

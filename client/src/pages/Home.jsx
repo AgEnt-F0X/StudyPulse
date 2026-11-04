@@ -1,28 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SpinnerGap, ArrowClockwise, Play, ArrowRight, Sparkle } from '@phosphor-icons/react'
+import { ArrowRight, Sparkle, Play, CaretUp, ArrowClockwise, SpinnerGap } from '@phosphor-icons/react'
 import { useAuthStore, useAssignmentsStore, useGradesStore, useNotesStore, useXPStore, useUIStore, usePomodoroStore, useLearnerStore, pctToGPA, calcStreak } from '../stores'
 import { hasClientKey, callGeminiClient, getKeyProvider } from '../utils/gemini'
-import { selectDueItems, statusDot, statusLabel } from '../utils/learnerEngine'
-import { C, fonts, btnPrimary, btnAmber, btnGhost } from '../utils/theme'
-import { StatCard, SectionTitle } from '../components/ui'
+import { selectDueItems, statusLabel } from '../utils/learnerEngine'
+import { C, fonts, btnPrimary, btnAmber } from '../utils/theme'
 import Book3D, { SUBJECT_ART } from '../components/Book3D'
 import { getLastRead } from './Library'
 import { getLearnerChapters } from '../utils/cbseSubjects'
-import { GoogleLogo } from '../components/GoogleButton'
 
-const stripMarkdown = (str) => {
-  if (!str) return ''
-  return str
-    .replace(/^#+\s+/gm, '')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\$([^$]+)\$/g, '$1')
-    .trim()
-}
-
-// ── LED focus telemetry matrix ────────────────────────────────
+// ── LED focus telemetry (lives in the collapsible drawer) ─────
 
 function LedMatrix({ dailyFocusLog, days = 14 }) {
   const cells = useMemo(() => {
@@ -44,9 +31,7 @@ function LedMatrix({ dailyFocusLog, days = 14 }) {
             className={`led ${c.mins === 0 ? 'off' : c.mins >= 30 ? 'green' : ''} ${i === cells.length - 1 ? 'live' : ''}`}
             style={{ opacity: c.mins === 0 ? 1 : Math.min(1, 0.45 + c.mins / 45), height: c.mins >= 30 ? 22 : c.mins > 0 ? 18 : 12 }}
           />
-          <span style={{ fontFamily: fonts.mono, fontSize: 7.5, color: C.textFaint, letterSpacing: '0.04em' }}>
-            {c.label[0]}
-          </span>
+          <span style={{ fontFamily: fonts.mono, fontSize: 7.5, color: C.textFaint }}>{c.label[0]}</span>
         </div>
       ))}
     </div>
@@ -55,45 +40,100 @@ function LedMatrix({ dailyFocusLog, days = 14 }) {
 
 export default function Home() {
   const navigate = useNavigate()
-  const { user, isGoogleConnected, loginWithGoogle } = useAuthStore()
-  const { assignments, courses, syncClassroom, syncing } = useAssignmentsStore()
+  const { user } = useAuthStore()
   const { addToast, aiChatOpen, toggleAIChat } = useUIStore()
-  const connected = isGoogleConnected()
-
-  const handleSync = async () => {
-    if (!connected) { navigate('/settings'); return }
-    try {
-      const r = await syncClassroom()
-      addToast({ type: 'success', message: `Synced ${r.courses} courses · ${r.assignments} assignments` })
-    } catch (e) {
-      if (e?.name === 'ClassroomAuthError') { addToast({ type: 'error', message: 'Google session expired — reconnecting…' }); loginWithGoogle().catch(() => {}) }
-      else addToast({ type: 'error', message: e?.message || 'Classroom sync failed' })
-    }
-  }
-  const { calculateCourseGrade, courseGrades } = useGradesStore()
-  const { notes } = useNotesStore()
   const xpStore = useXPStore()
   const { pct: xpPct, cur: xpLevel, next: xpNext, xpToNext } = xpStore.getProgress()
   const xp = xpStore.xp
-
   const name = user?.firstName || user?.name?.split(' ')[0] || 'Student'
   const hour = new Date().getHours()
   const daypart = hour < 12 ? 'early' : hour < 17 ? 'deep in the day' : 'late'
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
-  const todayAssignments = useMemo(() => {
-    const todayStr = new Date().toDateString()
-    return (assignments || []).filter(a => !a.completed && new Date(a.dueDate).toDateString() === todayStr)
-  }, [assignments])
+  const { dailyFocusLog } = usePomodoroStore()
+  const streak = calcStreak(dailyFocusLog || {})
+  const sessionCount = usePomodoroStore((s) => s.sessionCount)
 
-  const upcoming = useMemo(() => {
-    return (assignments || [])
-      .filter(a => !a.completed && new Date(a.dueDate) >= new Date())
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-      .slice(0, 5)
-  }, [assignments])
+  // Learner memory — the only always-visible data on Home
+  const learnerChapters = useLearnerStore((s) => s.chapters)
+  const noticedRaw = useLearnerStore((s) => s.noticedMisconceptions)
+  const { markMisconceptionResolved, dismissMisconception } = useLearnerStore()
+  const dueRefresh = useMemo(() => selectDueItems(learnerChapters).slice(0, 3), [learnerChapters])
+  const noticedOpen = useMemo(
+    () => noticedRaw.filter((m) => !m.resolved && !m.dismissed).slice(0, 3),
+    [noticedRaw]
+  )
+  const noticedCards = useMemo(() => {
+    const cards = []
+    for (const d of dueRefresh) {
+      cards.push({
+        kind: 'refresh',
+        id: `due-${d.key}-${d.conceptName}`,
+        title: `Can you still recall ${d.conceptName}?`,
+        meta: `${d.chapterTitle} · ${statusLabel(d.status)} · due now`,
+        status: d.status,
+        action: () => navigate('/quiz'),
+        actionLabel: 'Refresh now',
+      })
+    }
+    for (const m of noticedOpen.slice(0, Math.max(0, 3 - cards.length))) {
+      cards.push({
+        kind: 'noticed',
+        id: m.id,
+        title: m.correctiveRule,
+        meta: `${m.chapterTitle} · ${m.conceptName}`,
+        status: 'needs_attention',
+        action: () => navigate('/quiz'),
+        actionLabel: 'Practise this',
+        misconceptions: m,
+      })
+    }
+    return cards.slice(0, 3)
+  }, [dueRefresh, noticedOpen]) // eslint-disable-line
 
-  const recentNotes = useMemo(() => (notes || []).slice(0, 3), [notes])
+  // Hero: last-read chapter
+  const lastRead = useMemo(() => {
+    const lr = getLastRead()
+    if (!lr) return null
+    const ch = getLearnerChapters().find((c) => c.id === lr.chapterId)
+    return ch ? { ...ch, page: lr.page } : null
+  }, [])
+  const heroSubjectKey =
+    lastRead?.subject === 'Physics' ? 'physics'
+    : lastRead?.subject === 'Chemistry' ? 'chemistry'
+    : lastRead?.subject === 'Mathematics' ? 'maths'
+    : lastRead?.subject === 'Computer Science' ? 'cs'
+    : lastRead?.subject === 'English' ? 'english'
+    : 'science'
+
+  // Subjects shelf
+  const shelfSubjects = useMemo(() => {
+    const chapters = getLearnerChapters()
+    const bySubject = new Map()
+    for (const ch of chapters) {
+      if (!bySubject.has(ch.subject)) bySubject.set(ch.subject, ch)
+    }
+    const ART = { Physics: 'physics', Chemistry: 'chemistry', Mathematics: 'maths', 'Computer Science': 'cs', Science: 'science', English: 'english' }
+    return [...bySubject.entries()].map(([subject, ch]) => ({
+      subject, chapter: ch, artKey: ART[subject] || 'science',
+    }))
+  }, [])
+
+  const [askText, setAskText] = useState('')
+  const askAI = () => {
+    const q = askText.trim()
+    if (!q) { toggleAIChat(); return }
+    window.dispatchEvent(new CustomEvent('studypulse-ai-prefill', { detail: { text: q } }))
+    if (!aiChatOpen) toggleAIChat()
+    setAskText('')
+  }
+
+  // Collapsible secondary drawer — stats live here, never on the main view
+  const [showStats, setShowStats] = useState(false)
+  const { assignments, courses } = useAssignmentsStore()
+  const { calculateCourseGrade, courseGrades } = useGradesStore()
+  const { notes } = useNotesStore()
+  const { isGoogleConnected, loginWithGoogle, syncClassroom } = useAuthStore()
+  const { syncing } = useAssignmentsStore()
 
   const currentGPA = useMemo(() => {
     if (!courses?.length) return '—'
@@ -108,138 +148,79 @@ export default function Home() {
     return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '—'
   }, [courses, courseGrades, calculateCourseGrade])
 
-  const { dailyFocusLog } = usePomodoroStore()
-  const streak = calcStreak(dailyFocusLog || {})
-  const sessionCount = usePomodoroStore((s) => s.sessionCount)
+  const dueSoon = useMemo(() => {
+    return (assignments || [])
+      .filter(a => !a.completed && new Date(a.dueDate) >= new Date())
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+      .slice(0, 3)
+  }, [assignments])
 
-  // Learner memory
-  const learnerChapters = useLearnerStore((s) => s.chapters)
-  const noticedRaw = useLearnerStore((s) => s.noticedMisconceptions)
-  const { markMisconceptionResolved, dismissMisconception } = useLearnerStore()
-  const dueRefresh = useMemo(() => selectDueItems(learnerChapters).slice(0, 3), [learnerChapters])
-  const noticedOpen = useMemo(
-    () => noticedRaw.filter((m) => !m.resolved && !m.dismissed).slice(0, 3),
-    [noticedRaw]
-  )
-
-  // ── Hero: next best action ──
-  const lastRead = useMemo(() => {
-    const lr = getLastRead()
-    if (!lr) return null
-    const ch = getLearnerChapters().find((c) => c.id === lr.chapterId)
-    return ch ? { ...ch, page: lr.page } : null
-  }, [])
-
-  const nextDue = upcoming[0]
-  const heroChapter = lastRead
-  const heroSubjectKey =
-    heroChapter?.subject === 'Physics' ? 'physics'
-    : heroChapter?.subject === 'Chemistry' ? 'chemistry'
-    : heroChapter?.subject === 'Mathematics' ? 'maths'
-    : heroChapter?.subject === 'Computer Science' ? 'cs'
-    : heroChapter?.subject === 'English' ? 'english'
-    : 'science'
-
-  const [askText, setAskText] = useState('')
-  const askAI = () => {
-    const q = askText.trim()
-    if (!q) { toggleAIChat(); return }
-    window.dispatchEvent(new CustomEvent('studypulse-ai-prefill', { detail: { text: q } }))
-    if (!aiChatOpen) toggleAIChat()
-    setAskText('')
-  }
-
-  const todayKey = new Date().toISOString().split('T')[0]
-  const briefCacheKey = `studypulse-daily-brief-${todayKey}`
-  const [dailyBrief, setDailyBrief] = useState(() => {
-    try { return localStorage.getItem(briefCacheKey) || '' } catch { return '' }
-  })
-  const [briefLoading, setBriefLoading] = useState(false)
-
-  const generateBrief = async () => {
-    if (!hasClientKey()) return
-    setBriefLoading(true)
+  const handleSync = async () => {
+    if (!isGoogleConnected()) { navigate('/settings'); return }
     try {
-      const prompt = `You are StudyPulse's session planner. Based on the telemetry below, write a SHORT daily brief (4-5 lines max). Line 1: the single highest-priority item for today. Lines 2-3: what to focus on using the student's actual data. Line 4: one concrete action. No emojis, no headers, flowing text.
-
-Telemetry: ${name}, Level ${xpLevel?.level || 1}, ${xp} XP. Due today: ${todayAssignments.length}. This week: ${upcoming.length} upcoming. Notes: ${notes?.length || 0}. Focus streak: ${streak} days.`
-      const result = await callGeminiClient(prompt, { timeoutMs: 10000 })
-      if (result) {
-        setDailyBrief(result)
-        localStorage.setItem(briefCacheKey, result)
-      }
+      const r = await syncClassroom()
+      addToast({ type: 'success', message: `Synced ${r.courses} courses · ${r.assignments} assignments` })
     } catch (e) {
-      console.warn('Daily brief generation failed', e)
-    } finally {
-      setBriefLoading(false)
+      if (e?.name === 'ClassroomAuthError') { addToast({ type: 'error', message: 'Google session expired — reconnecting…' }); loginWithGoogle().catch(() => {}) }
+      else addToast({ type: 'error', message: e?.message || 'Classroom sync failed' })
     }
   }
 
-  useEffect(() => {
-    if (!dailyBrief && hasClientKey() && !briefLoading) generateBrief()
-  }, []) // eslint-disable-line
-
   return (
     <div style={{ fontFamily: fonts.body, color: C.text }}>
-      {/* ═══ Hero: next-best-action stage ═══ */}
+      {/* ═══ 1. Primary Hero — What should you do next? ═══ */}
       <div style={{
         position: 'relative',
         borderRadius: 22,
-        background: 'linear-gradient(150deg, rgba(30,53,43,0.75), rgba(14,24,19,0.9))',
+        background: 'linear-gradient(150deg, rgba(30,53,43,0.6), rgba(14,24,19,0.9))',
         border: `1px solid ${C.border}`,
-        boxShadow: '0 24px 60px rgba(30,25,15,0.4), inset 0 1px 0 rgba(244,240,234,0.07)',
-        padding: '30px 34px',
-        marginBottom: 20,
+        boxShadow: '0 18px 44px rgba(0,0,0,0.4)',
+        padding: '34px 38px',
+        marginBottom: 18,
         overflow: 'hidden',
+        contain: 'layout style paint',
+        transform: 'translateZ(0)',
       }}>
-        {/* Horizon backlight */}
         <div style={{
           position: 'absolute', left: 0, right: 0, bottom: -60, height: 140,
-          background: 'radial-gradient(600px 130px at 30% 100%, rgba(245,158,11,0.22), transparent 70%), radial-gradient(600px 130px at 75% 100%, rgba(16,185,129,0.22), transparent 70%)',
+          background: 'radial-gradient(600px 130px at 30% 100%, rgba(245,158,11,0.18), transparent 70%), radial-gradient(600px 130px at 75% 100%, rgba(16,185,129,0.18), transparent 70%)',
           pointerEvents: 'none',
         }} />
-        <div style={{ display: 'flex', gap: 30, alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
-          {heroChapter && (
+        <div style={{ display: 'flex', gap: 34, alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
+          {lastRead && (
             <Book3D
-              title={heroChapter.title}
-              subject={heroChapter.subject}
+              title={lastRead.title}
+              subject={lastRead.subject}
               subjectKey={heroSubjectKey}
-              classLevel={heroChapter.classLevel}
+              classLevel={lastRead.classLevel}
               size="md"
-              onOpen={() => navigate(`/read/${heroChapter.id}`)}
+              onOpen={() => navigate(`/read/${lastRead.id}`)}
             />
           )}
           <div style={{ flex: 1, minWidth: 280 }}>
             <span className="metric-label" style={{ padding: 0 }}>
-              {today} · studying {daypart}, {name}?
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} · studying {daypart}, {name}?
             </span>
             <h1 className="editorial" style={{
-              fontSize: 40, lineHeight: 1.05, margin: '8px 0 6px',
+              fontSize: 42, lineHeight: 1.05, margin: '8px 0 6px',
               color: C.text, textShadow: '0 2px 12px rgba(0,0,0,0.3)',
             }}>
               What should you do next?
             </h1>
-            <p style={{ fontSize: 13.5, color: C.textMuted, lineHeight: 1.6, marginBottom: 16, maxWidth: 460 }}>
-              {heroChapter
-                ? <>Pick up <strong style={{ color: C.text }}>{heroChapter.title}</strong> where you left off — page {heroChapter.page} is waiting{streak > 0 ? `, and your ${streak}-day streak is alive` : ''}.</>
-                : nextDue
-                  ? <>Nearest deadline: <strong style={{ color: C.text }}>{nextDue.title}</strong>. Open the Library to start reading, or run a Quiz Me.</>
-                  : <>Open the Library and open your first chapter — StudyPulse remembers where you get stuck.</>}
+            <p style={{ fontSize: 13.5, color: C.textMuted, lineHeight: 1.6, marginBottom: 16, maxWidth: 480 }}>
+              {lastRead
+                ? <>Pick up <strong style={{ color: C.text }}>{lastRead.title}</strong> at page {lastRead.page}{streak > 0 ? <> — your <strong style={{ color: C.primaryBright }}>{streak}-day streak</strong> is alive</> : ''}. StudyPulse has lined up exactly what to do.</>
+                : <>Open a chapter from your shelf below — StudyPulse remembers where you get stuck and brings it back before you forget.</>}
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
-              {heroChapter && (
-                <button onClick={() => navigate(`/read/${heroChapter.id}`)} style={btnPrimary}>
+              {lastRead && (
+                <button onClick={() => navigate(`/read/${lastRead.id}`)} className="motion-spring" style={btnPrimary}>
                   <Play size={13} weight="fill" /> Continue reading
                 </button>
               )}
-              <button onClick={() => navigate('/quiz')} style={btnAmber}>
+              <button onClick={() => navigate('/quiz')} className="motion-spring" style={btnAmber}>
                 <Sparkle size={13} weight="duotone" /> Start quiz
               </button>
-              {!connected && (
-                <button onClick={handleSync} style={btnGhost}>
-                  <GoogleLogo size={13} /> Connect Classroom
-                </button>
-              )}
             </div>
             {/* Ask bar */}
             <div
@@ -247,7 +228,7 @@ Telemetry: ${name}, Level ${xpLevel?.level || 1}, ${xp} XP. Due today: ${todayAs
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 maxWidth: 520, padding: '5px 5px 5px 16px', borderRadius: 999,
-                background: 'rgba(12,20,16,0.7)', border: `1px solid ${C.border}`,
+                background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.border}`,
               }}
             >
               <input
@@ -261,7 +242,7 @@ Telemetry: ${name}, Level ${xpLevel?.level || 1}, ${xp} XP. Due today: ${todayAs
                   color: C.text, fontFamily: fonts.body, fontSize: 13,
                 }}
               />
-              <button onClick={askAI} style={{
+              <button onClick={askAI} className="motion-spring" style={{
                 padding: '8px 18px', borderRadius: 999,
                 background: C.fill, color: C.fillText, border: 'none',
                 fontFamily: fonts.body, fontSize: 12, fontWeight: 700, cursor: 'pointer',
@@ -273,287 +254,287 @@ Telemetry: ${name}, Level ${xpLevel?.level || 1}, ${xp} XP. Due today: ${todayAs
         </div>
       </div>
 
-      {/* ═══ LED focus telemetry matrix ═══ */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 18, flexWrap: 'wrap',
-        borderRadius: 16, padding: '14px 20px', marginBottom: 20,
-        background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}`,
-      }}>
-        <div>
-          <div className="metric-label" style={{ padding: 0, marginBottom: 8 }}>Focus telemetry · last 14 days</div>
-          <LedMatrix dailyFocusLog={dailyFocusLog} />
-        </div>
-        <div style={{ display: 'flex', gap: 22, alignItems: 'center' }}>
-          {[
-            { v: `${streak}d`, l: 'STREAK' },
-            { v: sessionCount, l: 'SESSIONS' },
-            { v: `${xp}`, l: 'XP' },
-            { v: `L${xpLevel?.level || 1}`, l: 'LEVEL' },
-          ].map((s) => (
-            <div key={s.l}>
-              <div style={{ fontFamily: fonts.mono, fontSize: 19, fontWeight: 700, color: C.text, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
-                {s.v}
+      {/* ═══ 2. Noticed & Refresh row — max 3 calm cards ═══ */}
+      {noticedCards.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12, marginBottom: 18 }}>
+          {noticedCards.map((card) => (
+            <div key={card.id} style={{
+              borderRadius: 16, padding: '15px 17px',
+              background: '#131C18', border: `1px solid ${C.border}`,
+              boxShadow: '0 10px 26px rgba(0,0,0,0.32)',
+              contain: 'layout style paint',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
+                <span className={`badge3d ${card.status}`} style={{ fontSize: 9.5, padding: '3px 10px' }}>
+                  {card.kind === 'refresh' ? 'Due for refresh' : 'StudyPulse noticed'}
+                </span>
+                {card.kind === 'noticed' && (
+                  <button
+                    onClick={() => dismissMisconception(card.misconceptions.id)}
+                    title="This isn't right"
+                    style={{
+                      background: 'transparent', border: `1px solid ${C.borderSoft}`,
+                      borderRadius: 999, color: C.textFaint, cursor: 'pointer',
+                      fontFamily: fonts.body, fontSize: 10.5, padding: '2px 9px',
+                    }}
+                  >
+                    Not right
+                  </button>
+                )}
               </div>
-              <div className="metric-label" style={{ padding: 0, marginTop: 3 }}>{s.l}</div>
+              <p style={{ fontSize: 13, color: C.text, lineHeight: 1.55, margin: '0 0 4px', minHeight: 36 }}>
+                {card.title}
+              </p>
+              <p style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint, margin: '0 0 12px' }}>
+                {card.meta}
+              </p>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={card.action}
+                  className="motion-spring"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    padding: '5px 13px', borderRadius: 999,
+                    background: card.kind === 'refresh' ? C.fill : C.cardHover,
+                    color: card.kind === 'refresh' ? C.fillText : C.text,
+                    border: card.kind === 'refresh' ? 'none' : `1px solid ${C.border}`,
+                    fontFamily: fonts.body, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  {card.actionLabel} <ArrowRight size={10} weight="bold" />
+                </button>
+                {card.kind === 'noticed' && (
+                  <button
+                    onClick={() => markMisconceptionResolved(card.misconceptions.id)}
+                    style={{
+                      padding: '5px 12px', borderRadius: 999,
+                      background: 'transparent', border: `1px solid ${C.borderSoft}`,
+                      color: C.textFaint, cursor: 'pointer', fontFamily: fonts.body, fontSize: 11,
+                    }}
+                  >
+                    Done
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
-        {/* XP bar */}
-        <div style={{ minWidth: 160 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span className="metric-label" style={{ padding: 0 }}>{xpLevel?.title || 'Freshman'}</span>
-            <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>
-              {xpNext ? `${xpToNext - (xp - xpLevel.min)} to L${(xpLevel?.level || 1) + 1}` : 'max'}
-            </span>
-          </div>
-          <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.min(100, xpPct)}%`, background: 'linear-gradient(90deg, #10B981, #6EE7B7)', borderRadius: 2 }} />
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ Learner memory — tactile refresh + noticed cards ═══ */}
-      {(dueRefresh.length > 0 || noticedOpen.length > 0) && (
-        <div className="grid-2" style={{ marginBottom: 20 }}>
-          {/* Refresh queue */}
-          <div style={{
-            borderRadius: 16, padding: '16px 18px',
-            background: C.card, backdropFilter: 'blur(24px)', border: `1px solid ${C.border}`,
-            boxShadow: '0 14px 36px rgba(30,25,15,0.28)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                <span className="dot dot-warning" />
-                <span className="metric-label" style={{ padding: 0 }}>Refresh · brought back before you forget</span>
-              </span>
-              <span style={{ fontFamily: fonts.mono, fontSize: 10, color: C.textFaint }}>{dueRefresh.length} due</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {dueRefresh.map((d) => (
-                <div key={`due-${d.key}-${d.conceptName}`} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '9px 12px', borderRadius: 10,
-                  background: 'rgba(20,32,27,0.55)', border: `1px solid ${C.borderSoft}`,
-                }}>
-                  <span className={`badge3d ${d.status}`} style={{ fontSize: 9, padding: '3px 8px' }}>
-                    {statusLabel(d.status)}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: C.text }}>
-                      Can you still recall {d.conceptName}?
-                    </div>
-                    <div style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>
-                      {d.chapterTitle} · due now
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => navigate('/quiz')}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '4px 12px', borderRadius: 999, flexShrink: 0,
-                      background: C.fill, color: C.fillText, border: 'none',
-                      fontFamily: fonts.body, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                    }}
-                  >
-                    Refresh now <ArrowRight size={10} weight="bold" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* What StudyPulse Noticed */}
-          <div style={{
-            borderRadius: 16, padding: '16px 18px',
-            background: C.card, backdropFilter: 'blur(24px)', border: `1px solid ${C.border}`,
-            boxShadow: '0 14px 36px rgba(30,25,15,0.28)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                <span className="dot dot-error" />
-                <span className="metric-label" style={{ padding: 0 }}>What StudyPulse has noticed</span>
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {noticedOpen.map((m) => (
-                <div key={m.id} style={{
-                  padding: '10px 12px', borderRadius: 10,
-                  background: 'rgba(20,32,27,0.55)', border: `1px solid ${C.borderSoft}`,
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
-                    <span className="badge3d needs_attention" style={{ fontSize: 9, padding: '3px 8px' }}>
-                      {m.conceptName}
-                    </span>
-                    <span style={{ fontFamily: fonts.mono, fontSize: 9, color: C.textFaint }}>{m.chapterTitle}</span>
-                  </div>
-                  <p style={{ fontSize: 12, color: C.textMuted, margin: 0, lineHeight: 1.55 }}>{m.correctiveRule}</p>
-                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                    <button onClick={() => navigate('/quiz')} style={{
-                      padding: '3px 11px', borderRadius: 999,
-                      background: C.cardHover, border: `1px solid ${C.border}`,
-                      color: C.text, cursor: 'pointer', fontFamily: fonts.body, fontSize: 11, fontWeight: 600,
-                    }}>Practise this</button>
-                    <button onClick={() => dismissMisconception(m.id)} style={{
-                      padding: '3px 9px', borderRadius: 999,
-                      background: 'transparent', border: `1px solid ${C.borderSoft}`,
-                      color: C.textFaint, cursor: 'pointer', fontFamily: fonts.body, fontSize: 11,
-                    }}>This isn't right</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ═══ Stats ═══ */}
-      <div className="stat-grid" style={{ marginBottom: 20 }}>
-        <StatCard label="Due today" value={todayAssignments.length} status={todayAssignments.length > 0 ? 'warning' : 'success'} />
-        <StatCard label="GPA" value={currentGPA} />
-        <StatCard label="Notes" value={notes?.length || 0} />
-        <StatCard label="Completed" value={(assignments || []).filter(a => a.completed).length} status="success" />
-      </div>
-
-      {/* ═══ Columns: deadlines + notes ═══ */}
-      <div className="grid-2" style={{ marginBottom: 22 }}>
+      ) : (
         <div style={{
-          borderRadius: 16, padding: '14px 18px',
-          background: C.card, backdropFilter: 'blur(24px)', border: `1px solid ${C.border}`,
+          borderRadius: 16, padding: '16px 20px', marginBottom: 18,
+          background: '#131C18', border: `1px solid ${C.border}`,
+          display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <SectionTitle action={
-            <button onClick={() => navigate('/assignments')} style={{
-              fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase',
-              color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer',
-            }}>All →</button>
-          }>Upcoming deadlines</SectionTitle>
-          {upcoming.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '20px 0 10px' }}>
-              <p style={{ fontSize: 12.5, color: C.textMuted, marginBottom: 12 }}>
-                {connected ? 'No pending assignments.' : 'Sync Google Classroom or add assignments.'}
-              </p>
-              <button onClick={handleSync} disabled={syncing} style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                padding: '6px 14px', borderRadius: 999, border: 'none',
-                background: '#F4F0EA', color: '#232019', cursor: syncing ? 'not-allowed' : 'pointer',
-                fontFamily: fonts.body, fontSize: 12.5, fontWeight: 700,
-              }}>
-                <GoogleLogo size={14} /> {syncing ? 'Syncing…' : connected ? 'Sync Classroom' : 'Connect Classroom'}
-              </button>
-            </div>
-          ) : (
-            upcoming.map(a => {
-              const due = new Date(a.dueDate)
-              const daysLeft = Math.ceil((due - new Date()) / (1000 * 60 * 60 * 24))
-              const urgency = daysLeft <= 1 ? 'error' : daysLeft <= 3 ? 'warning' : 'neutral'
-              return (
-                <div key={a.id} className="hover-row" style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '8px 8px', margin: '0 -8px',
-                  borderBottom: `1px solid ${C.borderSoft}`,
-                }}>
-                  <span className={`dot dot-${urgency}`} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {a.title}
-                    </div>
-                    <div style={{ fontFamily: fonts.mono, fontSize: 10.5, color: C.textFaint }}>
-                      {a.course || a.courseName}
-                    </div>
-                  </div>
-                  <span style={{
-                    fontFamily: fonts.mono, fontSize: 10.5, fontWeight: 500,
-                    fontVariantNumeric: 'tabular-nums',
-                    color: daysLeft <= 1 ? C.error : C.textMuted, whiteSpace: 'nowrap',
-                  }}>
-                    {daysLeft === 0 ? 'TODAY' : daysLeft === 1 ? '+1D' : `${daysLeft}D`}
-                  </span>
-                  <button
-                    onClick={() => {
-                      usePomodoroStore.getState().setActiveAssignment(a)
-                      navigate('/focus')
-                    }}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '3px 9px', borderRadius: 999,
-                      background: 'transparent', border: `1px solid ${C.borderSoft}`,
-                      color: C.textMuted, cursor: 'pointer',
-                      fontFamily: fonts.mono, fontSize: 9.5, letterSpacing: '0.06em',
-                    }}
-                  >
-                    <Play size={9} weight="fill" /> FOCUS
-                  </button>
-                </div>
-              )
-            })
-          )}
-        </div>
-
-        <div style={{
-          borderRadius: 16, padding: '14px 18px',
-          background: C.card, backdropFilter: 'blur(24px)', border: `1px solid ${C.border}`,
-        }}>
-          <SectionTitle action={
-            <button onClick={() => navigate('/notes')} style={{
-              fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase',
-              color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer',
-            }}>All →</button>
-          }>Recent notes</SectionTitle>
-          {recentNotes.length === 0 ? (
-            <p style={{ fontSize: 12.5, color: C.textMuted, textAlign: 'center', padding: '20px 0' }}>
-              No notes yet — the reader can save highlights straight into Notes.
-            </p>
-          ) : (
-            recentNotes.map(n => {
-              const cleanText = stripMarkdown(n.content || '')
-              return (
-                <div key={n.id} className="hover-row" style={{
-                  padding: '8px 8px', margin: '0 -8px',
-                  borderBottom: `1px solid ${C.borderSoft}`, cursor: 'pointer',
-                }} onClick={() => navigate('/notes')}>
-                  <div style={{ fontSize: 12.5, fontWeight: 500, color: C.text }}>{n.title || 'Untitled'}</div>
-                  <div style={{ fontFamily: fonts.body, fontSize: 11.5, color: C.textFaint, marginTop: 2 }}>
-                    {cleanText.slice(0, 65)}{cleanText.length > 65 ? '…' : ''}
-                  </div>
-                </div>
-              )
-            })
-          )}
-        </div>
-      </div>
-
-      {/* ═══ Daily brief ═══ */}
-      {hasClientKey() && (
-        <div style={{
-          borderRadius: 16, padding: '14px 18px',
-          background: C.card, backdropFilter: 'blur(24px)', border: `1px solid ${C.border}`,
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <span className="dot dot-success" />
-              <span className="metric-label" style={{ padding: 0 }}>Daily brief</span>
-              <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>{getKeyProvider()}</span>
-            </span>
-            <button
-              onClick={generateBrief}
-              disabled={briefLoading}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '3px 10px', borderRadius: 999,
-                background: 'transparent', border: `1px solid ${C.borderSoft}`,
-                color: C.textMuted, cursor: briefLoading ? 'wait' : 'pointer',
-                fontFamily: fonts.mono, fontSize: 10,
-              }}
-            >
-              {briefLoading ? <SpinnerGap size={11} className="spin" /> : <ArrowClockwise size={11} />}
-              {briefLoading ? 'RUNNING' : 'REFRESH'}
-            </button>
-          </div>
-          <p style={{ fontSize: 13, lineHeight: 1.65, color: C.text, margin: 0 }}>
-            {dailyBrief || (briefLoading ? 'Generating from session telemetry…' : 'Add an API key in Settings to enable the daily brief.')}
+          <span className="dot dot-success" />
+          <p style={{ fontSize: 13, color: C.textMuted, margin: 0 }}>
+            Nothing due, nothing noticed. Run a <button onClick={() => navigate('/quiz')} style={{ background: 'none', border: 'none', color: C.primaryBright, cursor: 'pointer', font: 'inherit', fontWeight: 600 }}>Quiz Me</button> to map what you know.
           </p>
         </div>
       )}
+
+      {/* ═══ 3. Your Subjects Shelf — jump straight in ═══ */}
+      <div style={{
+        borderRadius: 20, padding: '20px 24px 8px',
+        background: 'linear-gradient(180deg, rgba(16,26,21,0.9), rgba(12,20,16,0.95))',
+        border: `1px solid ${C.border}`,
+        contain: 'layout style paint',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
+          <h2 className="editorial" style={{ fontSize: 22, margin: 0, color: C.text }}>Your subjects</h2>
+          <button onClick={() => navigate('/library')} style={{
+            fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase',
+            color: C.textMuted, background: 'none', border: 'none', cursor: 'pointer',
+          }}>Full library →</button>
+        </div>
+        <p style={{ fontFamily: fonts.mono, fontSize: 10, color: C.textFaint, marginBottom: 10 }}>
+          Click a book to open it — hover to feel the spine
+        </p>
+        <div style={{
+          display: 'flex', gap: 18, alignItems: 'flex-end',
+          overflowX: 'auto', paddingBottom: 10, scrollbarWidth: 'thin',
+        }}>
+          {shelfSubjects.map((s) => (
+            <Book3D
+              key={s.subject}
+              title={s.subject}
+              subject={s.subject}
+              subjectKey={s.artKey}
+              classLevel={s.chapter.classLevel}
+              size="sm"
+              onOpen={() => navigate(`/read/${s.chapter.id}`)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ═══ Collapsible secondary drawer — stats & telemetry ═══ */}
+      <div style={{ marginTop: 18, borderRadius: 16, border: `1px solid ${C.borderSoft}`, background: 'rgba(19,28,24,0.7)' }}>
+        <button
+          onClick={() => setShowStats((v) => !v)}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '11px 18px', background: 'transparent', border: 'none',
+            cursor: 'pointer', color: C.textMuted,
+          }}
+        >
+          <span className="metric-label" style={{ padding: 0 }}>
+            Stats & telemetry — streaks, GPA, deadlines, daily brief
+          </span>
+          <CaretUp size={13} style={{ transform: showStats ? 'none' : 'rotate(180deg)', transition: 'transform 180ms cubic-bezier(0.22,1,0.36,1)' }} />
+        </button>
+        {showStats && (
+          <div style={{ padding: '0 18px 16px', animation: 'studypulseFadeUp 0.2s cubic-bezier(0.16,1,0.3,1) both' }}>
+            {/* Telemetry strip */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: 18, flexWrap: 'wrap', padding: '12px 14px', marginBottom: 12,
+              borderRadius: 12, background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}`,
+            }}>
+              <div>
+                <div className="metric-label" style={{ padding: 0, marginBottom: 8 }}>Focus telemetry · last 14 days</div>
+                <LedMatrix dailyFocusLog={dailyFocusLog} />
+              </div>
+              <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+                {[
+                  { v: `${streak}d`, l: 'STREAK' },
+                  { v: sessionCount, l: 'SESSIONS' },
+                  { v: `${xp}`, l: 'XP' },
+                  { v: `L${xpLevel?.level || 1}`, l: 'LEVEL' },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 700, color: C.text, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{s.v}</div>
+                    <div className="metric-label" style={{ padding: 0, marginTop: 3 }}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ minWidth: 150 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span className="metric-label" style={{ padding: 0 }}>{xpLevel?.title || 'Freshman'}</span>
+                  <span style={{ fontFamily: fonts.mono, fontSize: 9.5, color: C.textFaint }}>
+                    {xpNext ? `${xpToNext - (xp - xpLevel.min)} to L${(xpLevel?.level || 1) + 1}` : 'max'}
+                  </span>
+                </div>
+                <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(100, xpPct)}%`, background: 'linear-gradient(90deg, #10B981, #6EE7B7)', borderRadius: 2 }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Deadlines + GPA + notes row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10 }}>
+              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}` }}>
+                <div className="metric-label" style={{ padding: 0, marginBottom: 8 }}>Due soon</div>
+                {dueSoon.length === 0 ? (
+                  <p style={{ fontSize: 12, color: C.textFaint, margin: 0 }}>Nothing due — clean slate.</p>
+                ) : dueSoon.map((a) => {
+                  const daysLeft = Math.ceil((new Date(a.dueDate) - new Date()) / 86400000)
+                  return (
+                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', fontSize: 12 }}>
+                      <span className={`dot dot-${daysLeft <= 1 ? 'error' : daysLeft <= 3 ? 'warning' : 'neutral'}`} />
+                      <span style={{ flex: 1, color: C.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.title}</span>
+                      <span style={{ fontFamily: fonts.mono, fontSize: 10, color: C.textFaint }}>{daysLeft <= 0 ? 'TODAY' : `${daysLeft}D`}</span>
+                    </div>
+                  )
+                })}
+                {isGoogleConnected() ? (
+                  <button onClick={handleSync} disabled={syncing} style={{
+                    marginTop: 8, fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.06em',
+                    color: C.textMuted, background: 'transparent', border: `1px solid ${C.borderSoft}`,
+                    borderRadius: 999, padding: '3px 10px', cursor: 'pointer',
+                  }}>
+                    {syncing ? 'SYNCING…' : 'RE-SYNC CLASSROOM'}
+                  </button>
+                ) : null}
+              </div>
+              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}` }}>
+                <div className="metric-label" style={{ padding: 0, marginBottom: 8 }}>Academic snapshot</div>
+                <div style={{ display: 'flex', gap: 18 }}>
+                  <div>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 700, color: C.text, lineHeight: 1 }}>{currentGPA}</div>
+                    <div className="metric-label" style={{ padding: 0, marginTop: 3 }}>GPA</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 700, color: C.text, lineHeight: 1 }}>{notes?.length || 0}</div>
+                    <div className="metric-label" style={{ padding: 0, marginTop: 3 }}>NOTES</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 700, color: C.text, lineHeight: 1 }}>{(assignments || []).filter(a => a.completed).length}</div>
+                    <div className="metric-label" style={{ padding: 0, marginTop: 3 }}>DONE</div>
+                  </div>
+                </div>
+                <button onClick={() => navigate('/grades')} style={{
+                  marginTop: 10, fontFamily: fonts.mono, fontSize: 10, letterSpacing: '0.06em',
+                  color: C.primaryBright, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+                }}>Open grades →</button>
+              </div>
+              {hasClientKey() && (
+                <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(12,20,16,0.75)', border: `1px solid ${C.borderSoft}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span className="metric-label" style={{ padding: 0 }}>Daily brief · {getKeyProvider()}</span>
+                    <BriefRefresh onDone={setDailyBriefExternal} />
+                  </div>
+                  <BriefText />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
+  )
+}
+
+// Daily brief helpers (isolated so the drawer stays cheap)
+let _briefCacheKey = `studypulse-daily-brief-${new Date().toISOString().split('T')[0]}`
+let _briefListeners = new Set()
+let _briefValue = (() => { try { return localStorage.getItem(_briefCacheKey) || '' } catch { return '' } })()
+let _briefLoadingGlobal = false
+
+function BriefText() {
+  const [, force] = useState(0)
+  useEffect(() => {
+    const fn = () => force((n) => n + 1)
+    _briefListeners.add(fn)
+    return () => _briefListeners.delete(fn)
+  }, [])
+  if (_briefLoadingGlobal) return <p style={{ fontFamily: fonts.mono, fontSize: 11, color: C.textFaint, margin: 0 }}>Generating from session telemetry…</p>
+  return <p style={{ fontSize: 12.5, lineHeight: 1.6, color: C.textMuted, margin: 0 }}>{_briefValue || 'No brief yet — hit refresh.'}</p>
+}
+
+function BriefRefresh({ onDone }) {
+  const [loading, setLoading] = useState(false)
+  const run = async () => {
+    setLoading(true)
+    _briefLoadingGlobal = true
+    _briefListeners.forEach((fn) => fn())
+    try {
+      const prompt = `You are StudyPulse's session planner. Write a SHORT daily brief (4-5 lines max). Line 1: the single highest-priority item for today. Lines 2-3: what to focus on. Line 4: one concrete action. No emojis, no headers.`
+      const result = await callGeminiClient(prompt, { timeoutMs: 10000 })
+      if (result) {
+        _briefValue = result
+        try { localStorage.setItem(_briefCacheKey, result) } catch {}
+        _briefListeners.forEach((fn) => fn())
+      }
+    } finally {
+      _briefLoadingGlobal = false
+      setLoading(false)
+      _briefListeners.forEach((fn) => fn())
+    }
+  }
+  return (
+    <button
+      onClick={run}
+      disabled={loading}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        padding: '3px 10px', borderRadius: 999,
+        background: 'transparent', border: `1px solid ${C.borderSoft}`,
+        color: C.textMuted, cursor: loading ? 'wait' : 'pointer',
+        fontFamily: fonts.mono, fontSize: 10,
+      }}
+    >
+      {loading ? <SpinnerGap size={11} className="spin" /> : <ArrowClockwise size={11} />}
+      {loading ? 'RUNNING' : 'REFRESH'}
+    </button>
   )
 }

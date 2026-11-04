@@ -102,7 +102,7 @@ const CommandPalette = () => {
           onClick={() => setOpen(false)}
           style={{
             position: 'fixed', inset: 0, zIndex: 200,
-            background: 'rgba(4,10,8,0.7)', backdropFilter: 'blur(4px)',
+            background: 'rgba(4,10,8,0.82)',
             display: 'flex', justifyContent: 'center', paddingTop: '12vh', paddingInline: 16,
           }}
         >

@@ -189,9 +189,7 @@ const AIChat = ({ onClose }) => {
 
   return (
     <div className="h-full flex flex-col" style={{
-      background: 'rgba(18, 29, 24, 0.85)',
-      backdropFilter: 'blur(28px) saturate(1.2)',
-      WebkitBackdropFilter: 'blur(28px) saturate(1.2)',
+      background: 'rgba(19, 28, 24, 0.985)',
     }}>
       {/* Header */}
       <div

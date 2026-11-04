@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import {
   X, Sparkle, CircleNotch, CaretLeft, CaretRight, Crosshair,
-  ArrowsOutSimple, NotePencil, ChatCircleText, GraduationCap, Plus, Warning,
+  ArrowsOutSimple, NotePencil, ChatCircleText, GraduationCap, Plus, Warning, Cube,
 } from '@phosphor-icons/react'
+import Interactive3DLab from '../components/Interactive3DLab'
 import { C, fonts, btnPrimary } from '../utils/theme'
 import { getAnyChapter } from '../data/ncertLibrary'
 import { pickFromBank } from '../data/quizBank'
@@ -384,10 +385,11 @@ export default function ChapterReader() {
     { id: 'pyq', label: 'PYQ', icon: GraduationCap },
     { id: 'quiz', label: 'Quiz Me', icon: NotePencil },
     { id: 'notes', label: 'My Notes', icon: NotePencil },
+    { id: 'lab', label: '3D Lab', icon: Cube },
   ]
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 1240, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, width: '100%' }}>
       {/* Toolbar */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -438,7 +440,7 @@ export default function ChapterReader() {
         </div>
       </div>
 
-      <div className="reader-grid" style={{ display: 'grid', gridTemplateColumns: readerMode ? '1fr' : '1fr 320px', gap: 16, alignItems: 'start' }}>
+      <div className="reader-grid" style={{ display: 'grid', gridTemplateColumns: readerMode ? '1fr' : '1.72fr 1fr', gap: 16, alignItems: 'start' }}>
         {/* Page canvas */}
         <div style={{ position: 'relative' }}>
           <div
@@ -620,7 +622,7 @@ export default function ChapterReader() {
           <div style={{
             background: C.card, border: `1px solid ${C.border}`, borderRadius: 4,
             display: 'flex', flexDirection: 'column', minHeight: 520,
-            position: 'sticky', top: 56,
+            position: 'sticky', top: 10,
           }}>
             {/* Tabs */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, padding: 6, borderBottom: `1px solid ${C.borderSoft}` }}>
@@ -988,6 +990,16 @@ export default function ChapterReader() {
                       )}
                     </>
                   )}
+                </div>
+              )}
+
+              {/* 3D Concept Lab tab */}
+              {tab === 'lab' && (
+                <div>
+                  <span className="metric-label" style={{ display: 'block', marginBottom: 10, padding: 0 }}>
+                    3D Concept Lab · {chapter.subject}
+                  </span>
+                  <Interactive3DLab subject={chapter.subject} />
                 </div>
               )}
 

@@ -1,8 +1,9 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 
-// <Book3D /> — hardware-accelerated CSS-3D hardcover: real spine thickness,
-// paper page striations, cursor-tracked tilt, floor shadow, open-on-click.
-// Pure CSS 3D (perspective 1200px, preserve-3d) — no WebGL required.
+// <Book3D /> — hardware-accelerated CSS-3D hardcover.
+// Tilt is driven by CSS custom properties (--rx / --ry / --ss) written
+// directly to the DOM node inside a requestAnimationFrame — ZERO React
+// re-renders on hover. Click-to-open is the only React state.
 
 export const SUBJECT_ART = {
   physics: { base: '#C77B2B', dark: '#8A5215', light: '#E8A85C', ink: '#FFF6E8', label: 'Physics' },
@@ -21,7 +22,7 @@ const SIZES = {
 }
 
 // Deterministic geometric cover art — one pattern family per subject index
-function CoverArt({ art, patternIndex, w, h }) {
+function CoverArt({ art, patternIndex }) {
   const stroke = art.ink
   const pid = patternIndex % 4
   return (
@@ -58,7 +59,6 @@ function CoverArt({ art, patternIndex, w, h }) {
           <line x1="30" y1="104" x2="70" y2="104" stroke={stroke} strokeWidth="1" />
         </>
       )}
-      {/* Foil frame */}
       <rect x="8" y="8" width="84" height="122" fill="none" stroke={stroke} strokeWidth="0.8" opacity="0.65" />
     </svg>
   )
@@ -85,70 +85,113 @@ export default function Book3D({
   const dims = SIZES[size] || SIZES.md
   const { w, h, t } = dims
   const wrapRef = useRef(null)
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 })
-  const [hover, setHover] = useState(false)
+  const sceneRef = useRef(null)
+  const shadowRef = useRef(null)
+  const rafRef = useRef(null)
+  const lastEvent = useRef(null)
   const [selfOpen, setSelfOpen] = useState(false)
   const opened = openProp !== undefined ? openProp : selfOpen
 
+  // rAF-throttled tilt — writes CSS vars straight to the DOM, no setState
+  const applyTilt = useCallback(() => {
+    rafRef.current = null
+    const e = lastEvent.current
+    const node = wrapRef.current
+    if (!e || !node) return
+    const rect = node.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    const ry = x * 22
+    const rx = -y * 14
+    node.style.setProperty('--ry', `${ry.toFixed(2)}deg`)
+    node.style.setProperty('--rx', `${rx.toFixed(2)}deg`)
+    node.style.setProperty('--ss', (1 - Math.min(0.3, Math.abs(ry) / 90)).toFixed(3))
+    if (sceneRef.current) {
+      sceneRef.current.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(calc(var(--book-base, -26deg) + ${ry.toFixed(2)}deg))`
+    }
+  }, [])
+
   const onMouseMove = useCallback((e) => {
     if (flat) return
-    const rect = wrapRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const mx = (e.clientX - rect.left) / rect.width
-    const my = (e.clientY - rect.top) / rect.height
-    setTilt({
-      ry: (mx - 0.5) * 26,
-      rx: -(my - 0.5) * 16,
-    })
-  }, [flat])
+    lastEvent.current = e
+    if (rafRef.current == null) {
+      rafRef.current = requestAnimationFrame(applyTilt)
+    }
+  }, [applyTilt, flat])
+
+  const onMouseLeave = useCallback(() => {
+    lastEvent.current = null
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+    const node = wrapRef.current
+    if (node) {
+      node.style.setProperty('--ry', '0deg')
+      node.style.setProperty('--rx', '0deg')
+      node.style.setProperty('--ss', '1')
+    }
+    if (sceneRef.current) {
+      sceneRef.current.style.transform = 'rotateX(0deg) rotateY(var(--book-base, -26deg))'
+    }
+  }, [])
+
+  useEffect(() => () => {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current)
+  }, [])
 
   const handleClick = () => {
     if (onOpen) onOpen()
     else setSelfOpen((o) => !o)
   }
 
-  const baseRy = flat ? 0 : -26
-  const ry = baseRy + tilt.ry * (hover ? 1 : 0.4)
-  const rx = tilt.rx * (hover ? 1 : 0.3)
-  const shadowScale = 1 - Math.min(0.35, Math.abs(ry - baseRy) / 140)
-
   const pageStriation = `repeating-linear-gradient(90deg, #EFE6D4 0px, #EFE6D4 2px, #D9CDB4 2px, #D9CDB4 3px)`
   const pagesBg = `linear-gradient(180deg, #EFE8D8, #E4DAC2)`
+  const baseRy = flat ? '0deg' : '-26deg'
 
   return (
     <div
       ref={wrapRef}
       onMouseMove={onMouseMove}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => { setHover(false); setTilt({ rx: 0, ry: 0 }) }}
+      onMouseLeave={onMouseLeave}
       onClick={handleClick}
+      className="book3d"
       style={{
         perspective: 1200,
         width: w, height: h + 26,
         position: 'relative',
         cursor: 'pointer',
         flexShrink: 0,
+        '--book-base': baseRy,
+        '--ry': '0deg',
+        '--rx': '0deg',
+        '--ss': 1,
         ...style,
       }}
     >
-      {/* Floor shadow */}
-      <div style={{
+      <style>{`
+        .book3d .b3d-sheen { opacity: 0; transition: opacity 300ms ease; }
+        .book3d:hover .b3d-sheen { opacity: 1; }
+        .book3d .b3d-shadow { transition: opacity 300ms ease; opacity: 0.6; }
+        .book3d:hover .b3d-shadow { opacity: 0.85; }
+        .book3d .b3d-scene { transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1); transform: rotateX(var(--rx, 0deg)) rotateY(var(--book-base, -26deg)); will-change: transform; transform-style: preserve-3d; }
+        .book3d:hover .b3d-scene { transition: transform 80ms linear; }
+      `}</style>
+
+      {/* Floor shadow — scaled via --ss, no layout cost */}
+      <div ref={shadowRef} className="b3d-shadow" style={{
         position: 'absolute', left: '50%', bottom: 0,
-        width: w * 0.92 * shadowScale, height: 16,
-        transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse at center, rgba(25,20,10,0.4), transparent 70%)',
+        width: w * 0.92, height: 16,
+        transform: 'translateX(-50%) scaleX(var(--ss, 1))',
+        background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.45), transparent 70%)',
         filter: 'blur(4px)',
-        transition: 'width 0.2s ease, opacity 0.2s ease',
-        opacity: hover ? 0.85 : 0.6,
+        pointerEvents: 'none',
       }} />
 
-      {/* 3D book */}
-      <div style={{
+      {/* 3D book scene — transform fully driven by CSS vars via rAF */}
+      <div ref={sceneRef} className="b3d-scene" style={{
         position: 'absolute', left: 0, top: 4,
         width: w, height: h,
-        transformStyle: 'preserve-3d',
-        transform: `rotateX(${rx}deg) rotateY(${ry}deg)`,
-        transition: hover ? 'transform 0.08s ease-out' : 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
       }}>
         {/* Front cover (swings open around the spine) */}
         <div style={{
@@ -165,11 +208,9 @@ export default function Book3D({
             boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.14), inset 4px 0 8px rgba(0,0,0,0.28)',
             overflow: 'hidden',
           }}>
-            <CoverArt art={art} patternIndex={title.length} w={w} h={h} />
+            <CoverArt art={art} patternIndex={title.length} />
             {/* Foil-stamped editorial title */}
-            <div style={{
-              position: 'absolute', left: 12, right: 10, top: 12,
-            }}>
+            <div style={{ position: 'absolute', left: 12, right: 10, top: 12 }}>
               <div style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
                 fontSize: size === 'lg' ? 19 : size === 'md' ? 15 : 11,
@@ -209,12 +250,10 @@ export default function Book3D({
                 CBSE · {classLevel}
               </div>
             )}
-            {/* Specular sheen */}
-            <div style={{
+            {/* Specular sheen — CSS hover, zero JS */}
+            <div className="b3d-sheen" style={{
               position: 'absolute', inset: 0,
               background: 'linear-gradient(115deg, transparent 32%, rgba(255,255,255,0.20) 46%, rgba(255,255,255,0.05) 54%, transparent 66%)',
-              opacity: hover && !opened ? 1 : 0,
-              transition: 'opacity 0.3s ease',
               pointerEvents: 'none',
             }} />
           </div>

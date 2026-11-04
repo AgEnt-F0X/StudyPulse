@@ -35,6 +35,36 @@ const ChapterReader = lazy(() => import('./pages/ChapterReader'))
 const PYQ = lazy(() => import('./pages/PYQ'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
+// ── Route preloading — every dock tab switches in <50ms ───────
+// After first paint, warm all lazy chunks during idle time so route
+// switching never blocks on a network fetch.
+const ROUTE_CHUNKS = [
+  () => import('./pages/Home'),
+  () => import('./pages/AIAssistant'),
+  () => import('./pages/Library'),
+  () => import('./pages/ChapterReader'),
+  () => import('./pages/Notes'),
+  () => import('./pages/PYQ'),
+  () => import('./pages/Quiz'),
+  () => import('./pages/StudyPlans'),
+  () => import('./pages/SqlPulse'),
+  () => import('./pages/Assignments'),
+  () => import('./pages/Calendar'),
+  () => import('./pages/Grades'),
+  () => import('./pages/Flashcards'),
+  () => import('./pages/Habits'),
+  () => import('./pages/Analytics'),
+  () => import('./pages/Leaderboard'),
+  () => import('./pages/FocusMode'),
+  () => import('./pages/Profile'),
+  () => import('./pages/Settings'),
+  () => import('./pages/SyllabusImport'),
+]
+
+export function preloadRoutes() {
+  ROUTE_CHUNKS.forEach((load) => { load().catch(() => {}) })
+}
+
 const PageSkeleton = () => (
   <div className="flex items-center justify-center min-h-[60vh] w-full">
     <div className="flex flex-col items-center gap-3 text-emerald-500/80">
@@ -48,6 +78,17 @@ function App() {
   // Validate the persisted session against Supabase and keep auth state in sync
   // with token refreshes / cross-tab sign-out.
   useEffect(() => { initAuthSync() }, [])
+
+  // Warm every route chunk during idle time — instant tab switching
+  useEffect(() => {
+    const warm = () => preloadRoutes()
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(warm, { timeout: 2500 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+    const t = setTimeout(warm, 1200)
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     <ErrorBoundary>

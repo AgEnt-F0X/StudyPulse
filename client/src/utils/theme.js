@@ -3,27 +3,27 @@
 // champagne-gold rims. Ivory paper where the book opens. Emerald/amber action.
 
 export const C = {
-  // Warm canvas
-  bg: 'var(--bg-primary, #E6DFD5)',
-  bgHi: 'var(--bg-canvas-hi, #F4F0EA)',
-  bgSoft: 'var(--surface-low, rgba(16,26,21,0.72))',
-  card: 'var(--bg-card, rgba(18,29,24,0.92))',
-  cardGlass: 'var(--bg-card-glass, rgba(18,29,24,0.92))',
-  cardSoft: 'var(--surface-card-soft, rgba(30,53,43,0.55))',
+  // Obsidian/pine canvas
+  bg: 'var(--bg-primary, #0B0F0D)',
+  bgHi: 'var(--bg-canvas-hi, #121D18)',
+  bgSoft: 'var(--surface-low, rgba(15,24,20,0.72))',
+  card: 'var(--bg-card, rgba(22,35,30,0.92))',
+  cardGlass: 'var(--bg-card-glass, rgba(22,35,30,0.92))',
+  cardSoft: 'var(--surface-card-soft, rgba(30,53,43,0.5))',
   cardHover: 'var(--surface-card-hover, rgba(30,53,43,0.85))',
   active: 'var(--surface-active, #1E352B)',
-  glassRaised: 'rgba(20, 32, 27, 0.95)',
+  glassRaised: 'rgba(22, 35, 30, 0.95)',
 
-  // Champagne hairlines
-  border: 'var(--border-color, rgba(212,195,163,0.28))',
-  borderSoft: 'var(--border-soft, rgba(212,195,163,0.14))',
-  borderStrong: 'rgba(212,195,163,0.45)',
+  // Emerald + champagne rims
+  border: 'var(--border-color, rgba(52,211,153,0.2))',
+  borderSoft: 'var(--border-soft, rgba(52,211,153,0.1))',
+  borderStrong: 'rgba(52,211,153,0.38)',
   gold: '#D4C3A3',
 
   // Ink on glass
-  text: 'var(--text-primary, #F4F0EA)',
-  textMuted: 'var(--text-secondary, #C9C2B4)',
-  textFaint: 'var(--text-muted, #8F8A7E)',
+  text: 'var(--text-primary, #FAF7F2)',
+  textMuted: 'var(--text-secondary, #BCC8BC)',
+  textFaint: 'var(--text-muted, #83907F)',
   ink: '#232019', // ink on warm paper
 
   // Action
@@ -100,11 +100,11 @@ export const fonts = {
 export const radius = { sm: 6, md: 10, lg: 14, xl: 18, xxl: 24, pill: 999 }
 
 export const shadow = {
-  card: '0 10px 28px rgba(30,25,15,0.22)',
-  lift: '0 20px 50px rgba(30,25,15,0.30)',
-  dock: '0 20px 50px rgba(10,14,10,0.45)',
-  book: '0 24px 40px rgba(30,25,15,0.35)',
-  modal: '0 24px 64px rgba(20,18,12,0.5)',
+  card: '0 10px 28px rgba(0,0,0,0.35)',
+  lift: '0 20px 50px rgba(0,0,0,0.45)',
+  dock: '0 20px 50px rgba(0,0,0,0.55)',
+  book: '0 24px 40px rgba(0,0,0,0.45)',
+  modal: '0 24px 64px rgba(0,0,0,0.6)',
   glowEmerald: '0 0 25px rgba(16,185,129,0.4)',
   glowAmber: 'none',
 }
@@ -118,21 +118,22 @@ export const elevation = {
 }
 
 // Glass panel
+// Solid GPU panel — no backdrop-filter on any scrolling surface
 export const card = {
-  background: C.card,
-  backdropFilter: 'blur(24px) saturate(1.15)',
-  WebkitBackdropFilter: 'blur(24px) saturate(1.15)',
-  border: `1px solid ${C.border}`,
+  background: '#131C18',
+  border: '1px solid rgba(52, 211, 153, 0.16)',
   borderRadius: radius.xl,
   padding: '18px 20px',
-  boxShadow: '0 20px 50px rgba(30,25,15,0.30), inset 0 1px 0 rgba(244,240,234,0.06)',
+  boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
+  contain: 'layout style paint',
+  transform: 'translateZ(0)',
 }
 
 export const cardFlat = {
   ...card,
   borderRadius: radius.lg,
   padding: '14px 16px',
-  boxShadow: '0 10px 28px rgba(30,25,15,0.22)',
+  boxShadow: '0 8px 22px rgba(0,0,0,0.32)',
 }
 
 export const cardAccent = card

@@ -282,7 +282,7 @@ export default function Quiz() {
     const resultColor = perfect ? C.warning : good ? C.success : C.error
     const readiness = chapter ? learner.getChapterReadiness(chapter.subject, chapter.chapterId) : null
     return (
-      <div className="page-enter" style={{ fontFamily: fonts.body, color: C.text, maxWidth: 580, margin: '0 auto' }}>
+      <div className="page-enter" style={{ fontFamily: fonts.body, color: C.text, maxWidth: 680, margin: '0 auto' }}>
         <div style={{ textAlign: 'center' }}>
           <Card style={{ padding: 40, marginBottom: 0 }}>
             <div style={{
@@ -321,7 +321,7 @@ export default function Quiz() {
     const q = questions[current]
     const canSubmit = selected !== null && confidence !== null && !attemptInfo
     return (
-      <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 580, margin: '0 auto' }}>
+      <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 680, margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <span className="metric-label">Question {current + 1} of {questions.length}</span>
@@ -482,7 +482,7 @@ export default function Quiz() {
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 580, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 680, margin: '0 auto' }}>
       <PageHeader
         title="Quiz Me"
         subtitle="Confidence-weighted practice — a lucky guess never counts"

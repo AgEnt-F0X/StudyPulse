@@ -8,7 +8,9 @@ import { C, fonts } from '../utils/theme'
 import { useUIStore } from '../stores'
 import {
   initEngine, resetToSeed, runQuery, computeExpected, inspectTable,
+  getTableRows, execOnDb, getActiveDatabase,
 } from '../lib/sqlEngine'
+import SqlStage3D from '../components/SqlStage3D'
 import { gradeSubmission } from '../lib/sqlGrader'
 import { MISSIONS, WORLDS, getMission, getWorldMissions } from '../data/sqlMissions'
 import { getBundle } from '../data/sqlDatasets'
@@ -326,6 +328,8 @@ export default function SqlPulse() {
 
   const [sqlText, setSqlText] = useState('')
   const [confidence, setConfidence] = useState('fairly_sure')
+  const [stageTables, setStageTables] = useState([])
+  const [stage, setStage] = useState({ highlights: {}, joinLinks: null, groupBuckets: null, aggLabel: 'COUNT', note: '' })
   const [your, setYour] = useState(null)       // last result set from the student db
   const [expected, setExpected] = useState(null)
   const [grade, setGrade] = useState(null)
@@ -349,11 +353,18 @@ export default function SqlPulse() {
     return () => { alive = false }
   }, [])
 
-  // Load mission: seed db, compute expected, inspect schema
+  // Load mission: seed db, compute expected, inspect schema, dump stage rows
   const loadMission = useCallback((m) => {
     const b = getBundle(m.bundle)
     const db = resetToSeed(b.seed)
+    setStage({ highlights: {}, joinLinks: null, groupBuckets: null, aggLabel: 'COUNT', note: '' })
     setDbTables(b.tables.map((t) => inspectTable(db, t)).filter(Boolean))
+    setStageTables(b.tables.map((t) => {
+      const insp = inspectTable(db, t)
+      const rows = getTableRows(db, t).values
+      return { name: t, fields: insp?.fields || [], rows }
+    }))
+    setStage({ highlights: {}, joinLinks: null, groupBuckets: null, aggLabel: 'COUNT', note: '' })
     setOpenTable(0)
     setSqlText('')
     setYour(null)
@@ -409,6 +420,110 @@ export default function SqlPulse() {
     }
   }
 
+  // ── 3D stage analysis — WHERE hits, JOIN beams, GROUP BY buckets ──
+  const computeStage = (sql, result) => {
+    const db = getActiveDatabase()
+    if (!db) return
+    const bundleTables = getBundle(mission.bundle).tables
+    const mentioned = bundleTables.filter((t) => new RegExp(`\\b${t}\\b`, 'i').test(sql))
+    const hasJoin = /\bjoin\b/i.test(sql) || (mentioned.length >= 2 && /,\s*\w+/.test(sql.match(/\bfrom\b([\s\S]*)/i)?.[1] || '') && mentioned.length >= 2)
+    const hasGroup = /\bgroup\s+by\b/i.test(sql)
+    const hasWhere = /\bwhere\b/i.test(sql)
+
+    let highlights = {}
+    let joinLinks = null
+    let groupBuckets = null
+    let aggLabel = 'COUNT'
+    let note = ''
+
+    const safeQuery = (q) => {
+      const r = execOnDb(db, q)
+      return r.error ? null : r.results[0] || null
+    }
+
+    if (hasJoin && mentioned.length >= 2) {
+      // Two-table query — draw PK→FK beams between matched rowid pairs
+      const [t1, t2] = mentioned.slice(0, 2)
+      let cond = null
+      const eq = sql.match(/(\w+)\.(\w+)\s*=\s*(\w+)\.(\w+)/)
+      if (eq) {
+        cond = `${eq[1]}.${eq[2]} = ${eq[3]}.${eq[4]}`
+      } else if (/\bnatural\s+join\b/i.test(sql)) {
+        // shared column name between the two tables
+        const f1 = new Set((stageTables.find((t) => t.name === t1)?.fields || []).map((f) => f.name.toLowerCase()))
+        const shared = (stageTables.find((t) => t.name === t2)?.fields || []).find((f) => f1.has(f.name.toLowerCase()))
+        if (shared) cond = `${t1}.${shared.name} = ${t2}.${shared.name}`
+      }
+      if (cond) {
+        const rs = safeQuery(`SELECT ${t1}.rowid AS ra, ${t2}.rowid AS rb FROM ${t1}, ${t2} WHERE ${cond}`)
+        if (rs) {
+          joinLinks = rs.values.map((r) => ({ a: r[0] - 1, b: r[1] - 1 }))
+          highlights = {
+            [t1]: new Set(joinLinks.map((l) => l.a)),
+            [t2]: new Set(joinLinks.map((l) => l.b)),
+          }
+        }
+      }
+      if (result) {
+        const d1 = stageTables.find((t) => t.name === t1)?.fields.length || 0
+        const d2 = stageTables.find((t) => t.name === t2)?.fields.length || 0
+        const c1 = stageTables.find((t) => t.name === t1)?.rows.length || 0
+        const c2 = stageTables.find((t) => t.name === t2)?.rows.length || 0
+        note = `Degree = D1+D2 = ${d1}+${d2} = ${result.columns.length} · Cardinality = C1×C2 = ${c1}×${c2} = ${c1 * c2} → matched rows: ${result.values.length}`
+      }
+    } else if (hasWhere && mentioned.length >= 1) {
+      // Single-table WHERE — evaluate the condition per row via rowid
+      const t = mentioned[0]
+      const m = sql.match(/\bwhere\b([\s\S]*)/i)
+      let seg = m ? m[1] : ''
+      const cut = seg.search(/\b(group\s+by|having|order\s+by|limit)\b/i)
+      if (cut >= 0) seg = seg.slice(0, cut)
+      seg = seg.replace(/;\s*$/, '').trim()
+      if (seg) {
+        const rs = safeQuery(`SELECT rowid FROM "${t}" WHERE ${seg}`)
+        if (rs) {
+          highlights = { [t]: new Set(rs.values.map((r) => r[0] - 1)) }
+          if (result) {
+            note = `Degree ${result.columns.length} · Cardinality ${result.values.length} — ${highlights[t].size} row(s) satisfy the WHERE clause`
+          }
+        }
+      }
+    } else if (hasGroup && result && result.values.length > 0) {
+      // GROUP BY — stack aggregate buckets straight from the result set
+      const cols = result.columns || []
+      let vIdx = -1
+      for (let i = cols.length - 1; i >= 0; i--) {
+        if (result.values.some((r) => typeof r[i] === 'number' || /^-?\d+(\.\d+)?$/.test(String(r[i])))) { vIdx = i; break }
+      }
+      if (vIdx >= 0) {
+        aggLabel = String(cols[vIdx]).toUpperCase()
+        groupBuckets = result.values.slice(0, 8).map((r) => ({ key: String(r[0]), value: Number(r[vIdx]) || 0 }))
+        note = `Degree ${result.columns.length} · Cardinality ${result.values.length} — tiles stack into ${groupBuckets.length} group bucket(s)`
+      }
+    } else if (result) {
+      note = `Degree ${result.columns.length} · Cardinality ${result.values.length}`
+    }
+
+    setStage({ highlights, joinLinks, groupBuckets, aggLabel, note })
+  }
+
+  // ── Visual clause builder — tactile chips scaffold the query ──
+  const CLAUSE_CHIPS = [
+    ['SELECT', 'SELECT '],
+    ['DISTINCT', 'DISTINCT '],
+    ['FROM', ' FROM '],
+    ['WHERE', ' WHERE '],
+    ['GROUP BY', ' GROUP BY  '],
+    ['HAVING', ' HAVING  '],
+    ['ORDER BY', ' ORDER BY  DESC'],
+    ['IS NULL', ' IS NULL'],
+    ['BETWEEN', " BETWEEN '' AND ''"],
+    ["LIKE '%_'", " LIKE '%'"],
+  ]
+  const insertClause = (tpl) => {
+    setSqlText((t) => (t.endsWith(' ') || t === '' ? t + tpl : t + tpl))
+  }
+
   // Execute + grade
   const handleExecute = () => {
     if (!engineOn || busy || !sqlText.trim()) return
@@ -438,6 +553,9 @@ export default function SqlPulse() {
     // Feed the attempt (with declared certainty) into Learner Memory —
     // grader traps become "What StudyPulse noticed" misconceptions.
     logSqlOutcome({ mission, grade: result, confidence })
+
+    // Drive the 3D relational stage from the executed query
+    computeStage(sqlText, last)
 
     if (result.passed && mission.kind !== 'quiz') {
       const { already, xp } = completeMission(mission.id, mission.xp)
@@ -525,7 +643,7 @@ export default function SqlPulse() {
   }
 
   return (
-    <div style={{ fontFamily: fonts.body, color: C.text, maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ fontFamily: fonts.body, color: C.text, width: '100%' }}>
       <PageHeader
         title="SQL Pulse"
         subtitle="CBSE Class 11-12 (083 / 065) MySQL campaign — 6 worlds · 24 missions · in-browser execution"
@@ -786,6 +904,19 @@ export default function SqlPulse() {
             ) : (
               /* SQL editor mission */
               <>
+                {/* 3D relational stage */}
+                {stageTables.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <SqlStage3D
+                      tables={stageTables}
+                      highlights={stage.highlights}
+                      joinLinks={stage.joinLinks}
+                      groupBuckets={stage.groupBuckets}
+                      aggLabel={stage.aggLabel}
+                      note={stage.note}
+                    />
+                  </div>
+                )}
                 <PaneCard
                   title="SQL terminal"
                   right={
@@ -794,6 +925,23 @@ export default function SqlPulse() {
                     </span>
                   }
                 >
+                  {/* Visual clause builder */}
+                  <div style={{
+                    display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center',
+                    padding: '8px 12px', borderBottom: `1px solid ${C.borderSoft}`,
+                  }}>
+                    <span className="metric-label" style={{ padding: 0, marginRight: 6 }}>Clause builder</span>
+                    {CLAUSE_CHIPS.map(([label, tpl]) => (
+                      <button key={label} onClick={() => insertClause(tpl)} className="motion-spring" style={{
+                        padding: '3px 10px', borderRadius: 999,
+                        background: 'rgba(52,211,153,0.08)', border: `1px solid ${C.borderSoft}`,
+                        color: C.primaryBright, cursor: 'pointer',
+                        fontFamily: fonts.mono, fontSize: 10, fontWeight: 600, letterSpacing: '0.04em',
+                      }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                   <SqlEditor value={sqlText} onChange={setSqlText} onExecute={handleExecute} />
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
